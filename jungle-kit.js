@@ -874,7 +874,7 @@
       }
       const old = document.querySelector('.cbar'); if (old) old.remove();
       const el = document.createElement('div'); el.className = 'cbar'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Cookies and storage');
-      el.innerHTML = `<b>Cookies &amp; storage</b><p>No tracking and no ads. With your OK this site uses your device's storage to remember your sound setting, your Flappy high scores and the latest weather. <a href="${esc(policy)}">Cookie policy</a></p>
+      el.innerHTML = `<b>Cookies &amp; storage</b><p>No tracking and no ads, but with your OK, we use your device’s storage to remember your settings and saved progress (like game scores), and to keep recent info like the weather. <a href="${esc(policy)}">Cookie policy</a></p>
         <div class="cb-row"><button type="button" class="cb-no">Essential only</button><button type="button" class="cb-yes">Accept</button></div>`;
       el.querySelector('.cb-no').addEventListener('click', () => { Consent.set('essential'); el.remove(); });
       el.querySelector('.cb-yes').addEventListener('click', () => { Consent.set('all'); el.remove(); });
