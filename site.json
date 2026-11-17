@@ -24,7 +24,8 @@
       "id": "flappy",
       "title": "Flappy",
       "url": "flappy",
-      "icon": "animal:macaw"
+      "icon": "animal:macaw",
+      "place": "jungle"
     },
     {
       "id": "contact",

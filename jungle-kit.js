@@ -826,7 +826,7 @@
       { id: 'about', title: 'About', url: 'about', icon: 'animal:monkey' },
       { id: 'projects', title: 'Projects', url: 'projects', icon: 'animal:toucan' },
       { id: 'gallery', title: 'Gallery', url: 'gallery', icon: 'animal:chameleon' },
-      { id: 'flappy', title: 'Flappy', url: 'flappy', icon: 'animal:macaw' },
+      { id: 'flappy', title: 'Flappy', url: 'flappy', icon: 'animal:macaw', place: 'jungle' },
       { id: 'contact', title: 'Contact', url: 'contact', icon: 'animal:frog' }
     ],
     socials: [

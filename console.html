@@ -66,6 +66,8 @@
   .addr input { box-shadow: none; padding-left: 2px; }
   .addr input:focus { outline: none; } .addr:focus-within { outline: 3px solid var(--green); outline-offset: 2px; }
   .acts { display: flex; gap: 6px; }
+  .place { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  .place select { width: auto; flex: 1; padding: 5px 8px; font-size: 13px; text-transform: none; letter-spacing: 0; }
   @media (max-width: 600px) { .row { grid-template-columns: 48px 1fr; } .row .acts { grid-column: 1 / -1; justify-content: flex-end; } .body { padding: 18px 16px 22px; } }
   .iconbtn { width: 56px; height: 56px; display: grid; place-items: center; padding: 0; border: 0; cursor: pointer; background: #0f1f2e; box-shadow: inset 0 0 0 3px var(--ink); position: relative; }
   .iconbtn img { max-width: 44px; max-height: 44px; }
@@ -137,7 +139,7 @@
       <input id="siteTag" type="text" maxlength="120" placeholder="e.g. Architect · Builder · Explorer">
 
       <h2>Pages</h2>
-      <p class="help">The menu on the home page. Tap an icon to change it.</p>
+      <p class="help">Tap an icon to change it. Each page can sit in the main menu or hang on a branch in the jungle (up to 5).</p>
       <div class="list" id="pages"></div>
       <form class="add" id="addPage">
         <div><label class="lbl" for="npTitle">Add a page</label><input id="npTitle" type="text" placeholder="Page name, e.g. Portfolio" maxlength="40" required></div>
@@ -271,6 +273,7 @@
   let SITE = null, SAVED = '', PENDING = {}, NEWPAGES = {}, REMOVALS = new Set(), confirmId = null;
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const overrides = () => Object.fromEntries(Object.entries(PENDING).map(([p, v]) => [p, v.dataURL]));
+  const placeOf = (p) => p.place || (p.url === 'flappy' ? 'jungle' : 'menu');
   const isSlug = (u) => /^[a-z0-9][a-z0-9-]*$/i.test(u || '');
   const pageFile = (u) => (isSlug(u) ? u + '/index.html' : /^pages\/[\w-]+\.html$/.test(u || '') ? u : null);
   function dirty() { return !!SITE && (JSON.stringify(SITE) !== SAVED || Object.keys(PENDING).length > 0 || REMOVALS.size > 0); }
@@ -288,7 +291,8 @@
       const d = document.createElement('div'); d.className = 'row';
       d.innerHTML = `<button class="iconbtn" type="button" aria-label="Change icon for ${K.esc(p.title)}">${iconFor(p, 'page')}</button>
         <div class="f"><input type="text" data-k="title" value="${K.esc(p.title)}" aria-label="Page name" maxlength="40">
-        <div class="addr"><span ${ext ? 'hidden' : ''}>${K.esc(HOST)}/</span><input type="text" data-k="url" value="${K.esc(p.url)}" aria-label="Address" spellcheck="false"></div></div>
+        <div class="addr"><span ${ext ? 'hidden' : ''}>${K.esc(HOST)}/</span><input type="text" data-k="url" value="${K.esc(p.url)}" aria-label="Address" spellcheck="false"></div>
+        <label class="place">Shows in <select data-k="place" aria-label="Where the link appears"><option value="menu" ${placeOf(p) === 'menu' ? 'selected' : ''}>the main menu</option><option value="jungle" ${placeOf(p) === 'jungle' ? 'selected' : ''}>the jungle — a sign on a branch</option></select></label></div>
         <div class="acts"><button class="btn sm" type="button" data-a="up" ${i ? '' : 'disabled'} aria-label="Move up">↑</button><button class="btn sm" type="button" data-a="down" ${i < SITE.pages.length - 1 ? '' : 'disabled'} aria-label="Move down">↓</button><button class="btn sm del" type="button" data-a="del" aria-label="Remove">✕</button></div>`;
       wire(d, SITE.pages, i, 'page');
       if (confirmId === p.id) {
@@ -321,6 +325,7 @@
     const it = arr[i];
     d.querySelectorAll('[data-k]').forEach((inp) => inp.addEventListener('input', () => {
       const k = inp.dataset.k;
+      if (kind === 'page' && k === 'place') { it.place = inp.value; const n = SITE.pages.filter((x) => placeOf(x) === 'jungle').length; msg('#editMsg', n > 5 ? 'Only 5 pages fit in the jungle at once — the rest won’t show until you move one back to the menu.' : '', n > 5 ? 'err' : ''); markDirty(); return; }
       if (kind === 'page' && k === 'url') { const was = it.url; it.url = inp.value.trim(); if (NEWPAGES[was]) { NEWPAGES[it.url] = NEWPAGES[was]; delete NEWPAGES[was]; } d.querySelector('.addr span').hidden = /:\/\//.test(it.url); }
       else it[k] = inp.value;
       if (k === 'platform') { it.label = K.PLATFORMS[inp.value][0]; d.querySelector('.iconbtn').innerHTML = iconFor(it, kind); }
@@ -386,7 +391,7 @@
   function clean() {
     const s = clone(SITE);
     s.title = (s.title || 'Harry').trim(); s.tagline = (s.tagline || '').trim();
-    s.pages = s.pages.filter((p) => p.title && p.url).map((p) => ({ id: p.id || uid(), title: p.title.trim(), url: p.url.trim().replace(/^\/+|\/+$/g, ''), icon: p.icon || 'auto' }));
+    s.pages = s.pages.filter((p) => p.title && p.url).map((p) => ({ id: p.id || uid(), title: p.title.trim(), url: p.url.trim().replace(/^\/+|\/+$/g, ''), icon: p.icon || 'auto', place: placeOf(p) }));
     s.socials = s.socials.filter((x) => x.url).map((x) => ({ id: x.id || uid(), platform: x.platform || 'other', label: (x.label || K.PLATFORMS[x.platform || 'other'][0]).trim(), url: x.url.trim(), icon: x.icon || 'auto' }));
     return s;
   }
