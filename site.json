@@ -1,24 +1,13 @@
 {
   "title": "Harry",
-  "tagline": "",
+  "tagline": "Enjoy the soundscape or take a look around!",
   "pages": [
     {
       "id": "about",
       "title": "About",
       "url": "about",
-      "icon": "animal:monkey"
-    },
-    {
-      "id": "projects",
-      "title": "Projects",
-      "url": "projects",
-      "icon": "animal:toucan"
-    },
-    {
-      "id": "gallery",
-      "title": "Gallery",
-      "url": "gallery",
-      "icon": "animal:chameleon"
+      "icon": "animal:monkey",
+      "place": "menu"
     },
     {
       "id": "flappy",
@@ -31,7 +20,15 @@
       "id": "contact",
       "title": "Contact",
       "url": "contact",
-      "icon": "animal:frog"
+      "icon": "animal:frog",
+      "place": "menu"
+    },
+    {
+      "id": "gq1kw4p",
+      "title": "Gallery",
+      "url": "gallery",
+      "icon": "auto",
+      "place": "menu"
     }
   ],
   "socials": [
@@ -39,14 +36,14 @@
       "id": "lb",
       "platform": "letterboxd",
       "label": "Letterboxd",
-      "url": "https://letterboxd.com/",
+      "url": "https://letterboxd.com/harryhayw/",
       "icon": "auto"
     },
     {
       "id": "sz",
       "platform": "serializd",
       "label": "Serializd",
-      "url": "https://www.serializd.com/",
+      "url": "https://www.serializd.com/user/harryh",
       "icon": "auto"
     }
   ]
