@@ -1,0 +1,53 @@
+{
+  "title": "Harry",
+  "tagline": "",
+  "pages": [
+    {
+      "id": "about",
+      "title": "About",
+      "url": "pages/about.html",
+      "icon": "animal:monkey"
+    },
+    {
+      "id": "projects",
+      "title": "Projects",
+      "url": "pages/projects.html",
+      "icon": "animal:toucan"
+    },
+    {
+      "id": "gallery",
+      "title": "Gallery",
+      "url": "pages/gallery.html",
+      "icon": "animal:chameleon"
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "url": "pages/contact.html",
+      "icon": "animal:frog"
+    }
+  ],
+  "socials": [
+    {
+      "id": "ig",
+      "platform": "instagram",
+      "label": "Instagram",
+      "url": "https://instagram.com/",
+      "icon": "auto"
+    },
+    {
+      "id": "yt",
+      "platform": "youtube",
+      "label": "YouTube",
+      "url": "https://youtube.com/",
+      "icon": "auto"
+    },
+    {
+      "id": "tt",
+      "platform": "tiktok",
+      "label": "TikTok",
+      "url": "https://tiktok.com/",
+      "icon": "auto"
+    }
+  ]
+}
