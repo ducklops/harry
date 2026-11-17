@@ -99,6 +99,33 @@
   .reader .sheet .btn-consent { display: inline-block; margin-top: 6px; padding: 10px 14px; font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--lime); text-decoration: none; }
   .reader .sheet td code { white-space: nowrap; }
   .reader .sheet code { background: rgba(194,234,106,.12); color: var(--lime); padding: 1px 6px; font-size: .9em; }
+  /* blocks made by the console's page editor */
+  .reader .sheet::after { content: ''; display: block; clear: both; }
+  .reader .sheet .pe-c { text-align: center; }
+  .reader .sheet figure.pe-img { margin: 1.2em auto; }
+  .reader .sheet figure.pe-img img { display: block; width: 100%; height: auto; }
+  .reader .sheet .pe-img.pe-full { width: 100%; }
+  .reader .sheet .pe-img.pe-medium { width: 66%; }
+  .reader .sheet .pe-img.pe-small { width: 40%; }
+  .reader .sheet .pe-img.pe-auto { width: fit-content; max-width: 100%; }
+  .reader .sheet .pe-img.pe-auto img { width: auto; max-width: 100%; }
+  .reader .sheet .pe-img.pe-left { float: left; margin: .35em 1.4em .8em 0; }
+  .reader .sheet .pe-img.pe-right { float: right; margin: .35em 0 .8em 1.4em; }
+  .reader .sheet .pe-img figcaption { margin-top: .5em; font-size: 14px; line-height: 1.5; color: rgba(238,246,216,.7); text-align: center; }
+  .reader .sheet .pe-gallery { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 10px; margin: 1.4em 0; clear: both; }
+  .reader .sheet .pe-gallery.pe-cols-2 { --cols: 2; }
+  .reader .sheet .pe-gallery.pe-cols-4 { --cols: 4; }
+  .reader .sheet .pe-gallery img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .reader .sheet .pe-embed { margin: 1.4em 0; clear: both; }
+  .reader .sheet .pe-embed iframe { display: block; width: 100%; border: 0; }
+  .reader .sheet .pe-embed.pe-video iframe { height: auto; aspect-ratio: 16 / 9; }
+  .reader .sheet .pe-embed.pe-tall { max-width: 340px; margin-left: auto; margin-right: auto; }
+  .reader .sheet .pe-embed.pe-tall iframe { height: auto; aspect-ratio: 9 / 16; }
+  .reader .sheet .pe-btnrow { margin: 1.4em 0; }
+  .reader .sheet .pe-btn { display: inline-block; padding: 12px 18px; font: 600 14px/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--lime); text-decoration: none; }
+  .reader .sheet .pe-btn:hover { filter: brightness(1.1); }
+  .reader .sheet hr { height: 4px; margin: 2em 0; border: 0; clear: both; background: repeating-linear-gradient(90deg, rgba(238,246,216,.28) 0 8px, transparent 8px 16px); }
+  @media (max-width: 600px) { .reader .sheet .pe-img.pe-left, .reader .sheet .pe-img.pe-right { float: none; margin: 1.2em auto; } .reader .sheet .pe-img.pe-medium, .reader .sheet .pe-img.pe-small { width: 80%; } .reader .sheet .pe-gallery.pe-cols-3, .reader .sheet .pe-gallery.pe-cols-4 { --cols: 2; } }
   .reader .loadingtxt { font-family: 'Pixelify Sans', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(238,246,216,.7); }
   .hero { display: flex; flex-direction: column; align-items: center; margin-top: auto; }
   h1.title { margin: 0; font-family: 'Climate Crisis', 'Arial Black', system-ui, sans-serif; font-weight: 400; font-size: calc(var(--u) * 12.5); line-height: .9; letter-spacing: .01em;
@@ -919,6 +946,7 @@
      its sound, time and weather carry on. Addresses stay clean: /about
      ===================================================================== */
   const ROOT = new URL('./', location.href);
+  const DRAFT = /[?&]draft\b/.test(location.search);   // console preview: unpublished pages come from this device
   const APP_PAGES = ['flappy'];   // full pages of their own (games etc.) — not shown in the reading view
   let reading = false, readSeq = 0;
   /** {key, fetch, pretty} for an internal page link, otherwise null */
@@ -937,15 +965,17 @@
     if (AC && soundOn) MASTER.gain.setTargetAtTime(0.55, AC.currentTime, 0.6);
     const body = $('#readerBody'); body.innerHTML = '<p class="loadingtxt">Loading…</p>';
     try {
-      const r = await fetch(info.fetch, { cache: 'no-cache' }); if (!r.ok) throw new Error(r.status);
-      const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      let html = null, base = info.fetch;
+      if (DRAFT) { try { const d = JSON.parse(localStorage.getItem('harry-page-drafts') || 'null'); if (d && d[info.key]) html = d[info.key]; } catch (e) { /* storage off */ } }
+      if (html == null) { const r = await fetch(info.fetch, { cache: 'no-cache' }); if (!r.ok) throw new Error(r.status); html = await r.text(); base = r.url; }
+      const doc = new DOMParser().parseFromString(html, 'text/html');
       if (seq !== readSeq) return;
       const main = doc.querySelector('main.sheet') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
       main.querySelectorAll('script').forEach((n) => n.remove());
       main.querySelectorAll('[src],[href],[poster]').forEach((n) => ['src', 'href', 'poster'].forEach((a) => {
         const v = n.getAttribute(a); if (!v || /^(#|mailto:|tel:|data:)/i.test(v)) return;
         if (/^javascript:/i.test(v)) { n.removeAttribute(a); return; }
-        n.setAttribute(a, new URL(v, r.url).href);
+        n.setAttribute(a, new URL(v, base).href);
       }));
       body.innerHTML = main.innerHTML;
       document.title = doc.title || (info.key + ' · ' + (SITE.title || 'Harry'));

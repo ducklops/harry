@@ -99,6 +99,119 @@
   .drop { display: block; margin-top: 14px; padding: 16px; text-align: center; cursor: pointer; color: var(--muted); box-shadow: inset 0 0 0 2px var(--line); font-size: 14px; }
   .drop b { color: var(--ice); }
   .drop.over { box-shadow: inset 0 0 0 2px var(--lime); color: var(--lime); }
+  /* ---------- page editor ---------- */
+  .wrap.pe-wide { max-width: 900px; }
+  .pe-head { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; margin: 0 0 14px; }
+  .pe-head h1 { margin: 0; } .pe-head h1 b { color: var(--ice); font-weight: 600; }
+  .pe-addr { font-size: 13px; color: var(--muted); }
+  .pe-tools { position: sticky; top: 0; z-index: 8; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; margin: 0 -24px 22px; padding: 10px 24px; background: rgba(7,14,22,.97); border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); }
+  .pe-pal, .pe-fmt { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .pe-pal > span, .pe-fmt > span { font: 400 11px 'Pixelify Sans', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+  .pe-pal button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border: 0; cursor: grab; touch-action: none; user-select: none; font: 400 12px 'Pixelify Sans', monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--ice); background: rgba(15,31,46,.95); box-shadow: inset 0 0 0 2px var(--line); }
+  .pe-pal button i { font-style: normal; color: var(--lime); min-width: 1.1em; text-align: center; }
+  .pe-pal button:hover { box-shadow: inset 0 0 0 2px var(--lime); color: var(--lime); }
+  .pe-fmt button { min-width: 32px; height: 32px; padding: 0 8px; border: 0; cursor: pointer; font: 600 14px Barlow, system-ui, sans-serif; color: var(--ice); background: rgba(15,31,46,.95); box-shadow: inset 0 0 0 2px var(--line); }
+  .pe-fmt button:hover { box-shadow: inset 0 0 0 2px var(--lime); color: var(--lime); }
+  .pe-fmt button.on { background: var(--lime); color: var(--ink); box-shadow: none; }
+  .pe-fmt button:disabled { opacity: .35; cursor: default; box-shadow: inset 0 0 0 2px var(--line); color: var(--ice); }
+  .pe-stage { padding: 30px 0 6px; }
+  @media (max-width: 600px) {
+    .pe-tools { gap: 8px; margin: 0 -16px 18px; padding: 8px 16px; }
+    .pe-pal, .pe-fmt { width: 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .pe-pal::-webkit-scrollbar, .pe-fmt::-webkit-scrollbar { display: none; }
+    .pe-pal button, .pe-fmt button { flex: none; } .pe-pal button { touch-action: pan-x; }
+    .pe-pal > span { display: none; }
+    .pe-bar, .pe-fr > .pe-bar { left: -4px; right: auto; max-width: calc(100% + 8px); }
+  }
+  /* the canvas looks exactly like a page on the site */
+  .pe-sheet { position: relative; max-width: 760px; min-height: 360px; margin: 0 auto; padding: clamp(22px, 4vw, 44px); background: #09121c; box-shadow: inset 0 0 0 3px rgba(238,246,216,.18); font: 400 18px/1.7 Barlow, system-ui, sans-serif; color: var(--ice); }
+  .pe-sheet h1 { margin: 0 0 .5em; padding: 0; border: 0; font: 600 clamp(24px, 4vw, 34px)/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); }
+  .pe-sheet h2, .pe-sheet h3 { padding: 0; border: 0; font-family: 'Pixelify Sans', ui-monospace, monospace; font-weight: bold; line-height: inherit; letter-spacing: .08em; text-transform: none; color: var(--lime); }
+  .pe-sheet h2 { margin: .83em 0; font-size: 1.5em; } .pe-sheet h3 { margin: 1em 0; font-size: 1.17em; }
+  .pe-sheet a { color: var(--lime); }
+  .pe-sheet blockquote { margin: 1em 0; padding-left: 1em; border-left: 4px solid var(--lime); font: italic 500 22px/1.4 'Cormorant Garamond', Georgia, serif; }
+  .pe-sheet img, .pe-sheet video, .pe-sheet iframe { max-width: 100%; }
+  .pe-sheet table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .pe-sheet th, .pe-sheet td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(238,246,216,.18); vertical-align: top; }
+  .pe-sheet::after { content: ''; display: block; clear: both; }
+  .pe-sheet .pe-c { text-align: center; }
+  .pe-sheet figure.pe-img { margin: 1.2em auto; }
+  .pe-sheet figure.pe-img img { display: block; width: 100%; height: auto; }
+  .pe-sheet .pe-img.pe-full { width: 100%; } .pe-sheet .pe-img.pe-medium { width: 66%; } .pe-sheet .pe-img.pe-small { width: 40%; }
+  .pe-sheet .pe-img.pe-auto { width: fit-content; max-width: 100%; } .pe-sheet .pe-img.pe-auto img { width: auto; max-width: 100%; }
+  .pe-sheet .pe-img figcaption { margin-top: .5em; font-size: 14px; line-height: 1.5; color: rgba(238,246,216,.7); text-align: center; }
+  .pe-sheet .pe-gallery { display: grid; grid-template-columns: repeat(var(--cols, 3), 1fr); gap: 10px; margin: 1.4em 0; clear: both; }
+  .pe-sheet .pe-gallery.pe-cols-2 { --cols: 2; } .pe-sheet .pe-gallery.pe-cols-4 { --cols: 4; }
+  .pe-sheet .pe-gallery img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .pe-sheet .pe-embed { margin: 1.4em 0; clear: both; }
+  .pe-sheet .pe-embed iframe { display: block; width: 100%; border: 0; }
+  .pe-sheet .pe-embed.pe-video iframe { height: auto; aspect-ratio: 16 / 9; }
+  .pe-sheet .pe-embed.pe-tall { max-width: 340px; margin-left: auto; margin-right: auto; } .pe-sheet .pe-embed.pe-tall iframe { height: auto; aspect-ratio: 9 / 16; }
+  .pe-sheet .pe-btnrow { margin: 1.4em 0; }
+  .pe-sheet .pe-btn { display: inline-block; padding: 12px 18px; font: 600 14px/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--lime); text-decoration: none; }
+  .pe-sheet hr { height: 4px; margin: 2em 0; border: 0; clear: both; background: repeating-linear-gradient(90deg, rgba(238,246,216,.28) 0 8px, transparent 8px 16px); }
+  @media (max-width: 600px) {
+    .pe-sheet .pe-img.pe-medium, .pe-sheet .pe-img.pe-small { width: 80%; }
+    .pe-sheet .pe-gallery.pe-cols-3, .pe-sheet .pe-gallery.pe-cols-4 { --cols: 2; }
+  }
+  /* blocks (editor only) */
+  .pe-block { position: relative; outline: 2px solid transparent; outline-offset: 6px; }
+  .pe-block:hover { outline-color: rgba(194,234,106,.22); }
+  .pe-block.sel { outline-color: var(--lime); }
+  .pe-block.pe-clear { clear: both; }
+  .pe-block.pe-fl { float: left; width: var(--w); margin: .35em 1.4em .8em 0; }
+  .pe-block.pe-fr { float: right; width: var(--w); margin: .35em 0 .8em 1.4em; }
+  .pe-block.pe-fl figure.pe-img, .pe-block.pe-fr figure.pe-img { width: 100%; margin: 0; }
+  @media (max-width: 600px) { .pe-block.pe-fl, .pe-block.pe-fr { float: none; width: auto; margin: 0; } .pe-block.pe-fl figure.pe-img, .pe-block.pe-fr figure.pe-img { width: 80%; margin: 1.2em auto; } }
+  .pe-block.pe-dragging { opacity: .3; }
+  .pe-block.pe-hot { outline: 3px solid var(--lime); }
+  .pe-rich { position: relative; outline: none; min-height: 1em; }
+  .pe-rich.is-empty::before { content: attr(data-ph); color: rgba(238,246,216,.35); pointer-events: none; }
+  .pe-text.is-empty::before { position: absolute; left: 0; right: 0; top: 0; }
+  .pe-block:not(.sel) figcaption.is-empty { display: none; }
+  .pe-tab { position: absolute; left: -38px; top: 0; width: 26px; height: 30px; display: grid; place-items: center; font-size: 18px; color: var(--muted); cursor: grab; touch-action: none; user-select: none; opacity: 0; }
+  .pe-block:hover > .pe-tab, .pe-block.sel > .pe-tab { opacity: 1; } .pe-tab:hover { color: var(--lime); }
+  .pe-fr > .pe-tab { left: auto; right: -38px; }
+  @media (max-width: 760px) { .pe-tab { display: none; } }
+  .pe-bar { position: absolute; left: -8px; bottom: calc(100% + 10px); z-index: 6; display: none; flex-wrap: wrap; align-items: center; gap: 4px; width: max-content; max-width: min(660px, 88vw); padding: 4px; background: #050b12; box-shadow: inset 0 0 0 2px var(--lime), 0 6px 18px rgba(0,0,0,.45); font: 400 12px/1 'Pixelify Sans', monospace; letter-spacing: .06em; }
+  .pe-fr > .pe-bar { left: auto; right: -8px; }
+  .pe-block.sel > .pe-bar { display: flex; }
+  .pe-bar .pe-grip { padding: 0 6px; font-size: 18px; color: var(--ice); cursor: grab; touch-action: none; user-select: none; }
+  .pe-bar .pe-grip:hover { color: var(--lime); }
+  .pe-type { padding: 0 6px 0 2px; color: var(--lime); letter-spacing: .14em; text-transform: uppercase; }
+  .pe-seg { display: inline-flex; gap: 2px; }
+  .pe-b { min-width: 28px; height: 28px; padding: 0 8px; border: 0; cursor: pointer; font: inherit; color: var(--ice); background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+  .pe-b:hover { color: var(--lime); box-shadow: inset 0 0 0 1px var(--lime); }
+  .pe-b.on { color: var(--ink); background: var(--lime); box-shadow: none; }
+  .pe-b.del:hover { color: #ffb4a8; box-shadow: inset 0 0 0 1px var(--red); }
+  .pe-b:disabled { opacity: .3; cursor: default; color: var(--ice); box-shadow: inset 0 0 0 1px var(--line); }
+  .pe-bar input[type=text], .pe-embedform input[type=text] { width: 220px; padding: 6px 8px; font: 13px Barlow, system-ui, sans-serif; letter-spacing: 0; }
+  .pe-embedform input[type=text] { width: auto; flex: 1; min-width: 0; }
+  .pe-ph { display: grid; place-items: center; gap: 4px; margin: 1.2em 0; padding: 36px 16px; text-align: center; font-size: 15px; line-height: 1.4; color: var(--muted); border: 2px dashed rgba(238,246,216,.3); cursor: pointer; }
+  .pe-ph b { font: 400 14px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ice); }
+  .pe-ph:hover, .pe-hot .pe-ph { border-color: var(--lime); color: var(--lime); }
+  .pe-gi { position: relative; display: block; }
+  .pe-gx { position: absolute; top: 4px; right: 4px; width: 26px; height: 26px; display: none; border: 0; cursor: pointer; background: rgba(5,11,18,.88); color: var(--ice); font: 16px/1 system-ui, sans-serif; }
+  .pe-gx:hover { color: #ffb4a8; }
+  .pe-block.sel .pe-gx { display: block; }
+  .pe-gadd { display: none; aspect-ratio: 1; border: 2px dashed rgba(238,246,216,.3); cursor: pointer; background: transparent; color: var(--muted); font: 400 12px 'Pixelify Sans', monospace; letter-spacing: .1em; text-transform: uppercase; }
+  .pe-gadd:hover { border-color: var(--lime); color: var(--lime); }
+  .pe-block.sel .pe-gadd, .pe-gallery.empty .pe-gadd { display: block; }
+  .pe-gallery.empty { grid-template-columns: 1fr; } .pe-gallery.empty .pe-gadd { aspect-ratio: auto; padding: 36px 16px; }
+  .pe-embedform { display: grid; gap: 10px; margin: 1.2em 0; padding: 18px; font-size: 15px; line-height: 1.45; color: var(--muted); border: 2px dashed rgba(238,246,216,.3); }
+  .pe-embedform b { font: 400 14px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ice); }
+  .pe-embedform .pe-row { display: flex; gap: 8px; }
+  .pe-embed, .pe-htmlprev { position: relative; }
+  .pe-shield { position: absolute; inset: 0; z-index: 1; cursor: pointer; }
+  .pe-htmlprev:empty::before { content: 'Empty HTML block'; color: var(--muted); }
+  .pe-code { display: block; width: 100%; min-height: 170px; margin: 10px 0; padding: 10px 12px; border: 0; resize: vertical; background: #050b12; color: var(--ice); box-shadow: inset 0 0 0 2px var(--lime); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .pe-end { clear: both; margin-top: 1.6em; padding: 18px; text-align: center; font: 400 12px/1.5 'Pixelify Sans', monospace; letter-spacing: .1em; text-transform: uppercase; color: rgba(238,246,216,.4); border: 2px dashed rgba(238,246,216,.14); }
+  .pe-end.pe-hotend { border-color: var(--lime); color: var(--lime); }
+  .pe-line { position: absolute; left: 16px; right: 16px; height: 4px; z-index: 7; background: var(--lime); box-shadow: 0 0 10px rgba(194,234,106,.75); pointer-events: none; }
+  .pe-ghost { position: fixed; left: 0; top: 0; z-index: 60; padding: 8px 12px; pointer-events: none; font: 400 12px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--lime); box-shadow: 0 8px 22px rgba(0,0,0,.45); }
+  body.pe-grabbing, body.pe-grabbing * { cursor: grabbing !important; user-select: none !important; }
+  .editbtn { color: var(--lime); }
+  .editbtn.edited::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 4px; background: #f6d24a; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -174,6 +287,50 @@
         <button class="btn go" id="publishBtn">Publish</button>
       </div>
       <div class="msg" id="editMsg"></div>
+    </div>
+
+    <!-- ================= PAGE EDITOR ================= -->
+    <div class="body" id="pageEd" hidden>
+      <div class="pe-head">
+        <button class="btn sm" type="button" id="peBack">← All pages</button>
+        <h1>Editing <b id="peName">page</b></h1>
+        <span class="pe-addr" id="peAddr"></span>
+      </div>
+      <div class="pe-tools">
+        <div class="pe-pal" id="pePal">
+          <span>Add</span>
+          <button type="button" data-new="heading" title="Click to add, or drag onto the page"><i>H</i>Heading</button>
+          <button type="button" data-new="text" title="Click to add, or drag onto the page"><i>¶</i>Text</button>
+          <button type="button" data-new="image" title="Click to add, or drag onto the page"><i>▣</i>Picture</button>
+          <button type="button" data-new="gallery" title="Click to add, or drag onto the page"><i>▦</i>Gallery</button>
+          <button type="button" data-new="quote" title="Click to add, or drag onto the page"><i>❝</i>Quote</button>
+          <button type="button" data-new="button" title="Click to add, or drag onto the page"><i>▭</i>Button</button>
+          <button type="button" data-new="embed" title="Click to add, or drag onto the page"><i>▶</i>Embed</button>
+          <button type="button" data-new="divider" title="Click to add, or drag onto the page"><i>—</i>Divider</button>
+          <button type="button" data-new="html" title="Click to add, or drag onto the page"><i>&lt;/&gt;</i>HTML</button>
+        </div>
+        <div class="pe-fmt" id="peFmt">
+          <button type="button" data-cmd="bold" title="Bold (Ctrl+B)" disabled><b>B</b></button>
+          <button type="button" data-cmd="italic" title="Italic (Ctrl+I)" disabled><i>I</i></button>
+          <button type="button" data-cmd="underline" title="Underline (Ctrl+U)" disabled><u>U</u></button>
+          <button type="button" data-cmd="createLink" title="Link the selected words" disabled>🔗</button>
+          <button type="button" data-cmd="insertUnorderedList" title="Bullet list" disabled>•≡</button>
+          <button type="button" data-cmd="insertOrderedList" title="Numbered list" disabled>1≡</button>
+          <button type="button" data-cmd="removeFormat" title="Clear formatting and links" disabled>⌫</button>
+          <button type="button" id="peUndo" title="Undo (Ctrl+Z)" disabled>↶ Undo</button>
+        </div>
+      </div>
+      <div class="pe-stage"><div class="pe-sheet" id="peCanvas"></div></div>
+      <p class="hint">Click any text to type straight onto the page. Drag blocks by <b>⠿</b> to move them, drag from the <b>Add</b> bar to drop a new block exactly where you want it, and drop pictures from your computer anywhere on the page.</p>
+      <datalist id="peLinks"></datalist>
+      <input type="file" id="peFile" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml,image/avif" hidden>
+      <div class="publish" id="pePubBar">
+        <span class="unsaved" id="peUnsaved">Everything is published</span>
+        <button class="btn" type="button" id="pePreview">Preview</button>
+        <button class="btn" type="button" id="peDone">Done</button>
+        <button class="btn go" type="button" id="pePublish">Publish</button>
+      </div>
+      <div class="msg" id="peMsg"></div>
     </div>
 
     <div class="statusbar"><span><span class="led off" id="led"></span><span id="statusText">Not connected</span></span><span>Changes go live about a minute after publishing</span></div>
@@ -278,12 +435,13 @@
 
   /* ---------- state ---------- */
   let SITE = null, SAVED = '', PENDING = {}, NEWPAGES = {}, REMOVALS = new Set(), confirmId = null;
+  let PAGEEDITS = {}, MEDIA = {};   // page-editor work in progress: { file → page }, { 'media/x.webp' → picture }
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const overrides = () => Object.fromEntries(Object.entries(PENDING).map(([p, v]) => [p, v.dataURL]));
   const placeOf = (p) => p.place || (p.url === 'flappy' ? 'jungle' : 'menu');
   const isSlug = (u) => /^[a-z0-9][a-z0-9-]*$/i.test(u || '');
   const pageFile = (u) => (isSlug(u) ? u + '/index.html' : /^pages\/[\w-]+\.html$/.test(u || '') ? u : null);
-  function dirty() { return !!SITE && (JSON.stringify(SITE) !== SAVED || Object.keys(PENDING).length > 0 || REMOVALS.size > 0); }
+  function dirty() { return !!SITE && (JSON.stringify(SITE) !== SAVED || Object.keys(PENDING).length > 0 || REMOVALS.size > 0 || Object.values(PAGEEDITS).some(peChanged)); }
   function markDirty() { const d = dirty(); $('#publishBar').classList.toggle('dirty', d); $('#unsaved').textContent = d ? 'Changes not published yet' : 'Everything is published'; }
   addEventListener('beforeunload', (e) => { if (dirty()) { e.preventDefault(); e.returnValue = ''; } });
 
@@ -300,7 +458,7 @@
         <div class="f"><input type="text" data-k="title" value="${K.esc(p.title)}" aria-label="Page name" maxlength="40">
         <div class="addr"><span ${ext ? 'hidden' : ''}>${K.esc(HOST)}/</span><input type="text" data-k="url" value="${K.esc(p.url)}" aria-label="Address" spellcheck="false"></div>
         <label class="place">Shows in <select data-k="place" aria-label="Where the link appears"><option value="menu" ${placeOf(p) === 'menu' ? 'selected' : ''}>the main menu</option><option value="jungle" ${placeOf(p) === 'jungle' ? 'selected' : ''}>the jungle — a sign on a branch</option></select></label></div>
-        <div class="acts"><button class="btn sm" type="button" data-a="up" ${i ? '' : 'disabled'} aria-label="Move up">↑</button><button class="btn sm" type="button" data-a="down" ${i < SITE.pages.length - 1 ? '' : 'disabled'} aria-label="Move down">↓</button><button class="btn sm del" type="button" data-a="del" aria-label="Remove">✕</button></div>`;
+        <div class="acts">${!ext && canEdit(p) ? `<button class="btn sm editbtn ${PAGEEDITS[pageFile(p.url)] && peChanged(PAGEEDITS[pageFile(p.url)]) ? 'edited' : ''}" type="button" data-a="edit" title="Edit what's on this page">✎ Edit page</button>` : ''}<button class="btn sm" type="button" data-a="up" ${i ? '' : 'disabled'} aria-label="Move up">↑</button><button class="btn sm" type="button" data-a="down" ${i < SITE.pages.length - 1 ? '' : 'disabled'} aria-label="Move down">↓</button><button class="btn sm del" type="button" data-a="del" aria-label="Remove">✕</button></div>`;
       wire(d, SITE.pages, i, 'page');
       if (confirmId === p.id) {
         const c = document.createElement('div'); c.className = 'confirm';
@@ -333,7 +491,15 @@
     d.querySelectorAll('[data-k]').forEach((inp) => inp.addEventListener('input', () => {
       const k = inp.dataset.k;
       if (kind === 'page' && k === 'place') { it.place = inp.value; const n = SITE.pages.filter((x) => placeOf(x) === 'jungle').length; msg('#editMsg', n > 5 ? 'Only 5 pages fit in the jungle at once — the rest won’t show until you move one back to the menu.' : '', n > 5 ? 'err' : ''); markDirty(); return; }
-      if (kind === 'page' && k === 'url') { const was = it.url; it.url = inp.value.trim(); if (NEWPAGES[was]) { NEWPAGES[it.url] = NEWPAGES[was]; delete NEWPAGES[was]; } d.querySelector('.addr span').hidden = /:\/\//.test(it.url); }
+      if (kind === 'page' && k === 'url') {
+        const was = it.url; it.url = inp.value.trim();
+        if (NEWPAGES[was]) {
+          NEWPAGES[it.url] = NEWPAGES[was]; delete NEWPAGES[was];
+          const of = pageFile(was), nf = pageFile(it.url);   // a brand-new page's edits follow it to its new address
+          if (of && PAGEEDITS[of]) { if (nf) { PAGEEDITS[nf] = PAGEEDITS[of]; PAGEEDITS[nf].file = nf; } delete PAGEEDITS[of]; }
+        }
+        d.querySelector('.addr span').hidden = /:\/\//.test(it.url);
+      }
       else it[k] = inp.value;
       if (k === 'platform') { it.label = K.PLATFORMS[inp.value][0]; d.querySelector('.iconbtn').innerHTML = iconFor(it, kind); }
       if (kind === 'page' && k === 'title' && (it.icon || 'auto') === 'auto') d.querySelector('.iconbtn').innerHTML = iconFor(it, kind);
@@ -341,7 +507,8 @@
     }));
     d.querySelector('.iconbtn').addEventListener('click', () => openPicker(it, kind));
     d.querySelector('.acts').addEventListener('click', (e) => {
-      const a = e.target.dataset.a; if (!a) return;
+      const a = e.target.closest('[data-a]') && e.target.closest('[data-a]').dataset.a; if (!a) return;
+      if (a === 'edit') { openPageEditor(it); return; }
       if (a === 'up' && i > 0) [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
       if (a === 'down' && i < arr.length - 1) [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]];
       if (a === 'del') { if (kind === 'page' && pageFile(it.url)) { confirmId = it.id; renderPages(); return; } arr.splice(i, 1); }
@@ -402,34 +569,613 @@
     s.socials = s.socials.filter((x) => x.url).map((x) => ({ id: x.id || uid(), platform: x.platform || 'other', label: (x.label || K.PLATFORMS[x.platform || 'other'][0]).trim(), url: x.url.trim(), icon: x.icon || 'auto' }));
     return s;
   }
-  $('#previewBtn').addEventListener('click', () => {
-    try { localStorage.setItem('harry-site-draft', JSON.stringify({ site: clean(), overrides: overrides() })); window.open('./?draft=1', '_blank', 'noopener'); }
-    catch (e) { msg('#editMsg', 'Your browser blocked storage, so the preview can’t open here.', 'err'); }
-  });
-  $('#undoBtn').addEventListener('click', () => { if (!dirty() || confirm('Undo everything you haven’t published?')) { SITE = JSON.parse(SAVED); PENDING = {}; NEWPAGES = {}; REMOVALS = new Set(); confirmId = null; renderAll(); msg('#editMsg', ''); } });
-  $('#publishBtn').addEventListener('click', async () => {
-    if (!dirty()) { msg('#editMsg', 'Nothing new to publish.', 'ok'); return; }
-    const btn = $('#publishBtn'); btn.disabled = true; status('Publishing…', 'warn'); msg('#editMsg', 'Publishing…');
+  /** saves the unpublished site and pages where the home page's ?draft preview can read them */
+  function writeDrafts() {
+    localStorage.setItem('harry-site-draft', JSON.stringify({ site: clean(), overrides: overrides() }));
+    const pages = (inline) => { const o = {}; for (const pe of Object.values(PAGEEDITS)) if (pe === PE || peChanged(pe)) o[pageKey(pe.file)] = '<main class="sheet">\n' + serializeBlocks(pe.blocks, inline) + '\n</main>'; return JSON.stringify(o); };
+    try { localStorage.setItem('harry-page-drafts', pages(true)); return ''; }
+    catch (e) { localStorage.setItem('harry-page-drafts', pages(false)); return 'New pictures are too big to preview, so they’ll show once you publish.'; }
+  }
+  function openPreview(key, msgSel) {
+    try { const note = writeDrafts(); window.open('./?draft=1' + (key ? '&p=' + encodeURIComponent(key) : ''), '_blank', 'noopener'); msg(msgSel, note, note ? 'err' : ''); }
+    catch (e) { msg(msgSel, 'Your browser blocked storage, so the preview can’t open here.', 'err'); }
+  }
+  $('#previewBtn').addEventListener('click', () => openPreview('', '#editMsg'));
+  $('#undoBtn').addEventListener('click', () => { if (!dirty() || confirm('Undo everything you haven’t published, including page edits?')) { SITE = JSON.parse(SAVED); PENDING = {}; NEWPAGES = {}; REMOVALS = new Set(); PAGEEDITS = {}; MEDIA = {}; confirmId = null; renderAll(); msg('#editMsg', ''); } });
+
+  async function publish() {
+    const say = (t, k) => { msg('#editMsg', t, k); msg('#peMsg', t, k); };
+    if (!dirty()) { say('Nothing new to publish.', 'ok'); return; }
+    const btns = [$('#publishBtn'), $('#pePublish')]; btns.forEach((b) => { b.disabled = true; }); status('Publishing…', 'warn'); say('Publishing…');
     try {
       const site = clean(), files = [], used = new Set([...site.pages, ...site.socials].map((x) => x.icon));
       for (const [path, v] of Object.entries(PENDING)) if (used.has(path)) files.push({ path, b64: v.b64 });
+      // edited pages: only the inside of each page's sheet changes; the rest of the file stays as it was
+      const live = new Set(site.pages.map((p) => pageFile(p.url)).filter(Boolean));
+      const edits = Object.values(PAGEEDITS).filter((pe) => live.has(pe.file) && peChanged(pe)), written = new Map(), media = new Set();
+      for (const pe of edits) {
+        const html = composePage(pe, site.title); written.set(pe, html);
+        files.push({ path: pe.file, b64: b64utf8(html) });
+        for (const m of html.matchAll(/\.\.\/(media\/[\w.-]+)/g)) media.add(m[1]);
+      }
+      for (const k of media) if (MEDIA[k] && !MEDIA[k].done) files.push({ path: k, b64: MEDIA[k].b64 });
       for (const [slug, title] of Object.entries(NEWPAGES)) {
-        if (!site.pages.some((p) => p.url === slug) || !isSlug(slug)) continue;
+        if (!site.pages.some((p) => p.url === slug) || !isSlug(slug) || edits.some((pe) => pe.file === slug + '/index.html')) continue;
         if (await exists(slug + '/index.html')) continue;          // never overwrite a page you've written
         files.push({ path: slug + '/index.html', b64: b64utf8(K.pageTemplate(title, site.title, slug)) });
       }
       files.push({ path: 'site.json', b64: b64utf8(JSON.stringify(site, null, 2) + '\n') });
       const removals = [];
       for (const f of REMOVALS) if (f && !site.pages.some((p) => pageFile(p.url) === f) && await exists(f)) removals.push(f);
-      await commit(files, removals, 'Update site from the console');
+      await commit(files, removals, edits.length ? 'Update ' + edits.map((pe) => pe.title).join(', ') + ' from the console' : 'Update site from the console');
+      for (const [pe, html] of written) { pe.base = html; pe.isNew = false; pe.orig = serializeBlocks(pe.blocks); }
+      for (const k of media) if (MEDIA[k]) MEDIA[k].done = true;
       SITE = site; SAVED = JSON.stringify(site); PENDING = {}; NEWPAGES = {}; REMOVALS = new Set();
-      try { localStorage.removeItem('harry-site-draft'); } catch (e) { /* off */ }
-      renderAll(); msg('#editMsg', 'Published! Your changes will be live in about a minute.', 'ok'); status('Published · ' + AUTH.owner + '/' + AUTH.repo);
-    } catch (err) { msg('#editMsg', 'Couldn’t publish: ' + err.message, 'err'); status('Publish failed', 'err'); }
-    btn.disabled = false;
+      try { localStorage.removeItem('harry-site-draft'); localStorage.removeItem('harry-page-drafts'); } catch (e) { /* off */ }
+      renderAll(); if (PE) peState(); say('Published! Your changes will be live in about a minute.', 'ok'); status('Published · ' + AUTH.owner + '/' + AUTH.repo);
+    } catch (err) { say('Couldn’t publish: ' + err.message, 'err'); status('Publish failed', 'err'); }
+    btns.forEach((b) => { b.disabled = false; });
+  }
+  $('#publishBtn').addEventListener('click', publish);
+
+  /* =====================================================================
+     PAGE EDITOR — edits only what's inside a page's <main class="sheet">
+     A page is a list of blocks; each block turns into plain, tidy HTML.
+     ===================================================================== */
+  const ROOTURL = new URL('./', location.href);
+  const APP_PAGES = ['flappy'];                 // full pages of their own (games) — not edited here
+  const A = K.esc;
+  const LABEL = { heading: 'Heading', text: 'Text', image: 'Picture', gallery: 'Gallery', quote: 'Quote', button: 'Button', embed: 'Embed', divider: 'Divider', html: 'HTML' };
+  const IMG_TYPES = /^image\/(png|jpeg|webp|gif|svg\+xml|avif)$/;
+  let PE = null, SEL = null, DRAG = null, eatClick = false;
+  function canEdit(p) { return !!pageFile(p.url) && !APP_PAGES.includes(p.url); }
+  function pageKey(f) { return f.replace(/\/index\.html$/, '').replace(/\.html$/, ''); }
+  function pageBase(f) { return new URL(f.replace(/[^/]*$/, ''), ROOTURL); }
+  function peChanged(pe) { return serializeBlocks(pe.blocks) !== pe.orig; }
+  const pmsg = (t, k = '') => msg('#peMsg', t, k);
+
+  /* ---------- links ---------- */
+  /** what someone types → a real link. "about" means one of your pages */
+  function hrefOut(u) {
+    u = (u || '').trim(); if (!u || /^\s*(javascript|data|vbscript):/i.test(u)) return '';
+    if (/^(https?:|mailto:|tel:|#|\.\.?\/|\/)/i.test(u)) return u;
+    if (/^[^\s@/]+@[^\s@/]+\.[a-z]{2,}$/i.test(u)) return 'mailto:' + u;
+    if (/^[a-z0-9][a-z0-9-]*$/i.test(u)) return '../' + u.toLowerCase() + '/';
+    if (/^[\w-]+(\.[\w-]+)+([/?#]|$)/i.test(u)) return 'https://' + u;
+    return u;
+  }
+  function hrefIn(h) { const m = (h || '').match(/^\.\.\/([a-z0-9-]+)\/?$/i); return m ? m[1] : (h || ''); }
+  const offsite = (h) => { try { const u = new URL(h, ROOTURL); return /^https?:$/.test(u.protocol) && u.host !== ROOTURL.host; } catch (e) { return false; } };
+
+  /* ---------- cleaning text ---------- */
+  const INLINE = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', U: 'u', S: 's', A: 'a', CODE: 'code', BR: 'br', SUB: 'sub', SUP: 'sup' };
+  const BLOCKY = /^(P|DIV|H[1-6]|BLOCKQUOTE|UL|OL|LI|SECTION|ARTICLE|PRE|FIGURE|TABLE|TR)$/;
+  /** keeps only simple formatting; blocks=true allows paragraphs and lists */
+  function sanitize(html, blocks) {
+    const src = new DOMParser().parseFromString('<body>' + (html || ''), 'text/html').body, out = document.createElement('div');
+    const brk = (to) => { if (to.lastChild && to.lastChild.nodeName !== 'BR') to.appendChild(document.createElement('br')); };
+    (function walk(from, to) {
+      for (const n of from.childNodes) {
+        if (n.nodeType === 3) { to.appendChild(document.createTextNode(n.textContent)); continue; }
+        if (n.nodeType !== 1 || /^(SCRIPT|STYLE|TEMPLATE|IFRAME|OBJECT|SVG|IMG|VIDEO|AUDIO|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(n.tagName)) continue;
+        const t = n.tagName;
+        if (blocks && /^(UL|OL|LI)$/.test(t)) { const el = document.createElement(t); walk(n, el); to.appendChild(el); continue; }
+        if (blocks && BLOCKY.test(t)) {                     // any other block becomes a paragraph
+          if (to !== out && to.nodeName !== 'LI') { brk(to); walk(n, to); continue; }
+          const el = document.createElement('p'); walk(n, el); to.appendChild(el); continue;
+        }
+        if (!blocks && BLOCKY.test(t)) { brk(to); walk(n, to); continue; }
+        if (INLINE[t]) {
+          const el = document.createElement(INLINE[t]);
+          if (t === 'A') { const h = hrefOut(n.getAttribute('href')); if (!h) { walk(n, to); continue; } el.setAttribute('href', h); if (offsite(h)) { el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener'); } }
+          if (t !== 'BR') walk(n, el); to.appendChild(el); continue;
+        }
+        walk(n, to);                                         // span, font… keep the words, drop the wrapper
+      }
+    })(src, out);
+    const blank = (n) => n.nodeType === 3 ? !n.textContent.trim() : n.nodeName === 'BR' || (/^(P|LI)$/.test(n.nodeName) && !n.textContent.trim() && !n.querySelector('br + *'));
+    if (blocks) {                                          // loose words/inline bits → wrap in paragraphs
+      const fixed = document.createElement('div'); let p = null;
+      for (const n of [...out.childNodes]) {
+        if (/^(P|UL|OL)$/.test(n.nodeName)) { p = null; fixed.appendChild(n); continue; }
+        if (n.nodeName === 'LI') { const ul = document.createElement('ul'); ul.appendChild(n); fixed.appendChild(ul); p = null; continue; }
+        if (!p) { if (blank(n)) continue; p = document.createElement('p'); fixed.appendChild(p); }
+        p.appendChild(n);
+      }
+      while (fixed.firstChild && blank(fixed.firstChild)) fixed.firstChild.remove();
+      while (fixed.lastChild && blank(fixed.lastChild)) fixed.lastChild.remove();
+      fixed.querySelectorAll('p').forEach((q) => { while (q.lastChild && q.lastChild.nodeName === 'BR' && q.childNodes.length > 1) q.lastChild.remove(); });
+      return fixed.innerHTML.replace(/<\/(p|ul|ol)>(?=<)/g, '</$1>\n');
+    }
+    while (out.firstChild && blank(out.firstChild)) out.firstChild.remove();
+    while (out.lastChild && blank(out.lastChild)) out.lastChild.remove();
+    return out.innerHTML;
+  }
+  /** custom HTML shown in the console: harmless copy with no scripts, styles or event handlers */
+  function previewHTML(html, base) {
+    const d = new DOMParser().parseFromString('<body>' + (html || ''), 'text/html');
+    d.querySelectorAll('script,style,link,meta,base,object,embed,form,frame,frameset').forEach((n) => n.remove());
+    d.querySelectorAll('*').forEach((n) => [...n.attributes].forEach((a) => {
+      if (/^on/i.test(a.name) || a.name === 'srcdoc' || (/^(src|href|action|formaction|poster|xlink:href)$/i.test(a.name) && /^\s*(javascript|vbscript):/i.test(a.value))) n.removeAttribute(a.name);
+      else if (/^(src|poster)$/i.test(a.name)) { try { n.setAttribute(a.name, new URL(a.value, base).href); } catch (e) { /* leave */ } }
+    }));
+    d.querySelectorAll('iframe').forEach((f) => { if (!/^https:/i.test(f.getAttribute('src') || '')) f.remove(); else f.setAttribute('tabindex', '-1'); });
+    return d.body.innerHTML;
+  }
+
+  /* ---------- embeds ---------- */
+  /** a link or <iframe> code → something we can show. null if it can't be embedded */
+  function embedFrom(input) {
+    let s = (input || '').trim(), h = null; if (!s) return null;
+    if (/<iframe/i.test(s)) { const f = new DOMParser().parseFromString(s, 'text/html').querySelector('iframe'); if (!f) return null; s = f.getAttribute('src') || ''; h = parseInt(f.getAttribute('height'), 10) || null; }
+    if (/^\/\//.test(s)) s = 'https:' + s;
+    if (!/^https?:\/\//i.test(s)) { if (/^[\w-]+(\.[\w-]+)+\//.test(s)) s = 'https://' + s; else return null; }
+    let u; try { u = new URL(s.replace(/^http:/i, 'https:')); } catch (e) { return null; }
+    const host = u.hostname.replace(/^(www|m)\./, '');
+    let id = null;
+    if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+    else if (/^(youtube|youtube-nocookie)\.com$/.test(host)) id = u.searchParams.get('v') || (u.pathname.match(/^\/(?:embed|shorts|live|v)\/([\w-]{6,})/) || [])[1];
+    if (id) { const t = parseInt(u.searchParams.get('t') || u.searchParams.get('start'), 10); return { kind: /\/shorts\//.test(u.pathname) ? 'tall' : 'video', src: 'https://www.youtube-nocookie.com/embed/' + id + (t ? '?start=' + t : ''), h: null }; }
+    if (host === 'vimeo.com' && (id = (u.pathname.match(/^\/(\d+)/) || [])[1])) return { kind: 'video', src: 'https://player.vimeo.com/video/' + id, h: null };
+    if (host === 'player.vimeo.com') return { kind: 'video', src: u.href, h: null };
+    if (host === 'open.spotify.com') {
+      const m = u.pathname.replace(/^\/intl-[\w-]+/, '').match(/^\/(?:embed\/)?(track|album|playlist|episode|show|artist)\/(\w+)/);
+      if (m) return { kind: 'audio', src: `https://open.spotify.com/embed/${m[1]}/${m[2]}`, h: /track|episode/.test(m[1]) ? 152 : 352 };
+    }
+    if (host === 'soundcloud.com' || host === 'on.soundcloud.com') return { kind: 'audio', src: 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(u.href) + '&color=%23c2ea6a', h: 166 };
+    if (host === 'w.soundcloud.com') return { kind: 'audio', src: u.href, h: h || 166 };
+    if (host === 'tiktok.com') { const m = u.pathname.match(/\/(?:video|v2)\/(\d+)/); if (m) return { kind: 'tall', src: 'https://www.tiktok.com/embed/v2/' + m[1], h: null }; }
+    if (/(^|\.)google\.[a-z.]+$/.test(host) && /^\/maps\/embed/.test(u.pathname)) return { kind: 'map', src: u.href, h: h || 420 };
+    return { kind: 'frame', src: u.href, h: h || 450 };
+  }
+
+  /* ---------- page HTML → blocks ---------- */
+  function parseSheet(main) {
+    const blocks = []; let buf = '';
+    const flush = () => { if (buf.trim()) blocks.push({ type: 'text', html: buf, align: 'left' }); buf = ''; };
+    const imgBlock = (img, fig) => {
+      const c = (fig || img).classList, size = ['small', 'medium', 'full', 'auto'].find((s) => c.contains('pe-' + s)) || (fig && c.contains('pe-img') ? 'full' : 'auto');
+      const cap = fig && fig.querySelector('figcaption');
+      return { type: 'image', src: img.getAttribute('src') || '', alt: img.getAttribute('alt') || '', caption: cap ? cap.innerHTML : '', size, align: c.contains('pe-left') ? 'left' : c.contains('pe-right') ? 'right' : 'center' };
+    };
+    for (const n of [...main.childNodes]) {
+      if (n.nodeType === 3) { if (n.textContent.trim()) buf += '<p>' + A(n.textContent.trim()) + '</p>'; continue; }
+      if (n.nodeType !== 1) continue;
+      const t = n.tagName, c = n.classList, only = n.children.length === 1 ? n.firstElementChild : null, bare = !n.textContent.trim();
+      if (/^H[1-6]$/.test(t)) { flush(); blocks.push({ type: 'heading', level: Math.min(3, +t[1]), html: n.innerHTML, align: c.contains('pe-c') ? 'center' : 'left' }); }
+      else if (t === 'P' && only && only.matches('a') && (c.contains('pe-btnrow') || only.classList.contains('pe-btn')) && n.textContent.trim() === only.textContent.trim()) { flush(); blocks.push({ type: 'button', label: only.textContent.trim(), url: only.getAttribute('href') || '', align: c.contains('pe-c') ? 'center' : 'left' }); }
+      else if ((t === 'P' || t === 'DIV') && only && only.tagName === 'IMG' && bare) { flush(); blocks.push(imgBlock(only)); }
+      else if (t === 'IMG') { flush(); blocks.push(imgBlock(n)); }
+      else if (t === 'FIGURE' && n.querySelector('img') && !n.querySelector('iframe,video')) { flush(); blocks.push(imgBlock(n.querySelector('img'), n)); }
+      else if (t === 'DIV' && c.contains('pe-gallery')) { flush(); blocks.push({ type: 'gallery', images: [...n.querySelectorAll('img')].map((i) => ({ src: i.getAttribute('src') || '', alt: i.getAttribute('alt') || '' })), cols: c.contains('pe-cols-2') ? 2 : c.contains('pe-cols-4') ? 4 : 3 }); }
+      else if ((t === 'DIV' && c.contains('pe-embed')) || t === 'IFRAME') {
+        const f = t === 'IFRAME' ? n : n.querySelector('iframe'), src = f && f.getAttribute('src') || '';
+        flush();
+        if (!/^https:/i.test(src)) blocks.push({ type: 'html', html: n.outerHTML });
+        else blocks.push({ type: 'embed', src, kind: ['video', 'tall', 'audio', 'map', 'frame'].find((k) => c.contains('pe-' + k)) || 'frame', h: parseInt(f.getAttribute('height'), 10) || (t === 'IFRAME' ? 450 : null), input: '' });
+      }
+      else if (t === 'BLOCKQUOTE') { flush(); blocks.push({ type: 'quote', html: n.innerHTML }); }
+      else if (t === 'HR') { flush(); blocks.push({ type: 'divider' }); }
+      else if (t === 'DIV' && c.contains('pe-c') && !n.querySelector('img,iframe,table,h1,h2,h3,h4,h5,h6,blockquote,form')) { flush(); blocks.push({ type: 'text', html: n.innerHTML, align: 'center' }); }
+      else if (/^(P|UL|OL)$/.test(t) && !n.querySelector('img,iframe,video,table,form,input,button')) buf += n.outerHTML;
+      else { flush(); blocks.push({ type: 'html', html: n.outerHTML }); }   // anything else is kept exactly as written
+    }
+    flush();
+    return blocks;
+  }
+
+  /* ---------- blocks → page HTML ---------- */
+  function srcOut(src, inline) { const m = inline && (src || '').match(/^\.\.\/(media\/[^?#]+)$/); return m && MEDIA[m[1]] ? MEDIA[m[1]].dataURL : src; }
+  function blockHTML(b, inline) {
+    const ctr = (x) => x.align === 'center' ? ' class="pe-c"' : '';
+    switch (b.type) {
+      case 'heading': { const h = sanitize(b.html, false); return h ? `<h${b.level}${ctr(b)}>${h}</h${b.level}>` : ''; }
+      case 'text': { const h = sanitize(b.html, true); return !h ? '' : b.align === 'center' ? `<div class="pe-c">\n  ${h.replace(/\n/g, '\n  ')}\n</div>` : h; }
+      case 'quote': { const h = sanitize(b.html, false); return h ? `<blockquote>${h}</blockquote>` : ''; }
+      case 'image': {
+        if (!b.src) return ''; const cap = sanitize(b.caption, false), al = b.size === 'full' ? 'center' : b.align || 'center';
+        return `<figure class="pe-img pe-${b.size || 'full'} pe-${al}"><img src="${A(srcOut(b.src, inline))}" alt="${A(b.alt || '')}" loading="lazy">${cap ? `<figcaption>${cap}</figcaption>` : ''}</figure>`;
+      }
+      case 'gallery': return b.images.length ? `<div class="pe-gallery pe-cols-${b.cols || 3}">\n${b.images.map((im) => `  <img src="${A(srcOut(im.src, inline))}" alt="${A(im.alt || '')}" loading="lazy">`).join('\n')}\n</div>` : '';
+      case 'button': {
+        const l = (b.label || '').trim(), u = hrefOut(b.url || ''); if (!l) return '';
+        return `<p class="pe-btnrow${b.align === 'center' ? ' pe-c' : ''}"><a class="pe-btn" href="${A(u || '#')}"${offsite(u) ? ' target="_blank" rel="noopener"' : ''}>${A(l)}</a></p>`;
+      }
+      case 'embed': return b.src ? `<div class="pe-embed pe-${b.kind}"><iframe src="${A(b.src)}"${b.h && !/video|tall/.test(b.kind) ? ` height="${b.h}"` : ''} title="Embedded content" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>` : '';
+      case 'divider': return '<hr>';
+      case 'html': return (b.html || '').trim();
+    }
+    return '';
+  }
+  function serializeBlocks(blocks, inline) {
+    return blocks.map((b) => [b, blockHTML(b, inline)]).filter((x) => x[1]).map(([b, h]) => '  ' + (b.type === 'html' ? h : h.replace(/\n/g, '\n  '))).join('\n');
+  }
+  /** the page file with only its sheet swapped for the new content */
+  function composePage(pe, siteTitle) {
+    const inner = '\n' + serializeBlocks(pe.blocks) + '\n', re = /(<main\b[^>]*>)[\s\S]*?(<\/main>)/i;
+    return re.test(pe.base) ? pe.base.replace(re, (m, open, close) => open + inner + close) : K.pageTemplate(pe.title, siteTitle, pageKey(pe.file), inner.slice(1, -1));
+  }
+
+  /* ---------- pictures ---------- */
+  function disp(src) {
+    const m = (src || '').match(/^\.\.\/(media\/[^?#]+)$/);
+    if (m && MEDIA[m[1]]) return MEDIA[m[1]].dataURL;
+    try { return new URL(src, pageBase(PE.file)).href; } catch (e) { return ''; }
+  }
+  const readURL = (blob) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(blob); });
+  const toBlob = (c, type, q) => new Promise((res) => c.toBlob(res, type, q));
+  /** shrinks big photos (max 1800px, WebP) so pages stay quick, and queues the file for publishing */
+  async function prepImage(file) {
+    if (!IMG_TYPES.test(file.type)) throw new Error('“' + file.name + '” isn’t a picture I can use. Try PNG, JPG, WebP, GIF or SVG.');
+    if (file.size > 30 * 1024 * 1024) throw new Error('“' + file.name + '” is over 30 MB — please use a smaller picture.');
+    let blob = file, ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/gif': 'gif', 'image/svg+xml': 'svg', 'image/avif': 'avif' }[file.type];
+    if (/png|jpeg|webp/.test(file.type)) {
+      const url = URL.createObjectURL(file);
+      try {
+        const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+        const sc = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+        if (sc < 1 || file.size > 700 * 1024) {
+          const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * sc); c.height = Math.round(img.naturalHeight * sc);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          let out = await toBlob(c, 'image/webp', 0.86), oext = 'webp';
+          if (!out || out.type !== 'image/webp') { const c2 = document.createElement('canvas'); c2.width = c.width; c2.height = c.height; const g = c2.getContext('2d'); g.fillStyle = '#09121c'; g.fillRect(0, 0, c2.width, c2.height); g.drawImage(c, 0, 0); out = await toBlob(c2, 'image/jpeg', 0.86); oext = 'jpg'; }
+          if (out && (out.size < file.size || sc < 1)) { blob = out; ext = oext; }
+        }
+      } catch (e) { /* use the original */ } finally { URL.revokeObjectURL(url); }
+    }
+    if (blob.size > 6 * 1024 * 1024) throw new Error('“' + file.name + '” is still over 6 MB after shrinking — please use a smaller picture.');
+    const dataURL = await readURL(blob), path = `media/${K.slugify(file.name.replace(/\.[^.]+$/, '')).slice(0, 32) || 'picture'}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}.${ext}`;
+    MEDIA[path] = { b64: dataURL.split(',')[1], dataURL };
+    return { src: '../' + path, alt: '' };
+  }
+  async function takeImages(files) {
+    files = [...files].filter((f) => f && f.type && f.type.startsWith('image/'));
+    if (!files.length) return [];
+    pmsg(files.length > 1 ? `Preparing ${files.length} pictures…` : 'Preparing picture…');
+    const out = []; let err = '';
+    for (const f of files) { try { out.push(await prepImage(f)); } catch (e) { err = e.message; } }
+    pmsg(err, err ? 'err' : '');
+    return out;
+  }
+  function chooseFiles(multiple) {
+    return new Promise((res) => { const f = $('#peFile'); f.multiple = multiple; f.value = ''; f.onchange = () => res([...f.files]); f.click(); });
+  }
+
+  /* ---------- history ---------- */
+  function snap() { PE.hist.push(JSON.stringify(PE.blocks)); if (PE.hist.length > 80) PE.hist.shift(); $('#peUndo').disabled = false; }
+  function undo() { if (!PE.hist.length) return; const sel = PE.blocks.indexOf(SEL); PE.blocks = JSON.parse(PE.hist.pop()); SEL = PE.blocks[Math.min(sel, PE.blocks.length - 1)] || null; render(); }
+
+  /* ---------- drawing the page ---------- */
+  function newBlock(type) {
+    return {
+      heading: { type, level: 2, html: '', align: 'left' }, text: { type, html: '', align: 'left' }, image: { type, src: '', alt: '', caption: '', size: 'full', align: 'center' },
+      gallery: { type, images: [], cols: 3 }, quote: { type, html: '' }, button: { type, label: 'Find out more', url: '', align: 'left' },
+      embed: { type, src: '', kind: '', h: null, input: '' }, divider: { type }, html: { type, html: '', editing: true }
+    }[type];
+  }
+  function seg(act, opts, cur) { return '<span class="pe-seg">' + opts.map(([v, l, t]) => `<button type="button" class="pe-b${String(v) === String(cur) ? ' on' : ''}" data-act="${act}" data-v="${v}" title="${A(t || l)}">${l}</button>`).join('') + '</span>'; }
+  function barHTML(b, i, n) {
+    let mid = '';
+    const align = seg('align', [['left', '⇤', 'Line up on the left'], ['center', '⇔', 'Centre']], b.align || 'left');
+    if (b.type === 'heading') mid = seg('level', [[1, 'H1', 'Page title'], [2, 'H2', 'Section heading'], [3, 'H3', 'Small heading']], b.level) + align;
+    if (b.type === 'text') mid = align;
+    if (b.type === 'image' && b.src) mid = seg('size', [['small', 'S', 'Small'], ['medium', 'M', 'Medium'], ['full', 'L', 'Full width'], ['auto', '1:1', 'Actual size']], b.size)
+      + (b.size !== 'full' ? seg('align', [['left', '⇤', 'Left — text wraps around it'], ['center', '⇔', 'Centre'], ['right', '⇥', 'Right — text wraps around it']], b.align) : '')
+      + `<button type="button" class="pe-b" data-act="pick">Replace</button><input type="text" data-set="alt" value="${A(b.alt)}" placeholder="Describe it (for screen readers)" aria-label="Picture description">`;
+    if (b.type === 'gallery') mid = `<span class="pe-type" style="color:var(--muted)">Columns</span>` + seg('cols', [[2, '2'], [3, '3'], [4, '4']], b.cols) + `<button type="button" class="pe-b" data-act="gadd">+ Pictures</button>`;
+    if (b.type === 'button') mid = `<input type="text" data-set="url" list="peLinks" value="${A(hrefIn(b.url))}" placeholder="Goes to: a page name, or https://…" aria-label="Button link">` + align;
+    if (b.type === 'embed' && b.src) mid = `<button type="button" class="pe-b" data-act="embclear">Change</button>`;
+    if (b.type === 'html') mid = `<button type="button" class="pe-b${b.editing ? ' on' : ''}" data-act="code">${b.editing ? 'Done' : 'Edit code'}</button>`;
+    return `<div class="pe-bar"><span class="pe-grip" title="Drag to move">⠿</span><span class="pe-type">${LABEL[b.type]}</span>${mid}<span class="pe-seg">` +
+      `<button type="button" class="pe-b" data-act="up" ${i ? '' : 'disabled'} title="Move up">↑</button><button type="button" class="pe-b" data-act="down" ${i < n - 1 ? '' : 'disabled'} title="Move down">↓</button>` +
+      `<button type="button" class="pe-b" data-act="dup" title="Duplicate">⧉</button><button type="button" class="pe-b del" data-act="del" title="Delete">✕</button></span></div>`;
+  }
+  function contentHTML(b) {
+    const ed = (tag, cls, f, ph, inner, extra = '') => `<${tag} class="pe-rich ${cls}" contenteditable="true" data-f="${f}" data-ph="${A(ph)}" ${extra}>${inner}</${tag}>`;
+    switch (b.type) {
+      case 'heading': return ed('h' + b.level, b.align === 'center' ? 'pe-c' : '', 'html', b.level === 1 ? 'Page title' : 'Heading', sanitize(b.html, false), 'data-line');
+      case 'text': return ed('div', 'pe-text' + (b.align === 'center' ? ' pe-c' : ''), 'html', 'Write something…', sanitize(b.html, true) || '<p><br></p>');
+      case 'quote': return ed('blockquote', '', 'html', 'A quote, or something that should stand out…', sanitize(b.html, false));
+      case 'image': return b.src
+        ? `<figure class="pe-img pe-${b.size} pe-${b.size === 'full' ? 'center' : b.align}"><img src="${A(disp(b.src))}" alt="${A(b.alt)}" draggable="false">${ed('figcaption', '', 'caption', 'Add a caption (optional)', sanitize(b.caption, false), 'data-line')}</figure>`
+        : '<div class="pe-ph" data-act="pick"><b>Add a picture</b><span>Click to choose one, or drop it here</span></div>';
+      case 'gallery': return `<div class="pe-gallery pe-cols-${b.cols}${b.images.length ? '' : ' empty'}">${b.images.map((im, j) => `<span class="pe-gi"><img src="${A(disp(im.src))}" alt="${A(im.alt)}" draggable="false"><button type="button" class="pe-gx" data-act="gdel" data-v="${j}" title="Remove this picture">×</button></span>`).join('')}<button type="button" class="pe-gadd" data-act="gadd">${b.images.length ? '+ Add' : '<b style="color:var(--ice)">Add pictures</b><br>Click to choose several, or drop them here'}</button></div>`;
+      case 'button': return `<p class="pe-btnrow${b.align === 'center' ? ' pe-c' : ''}">${ed('span', 'pe-btn', 'label', 'Button text', A(b.label), 'data-line data-plain')}</p>`;
+      case 'embed': return b.src
+        ? `<div class="pe-embed pe-${b.kind}"><iframe src="${A(b.src)}"${b.h && !/video|tall/.test(b.kind) ? ` height="${b.h}"` : ''} tabindex="-1" loading="lazy" title="Embedded content" allow="autoplay; encrypted-media; fullscreen; picture-in-picture"></iframe><div class="pe-shield"></div></div>`
+        : `<div class="pe-embedform"><b>Embed something</b><span>Paste a link from YouTube, Vimeo, Spotify, SoundCloud or TikTok — or the embed code (an &lt;iframe&gt;) any site gives you, like a Google Map.</span><div class="pe-row"><input type="text" data-embin value="${A(b.input || '')}" placeholder="https://…" aria-label="Link or embed code"><button type="button" class="btn sm go" data-act="emb">Embed</button></div></div>`;
+      case 'divider': return '<hr>';
+      case 'html': return `<div class="pe-htmlprev">${previewHTML(b.html, pageBase(PE.file))}${b.editing ? '' : '<div class="pe-shield"></div>'}</div>${b.editing ? `<textarea class="pe-code" data-code spellcheck="false" placeholder="Paste or write HTML here">${A(b.html)}</textarea>` : ''}`;
+    }
+    return '';
+  }
+  function blockNode(b, i, n) {
+    const d = document.createElement('div'), floaty = b.type === 'image' && b.src && b.size !== 'full' && b.align !== 'center';
+    d.className = 'pe-block' + (b === SEL ? ' sel' : '') + (floaty ? (b.align === 'left' ? ' pe-fl' : ' pe-fr') : '') + (/gallery|embed|divider/.test(b.type) ? ' pe-clear' : '');
+    d.dataset.i = i;
+    if (floaty) d.style.setProperty('--w', { small: '40%', medium: '66%', auto: 'auto' }[b.size]);
+    d.innerHTML = `<span class="pe-grip pe-tab" title="Drag to move">⠿</span>${barHTML(b, i, n)}${contentHTML(b)}`;
+    d.querySelectorAll('.pe-rich').forEach((r) => r.classList.toggle('is-empty', !r.textContent.trim()));
+    return d;
+  }
+  function render() {
+    const c = $('#peCanvas'); c.innerHTML = '';
+    PE.blocks.forEach((b, i) => c.appendChild(blockNode(b, i, PE.blocks.length)));
+    const end = document.createElement('div'); end.className = 'pe-end'; end.id = 'peEnd';
+    end.textContent = PE.blocks.length ? 'Drop pictures here · or add a block from the bar above' : 'This page is empty — add a block from the bar above, or drop pictures here';
+    c.appendChild(end);
+    const line = document.createElement('div'); line.className = 'pe-line'; line.id = 'peLine'; line.hidden = true; c.appendChild(line);
+    $('#peUndo').disabled = !PE.hist.length;
+    peState();
+  }
+  function rerender(b) { const i = PE.blocks.indexOf(b), old = $('#peCanvas').children[i]; if (old && old.classList.contains('pe-block')) old.replaceWith(blockNode(b, i, PE.blocks.length)); peState(); }
+  function nodeOf(b) { const i = PE.blocks.indexOf(b); return i < 0 ? null : $('#peCanvas').children[i]; }
+  function select(b) {
+    SEL = b;
+    [...$('#peCanvas').querySelectorAll(':scope > .pe-block')].forEach((n, i) => n.classList.toggle('sel', PE.blocks[i] === b));
+  }
+  function focusIn(b, atEnd = true) {
+    const n = nodeOf(b), r = n && n.querySelector('.pe-rich, [data-embin], textarea'); if (!r) return;
+    r.focus({ preventScroll: true });
+    if (r.isContentEditable) { const rg = document.createRange(); rg.selectNodeContents(r); rg.collapse(!atEnd); const s = getSelection(); s.removeAllRanges(); s.addRange(rg); }
+  }
+  let stT = 0;
+  function peState() {
+    clearTimeout(stT);
+    stT = setTimeout(() => {
+      if (!PE) return; const mine = peChanged(PE), any = dirty();
+      $('#pePubBar').classList.toggle('dirty', any);
+      $('#peUnsaved').textContent = mine ? 'This page has changes not published yet' : any ? 'Other changes not published yet' : 'Everything is published';
+      markDirty();
+    }, 120);
+  }
+
+  /* ---------- adding, moving, deleting ---------- */
+  function insertBlock(b, at) { snap(); PE.blocks.splice(at, 0, b); SEL = b; render(); const n = nodeOf(b); if (n) n.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  async function addFromBar(type) {
+    const at = SEL && PE.blocks.includes(SEL) ? PE.blocks.indexOf(SEL) + 1 : PE.blocks.length, b = newBlock(type);
+    if (type === 'image' || type === 'gallery') {            // go straight to choosing pictures
+      const pick = chooseFiles(type === 'gallery');
+      insertBlock(b, at);
+      const got = await takeImages(await pick); if (!got.length) return;
+      if (type === 'image') Object.assign(b, got[0]); else b.images.push(...got);
+      rerender(b); return;
+    }
+    insertBlock(b, at); focusIn(b);
+  }
+  async function act(name, b, v, el) {
+    const i = PE.blocks.indexOf(b);
+    switch (name) {
+      case 'up': if (i > 0) { snap(); [PE.blocks[i - 1], PE.blocks[i]] = [b, PE.blocks[i - 1]]; render(); } break;
+      case 'down': if (i < PE.blocks.length - 1) { snap(); [PE.blocks[i + 1], PE.blocks[i]] = [b, PE.blocks[i + 1]]; render(); } break;
+      case 'dup': { const c = JSON.parse(JSON.stringify(b)); insertBlock(c, i + 1); break; }
+      case 'del': snap(); PE.blocks.splice(i, 1); SEL = PE.blocks[i] || PE.blocks[i - 1] || null; render(); break;
+      case 'level': snap(); b.level = +v; rerender(b); focusIn(b); break;
+      case 'align': snap(); b.align = v; rerender(b); break;
+      case 'size': snap(); b.size = v; rerender(b); break;
+      case 'cols': snap(); b.cols = +v; rerender(b); break;
+      case 'pick': { const got = await takeImages(await chooseFiles(false)); if (got.length) { snap(); b.src = got[0].src; rerender(b); } break; }
+      case 'gadd': { const got = await takeImages(await chooseFiles(true)); if (got.length) { snap(); b.images.push(...got); rerender(b); } break; }
+      case 'gdel': snap(); b.images.splice(+v, 1); rerender(b); break;
+      case 'emb': {
+        const e = embedFrom(b.input);
+        if (!e) { pmsg('That doesn’t look like a link or embed code I can use. Paste a full link starting with https://', 'err'); return; }
+        snap(); Object.assign(b, e); pmsg(e.kind === 'frame' ? 'Embedded. Some sites don’t allow embedding — if it stays blank, use a Button linking to it instead.' : ''); rerender(b); break;
+      }
+      case 'embclear': snap(); b.input = b.src; b.src = ''; rerender(b); focusIn(b); break;
+      case 'code': if (!b.editing) snap(); b.editing = !b.editing; rerender(b); if (b.editing) focusIn(b); break;
+    }
+  }
+
+  /* ---------- canvas events ---------- */
+  const canvas = $('#peCanvas');
+  const blockAt = (el) => { const n = el && el.closest && el.closest('#peCanvas > .pe-block'); return n ? PE.blocks[+n.dataset.i] : null; };
+  canvas.addEventListener('click', (e) => {
+    const b = blockAt(e.target);
+    if (!b) { if (e.target === canvas || e.target.id === 'peEnd') select(null); return; }
+    if (b !== SEL) select(b);
+    const a = e.target.closest('[data-act]'); if (a) { e.preventDefault(); act(a.dataset.act, b, a.dataset.v, a); }
+  });
+  canvas.addEventListener('focusin', (e) => { const b = blockAt(e.target); if (b && b !== SEL) select(b); });
+  canvas.addEventListener('input', (e) => {
+    const t = e.target, b = blockAt(t); if (!b) return;
+    if (t.matches('[data-code]')) { b.html = t.value; clearTimeout(t._t); t._t = setTimeout(() => { const p = nodeOf(b) && nodeOf(b).querySelector('.pe-htmlprev'); if (p) p.innerHTML = previewHTML(b.html, pageBase(PE.file)); }, 250); peState(); return; }
+    if (t.matches('[data-set]')) { b[t.dataset.set] = t.value; peState(); return; }
+    if (t.matches('[data-embin]')) { b.input = t.value; return; }
+    const r = t.closest('.pe-rich'); if (!r) return;
+    b[r.dataset.f] = r.hasAttribute('data-plain') ? r.textContent : r.innerHTML;
+    r.classList.toggle('is-empty', !r.textContent.trim());
+    peState();
+  });
+  canvas.addEventListener('keydown', (e) => {
+    const t = e.target, b = blockAt(t); if (!b) return;
+    if (t.matches('[data-embin]') && e.key === 'Enter') { e.preventDefault(); act('emb', b); return; }
+    const r = t.closest('.pe-rich'); if (!r) return;
+    if (e.key === 'Enter' && r.hasAttribute('data-line') && !e.shiftKey) {
+      e.preventDefault();
+      if (b.type === 'heading') { const nb = newBlock('text'); insertBlock(nb, PE.blocks.indexOf(b) + 1); focusIn(nb); } else r.blur();
+      return;
+    }
+    if (e.key === 'Backspace' && /heading|text|quote/.test(b.type) && !r.textContent.trim() && PE.blocks.length > 1) {
+      e.preventDefault(); snap(); const i = PE.blocks.indexOf(b); PE.blocks.splice(i, 1);
+      const prev = PE.blocks[Math.max(0, i - 1)]; SEL = prev; render(); focusIn(prev);
+    }
+  });
+  canvas.addEventListener('paste', async (e) => {
+    const cd = e.clipboardData; if (!cd) return;
+    const files = [...cd.files].filter((f) => f.type.startsWith('image/')), b = blockAt(e.target);
+    if (files.length) {
+      e.preventDefault(); const got = await takeImages(files); if (!got.length) return;
+      if (b && b.type === 'gallery') { snap(); b.images.push(...got); rerender(b); return; }
+      if (b && b.type === 'image' && !b.src) { snap(); Object.assign(b, got[0]); rerender(b); return; }
+      const nb = got.length > 1 ? Object.assign(newBlock('gallery'), { images: got }) : Object.assign(newBlock('image'), got[0]);
+      insertBlock(nb, b ? PE.blocks.indexOf(b) + 1 : PE.blocks.length); return;
+    }
+    const r = e.target.closest && e.target.closest('.pe-rich'); if (!r) return;
+    e.preventDefault();
+    const html = cd.getData('text/html'), text = cd.getData('text/plain');
+    if (r.classList.contains('pe-text') && html) document.execCommand('insertHTML', false, sanitize(html, true));
+    else if (r.hasAttribute('data-line')) document.execCommand('insertText', false, text.replace(/\s*\n\s*/g, ' '));
+    else if (!r.hasAttribute('data-plain') && html) document.execCommand('insertHTML', false, sanitize(html, false));
+    else document.execCommand('insertText', false, text);
   });
 
-  $('#chips').innerHTML = [['Live', ''], ['Dawn', 'time=dawn'], ['Midday sun', 'time=day&weather=clear'], ['Golden hour', 'time=golden&weather=cloudy'], ['Dusk', 'time=dusk&weather=clear'], ['Starry night', 'time=night&weather=clear'],
+  /* ---------- drag to move / drag in new blocks ---------- */
+  function dropIndex(y) {
+    const nodes = [...canvas.querySelectorAll(':scope > .pe-block')];
+    for (let i = 0; i < nodes.length; i++) { const r = nodes[i].getBoundingClientRect(); if (y < r.top + r.height / 2) return i; }
+    return nodes.length;
+  }
+  function showLine(idx) {
+    const line = $('#peLine'); if (!line) return;
+    if (idx == null) { line.hidden = true; return; }
+    const nodes = [...canvas.querySelectorAll(':scope > .pe-block')], cr = canvas.getBoundingClientRect();
+    const y = idx < nodes.length ? nodes[idx].getBoundingClientRect().top - 9 : (nodes.length ? Math.max(...nodes.map((n) => n.getBoundingClientRect().bottom)) + 7 : $('#peEnd').getBoundingClientRect().top - 9);
+    line.style.top = (y - cr.top) + 'px'; line.hidden = false;
+  }
+  function startDrag(e, payload, label) {
+    e.preventDefault();
+    const ghost = document.createElement('div'); ghost.className = 'pe-ghost'; ghost.textContent = label; document.body.appendChild(ghost);
+    DRAG = { payload, ghost, idx: null, y: e.clientY, raf: 0, armed: false };
+    document.body.classList.add('pe-grabbing');
+    if (payload.from != null) canvas.children[payload.from].classList.add('pe-dragging');
+    const scroll = () => {
+      if (!DRAG) return;
+      const y = DRAG.y, top = $('#pageEd .pe-tools').getBoundingClientRect().bottom + 50, bottom = innerHeight - 70;
+      if (y > top && y < bottom) DRAG.armed = true;           // starting on the Add bar shouldn't scroll the page away
+      if (DRAG.armed && y < top) scrollBy(0, -Math.ceil(Math.min(top - y, 120) / 5)); else if (DRAG.armed && y > bottom) scrollBy(0, Math.ceil(Math.min(y - bottom, 120) / 5));
+      if (DRAG.idx != null) showLine(DRAG.idx); DRAG.raf = requestAnimationFrame(scroll);
+    };
+    DRAG.raf = requestAnimationFrame(scroll);
+    moveDrag(e);
+    addEventListener('pointermove', moveDrag); addEventListener('pointerup', endDrag); addEventListener('pointercancel', endDrag);
+  }
+  function moveDrag(e) {
+    if (!DRAG) return;
+    DRAG.ghost.style.transform = `translate(${e.clientX + 14}px, ${e.clientY + 14}px)`; DRAG.y = e.clientY;
+    const r = canvas.getBoundingClientRect(), inside = e.clientX > r.left - 80 && e.clientX < r.right + 80 && e.clientY > r.top - 60 && e.clientY < r.bottom + 60;
+    DRAG.idx = inside ? dropIndex(e.clientY) : null; showLine(DRAG.idx);
+  }
+  function endDrag(e) {
+    removeEventListener('pointermove', moveDrag); removeEventListener('pointerup', endDrag); removeEventListener('pointercancel', endDrag);
+    if (!DRAG) return; const { payload, ghost, raf } = DRAG; let { idx } = DRAG; DRAG = null;
+    cancelAnimationFrame(raf); ghost.remove(); showLine(null); document.body.classList.remove('pe-grabbing');
+    setTimeout(() => { eatClick = false; }, 0);
+    if (e.type === 'pointercancel' || idx == null) { render(); return; }
+    if (payload.from != null) {
+      if (idx === payload.from || idx === payload.from + 1) { render(); return; }
+      snap(); const [b] = PE.blocks.splice(payload.from, 1); PE.blocks.splice(idx > payload.from ? idx - 1 : idx, 0, b); SEL = b; render();
+    } else {
+      const b = newBlock(payload.type); insertBlock(b, idx);
+      if (/heading|text|quote|embed|html/.test(b.type)) focusIn(b);
+    }
+  }
+  canvas.addEventListener('pointerdown', (e) => {
+    const g = e.target.closest('.pe-grip'); if (!g || e.button > 0) return;
+    const b = blockAt(g); if (!b) return;
+    select(b); startDrag(e, { from: PE.blocks.indexOf(b) }, '⠿ ' + LABEL[b.type]);
+  });
+  $('#pePal').addEventListener('pointerdown', (e) => {
+    const btn = e.target.closest('[data-new]'); if (!btn || e.button > 0) return;
+    const sx = e.clientX, sy = e.clientY;
+    const touch = e.pointerType !== 'mouse';
+    const mv = (ev) => { const dx = Math.abs(ev.clientX - sx), dy = Math.abs(ev.clientY - sy); if (touch ? dy > 8 && dy > dx : Math.hypot(dx, dy) > 6) { stop(); eatClick = true; startDrag(ev, { type: btn.dataset.new }, '+ ' + LABEL[btn.dataset.new]); } };
+    const stop = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', stop); removeEventListener('pointercancel', stop); };
+    addEventListener('pointermove', mv); addEventListener('pointerup', stop); addEventListener('pointercancel', stop);
+  });
+  $('#pePal').addEventListener('click', (e) => { const btn = e.target.closest('[data-new]'); if (!btn) return; if (eatClick) { eatClick = false; return; } addFromBar(btn.dataset.new); });
+
+  /* ---------- drop pictures from the computer ---------- */
+  const hasFiles = (e) => !!e.dataTransfer && [...e.dataTransfer.types].includes('Files');
+  let hot = null;
+  function setHot(n) { if (hot && hot !== n) hot.classList.remove('pe-hot'); hot = n; if (n) n.classList.add('pe-hot'); }
+  addEventListener('dragover', (e) => { if (hasFiles(e)) e.preventDefault(); });   // never let a dropped picture replace the console
+  addEventListener('drop', (e) => { if (hasFiles(e)) e.preventDefault(); });
+  canvas.addEventListener('dragover', (e) => {
+    if (!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+    const b = blockAt(e.target), n = b && nodeOf(b);
+    if (b && (b.type === 'gallery' || (b.type === 'image' && (!b.src || e.target.tagName === 'IMG')))) { setHot(n); showLine(null); }
+    else { setHot(null); showLine(dropIndex(e.clientY)); }
+    $('#peEnd').classList.toggle('pe-hotend', e.target.id === 'peEnd');
+  });
+  canvas.addEventListener('dragleave', (e) => { if (!canvas.contains(e.relatedTarget)) { setHot(null); showLine(null); $('#peEnd').classList.remove('pe-hotend'); } });
+  canvas.addEventListener('drop', async (e) => {
+    if (!hasFiles(e)) return; e.preventDefault();
+    const target = hot ? blockAt(hot) : null, idx = target ? null : dropIndex(e.clientY);
+    setHot(null); showLine(null); $('#peEnd').classList.remove('pe-hotend');
+    const got = await takeImages(e.dataTransfer.files); if (!got.length) return;
+    if (target && target.type === 'gallery') { snap(); target.images.push(...got); SEL = target; rerender(target); return; }
+    if (target && target.type === 'image') { snap(); target.src = got[0].src; SEL = target; rerender(target); if (got.length > 1) insertBlock(Object.assign(newBlock('gallery'), { images: got.slice(1) }), PE.blocks.indexOf(target) + 1); return; }
+    insertBlock(got.length > 1 ? Object.assign(newBlock('gallery'), { images: got }) : Object.assign(newBlock('image'), got[0]), idx);
+  });
+
+  /* ---------- text formatting bar ---------- */
+  try { document.execCommand('styleWithCSS', false, false); document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) { /* old browser */ }
+  const activeRich = () => { const a = document.activeElement; return a && a.classList && a.classList.contains('pe-rich') && canvas.contains(a) ? a : null; };
+  document.addEventListener('selectionchange', () => {
+    if (!PE) return; const r = activeRich();
+    $('#peFmt').querySelectorAll('[data-cmd]').forEach((b) => {
+      const c = b.dataset.cmd, list = /List$/.test(c);
+      b.disabled = !r || (list && !r.classList.contains('pe-text')) || r.hasAttribute('data-plain');
+      if (/bold|italic|underline/.test(c)) { let on = false; try { on = !b.disabled && document.queryCommandState(c); } catch (e) { /* none */ } b.classList.toggle('on', on); }
+    });
+  });
+  $('#peFmt').addEventListener('mousedown', (e) => { if (e.target.closest('[data-cmd]')) e.preventDefault(); });   // keep the text selected
+  $('#peFmt').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-cmd]'); if (!btn) return;
+    const r = activeRich(); if (!r) { pmsg('Click into some text first.'); return; }
+    const c = btn.dataset.cmd;
+    if (c === 'createLink') {
+      const s = getSelection(); if (!s.rangeCount || s.isCollapsed) { pmsg('Select the words you want to turn into a link first.'); return; }
+      const rg = s.getRangeAt(0), u = prompt('Link to — a web address (https://…), an email, or one of your pages (like about):', '');
+      r.focus(); s.removeAllRanges(); s.addRange(rg);
+      const h = hrefOut(u || ''); if (h) document.execCommand('createLink', false, h);
+      return;
+    }
+    if (c === 'removeFormat') { document.execCommand('removeFormat'); document.execCommand('unlink'); return; }
+    document.execCommand(c, false, null);
+  });
+  $('#peUndo').addEventListener('click', undo);
+  addEventListener('keydown', (e) => {
+    if (!PE || $('#pageEd').hidden) return;
+    const t = e.target, typing = t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z' && !typing) { e.preventDefault(); undo(); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && !typing && SEL) { e.preventDefault(); act('del', SEL); }
+    if (e.key === 'Escape' && !typing && SEL) select(null);
+  });
+
+  /* ---------- opening and closing ---------- */
+  async function openPageEditor(p) {
+    const file = pageFile(p.url); if (!file) return;
+    msg('#editMsg', 'Opening ' + p.title + '…');
+    try {
+      if (!PAGEEDITS[file]) {
+        let text = NEWPAGES[p.url] ? null : await readFile(file);
+        const isNew = text == null; if (isNew) text = K.pageTemplate(p.title, SITE.title || 'Harry', pageKey(file));
+        const main = new DOMParser().parseFromString(text, 'text/html').querySelector('main.sheet, main');
+        if (!main) throw new Error('this page isn’t built like the others, so it can’t be edited here safely');
+        const blocks = parseSheet(main);
+        PAGEEDITS[file] = { file, title: p.title, base: text, isNew, blocks, orig: serializeBlocks(blocks), hist: [] };
+      }
+      PE = PAGEEDITS[file]; PE.title = p.title; SEL = null;
+      $('#peName').textContent = p.title; $('#peAddr').textContent = (HOST || 'harryh.xyz') + '/' + pageKey(file);
+      $('#peLinks').innerHTML = SITE.pages.filter((x) => isSlug(x.url)).map((x) => `<option value="${A(x.url)}">${A(x.title)}</option>`).join('');
+      $('#editor').hidden = true; $('#pageEd').hidden = false; $('.wrap').classList.add('pe-wide');
+      msg('#editMsg', ''); pmsg('');
+      render(); scrollTo(0, 0);
+    } catch (err) { msg('#editMsg', 'Couldn’t open the page: ' + err.message, 'err'); }
+  }
+  function closePageEditor() {
+    PE = null; SEL = null;
+    $('#pageEd').hidden = true; $('#editor').hidden = false; $('.wrap').classList.remove('pe-wide');
+    renderPages(); markDirty(); scrollTo(0, 0);
+  }
+  $('#peBack').addEventListener('click', closePageEditor);
+  $('#peDone').addEventListener('click', closePageEditor);
+  $('#pePreview').addEventListener('click', () => openPreview(pageKey(PE.file), '#peMsg'));
+  $('#pePublish').addEventListener('click', publish);
+
+  $('#chips').innerHTML =[['Live', ''], ['Dawn', 'time=dawn'], ['Midday sun', 'time=day&weather=clear'], ['Golden hour', 'time=golden&weather=cloudy'], ['Dusk', 'time=dusk&weather=clear'], ['Starry night', 'time=night&weather=clear'],
     ['Rain', 'time=day&weather=rain'], ['Thunderstorm', 'time=night&weather=storm'], ['Fog', 'time=day&weather=fog'], ['Snow', 'time=dawn&weather=snow'], ['Elephant clock', 'chime=now']]
     .map(([l, q]) => `<a href="./${q ? '?' + q : ''}" target="_blank" rel="noopener">${l}</a>`).join('');
 })();
