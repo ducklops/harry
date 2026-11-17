@@ -36,24 +36,17 @@
   ],
   "socials": [
     {
-      "id": "ig",
-      "platform": "instagram",
-      "label": "Instagram",
-      "url": "https://instagram.com/",
+      "id": "lb",
+      "platform": "letterboxd",
+      "label": "Letterboxd",
+      "url": "https://letterboxd.com/",
       "icon": "auto"
     },
     {
-      "id": "yt",
-      "platform": "youtube",
-      "label": "YouTube",
-      "url": "https://youtube.com/",
-      "icon": "auto"
-    },
-    {
-      "id": "tt",
-      "platform": "tiktok",
-      "label": "TikTok",
-      "url": "https://tiktok.com/",
+      "id": "sz",
+      "platform": "serializd",
+      "label": "Serializd",
+      "url": "https://www.serializd.com/",
       "icon": "auto"
     }
   ]

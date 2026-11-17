@@ -501,12 +501,15 @@
     snow: '<path d="M7 13h10a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6 1.4A2.8 2.8 0 0 0 7 13z"/><path d="M8 17v.5M12 19v.5M16 17v.5M10 21v.5M14 21v.5"/>',
     fog: '<path d="M3 9h18M5 13h14M3 17h18"/>',
     storm: '<path d="M7 13h10a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6 1.4A2.8 2.8 0 0 0 7 13z"/><path d="M13 13l-3 4h4l-3 5"/>',
+    film: '<path d="M3.5 10.5h17v9h-17z"/><path d="M3.5 10.5l-.6-4.6 16.6-2.2.6 4.6z"/><path d="M8.2 5.3l2.4 3.6M13.6 4.6l2.4 3.6"/><path d="M7 15h10" stroke-width="2"/>',
+    tv: '<path d="M2.8 8h18.4v12H2.8z"/><path d="M8 3l4 4.6L16 3"/><path d="M6 11.2h8.6v5.6H6z" stroke-width="1.8"/><path d="M18 11.4v.1M18 15.6v.1"/>',
     link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
   };
   const PLATFORMS = {
     instagram: ['Instagram', 'camera'], youtube: ['YouTube', 'video'], tiktok: ['TikTok', 'music'], x: ['X / Twitter', 'chat'], threads: ['Threads', 'chat'], bluesky: ['Bluesky', 'chat'],
     facebook: ['Facebook', 'people'], linkedin: ['LinkedIn', 'briefcase'], github: ['GitHub', 'code'], twitch: ['Twitch', 'gamepad'], discord: ['Discord', 'gamepad'],
     spotify: ['Spotify', 'headphones'], soundcloud: ['SoundCloud', 'headphones'], pinterest: ['Pinterest', 'pin'], snapchat: ['Snapchat', 'chat'], email: ['Email', 'mail'],
+    letterboxd: ['Letterboxd', 'film'], serializd: ['Serializd', 'tv'],
     blog: ['Blog', 'pen'], website: ['Website', 'globe'], other: ['Other', 'link']
   };
   const glyphSVG = (name) => `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square" stroke-linejoin="miter">${G[name] || G.link}</svg>`;
