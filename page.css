@@ -1,22 +1,26 @@
-/* Shared styles for the starter pages in /pages */
+/* Pages opened directly with ?standalone (normally they show inside the home page's reading view) */
 :root { --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --c: 4px; }
 * { box-sizing: border-box; }
 html, body { margin: 0; min-height: 100%; }
-body { background: #0f1f2e; color: var(--ice); font: 18px/1.65 system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
+body { background: #0f1f2e; color: var(--ice); font: 400 18px/1.7 Barlow, system-ui, -apple-system, 'Segoe UI', sans-serif; overflow-x: hidden; }
 canvas, img.px { image-rendering: pixelated; }
-.backdrop { position: fixed; left: 0; top: 0; z-index: 0; filter: brightness(.7) saturate(.9); }
+.backdrop { position: fixed; left: 0; top: 0; z-index: 0; filter: brightness(.55) saturate(.85); }
 .critters { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 .critters .sp { pointer-events: auto; cursor: pointer; }
 .top { position: relative; z-index: 2; display: flex; justify-content: center; padding: 5vh 16px 0; }
-.home { font: 400 clamp(40px, 8vmin, 84px)/1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--ice); text-decoration: none;
+.home { font: 400 clamp(38px, 7.5vmin, 76px)/1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--ice); text-decoration: none;
   text-shadow: 0 .05em 0 #0b1622, 0 0 24px rgba(255,250,215,.35); }
 .home:hover { color: var(--lime); }
-.sheet { position: relative; z-index: 2; max-width: 760px; margin: 4vh auto 16vh; padding: clamp(22px, 4vw, 44px);
-  background: rgba(9,18,28,.88); box-shadow: inset 0 0 0 3px rgba(238,246,216,.18);
+.sheet { position: relative; z-index: 2; max-width: 760px; margin: 4vh auto 14vh; padding: clamp(22px, 4vw, 44px);
+  background: rgba(9,18,28,.9); box-shadow: inset 0 0 0 3px rgba(238,246,216,.18);
   clip-path: polygon(0 var(--c), var(--c) var(--c), var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c))); }
 .sheet h1 { margin: 0 0 .5em; font: 600 clamp(24px, 4vw, 34px)/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); }
 .sheet h2, .sheet h3 { font-family: 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .08em; color: var(--lime); }
 .sheet a { color: var(--lime); }
-.sheet img { max-width: 100%; }
-.sheet blockquote { margin: 1em 0; padding-left: 1em; border-left: 4px solid var(--lime); font: italic 22px/1.4 'Cormorant Garamond', Georgia, serif; }
+.sheet img, .sheet video, .sheet iframe { max-width: 100%; }
+.sheet table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.sheet th, .sheet td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(238,246,216,.18); vertical-align: top; }
+.sheet blockquote { margin: 1em 0; padding-left: 1em; border-left: 4px solid var(--lime); font: italic 500 22px/1.4 'Cormorant Garamond', Georgia, serif; }
 code { background: rgba(194,234,106,.12); color: var(--lime); padding: 1px 6px; font-size: .9em; }
+.copy { position: relative; z-index: 2; text-align: center; padding: 0 16px 24px; font: 11px 'Pixelify Sans', monospace; letter-spacing: .18em; text-transform: uppercase; color: rgba(238,246,216,.75); }
+.copy a { color: inherit; }

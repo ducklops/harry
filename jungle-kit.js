@@ -7,6 +7,8 @@
    ========================================================================= */
 (function (global) {
   'use strict';
+  const KIT_SRC = (document.currentScript && document.currentScript.src) || '';
+  const SITE_ROOT = KIT_SRC ? KIT_SRC.replace(/jungle-kit\.js(\?.*)?$/, '') : new URL('./', location.href).href;
 
   /* ---------------- helpers ---------------- */
   function rng(seed) {
@@ -821,10 +823,11 @@
     title: 'Harry',
     tagline: '',
     pages: [
-      { id: 'about', title: 'About', url: 'pages/about.html', icon: 'animal:monkey' },
-      { id: 'projects', title: 'Projects', url: 'pages/projects.html', icon: 'animal:toucan' },
-      { id: 'gallery', title: 'Gallery', url: 'pages/gallery.html', icon: 'animal:chameleon' },
-      { id: 'contact', title: 'Contact', url: 'pages/contact.html', icon: 'animal:frog' }
+      { id: 'about', title: 'About', url: 'about', icon: 'animal:monkey' },
+      { id: 'projects', title: 'Projects', url: 'projects', icon: 'animal:toucan' },
+      { id: 'gallery', title: 'Gallery', url: 'gallery', icon: 'animal:chameleon' },
+      { id: 'flappy', title: 'Flappy', url: 'flappy', icon: 'animal:macaw' },
+      { id: 'contact', title: 'Contact', url: 'contact', icon: 'animal:frog' }
     ],
     socials: [
       { id: 'ig', platform: 'instagram', label: 'Instagram', url: 'https://instagram.com/', icon: 'auto' },
@@ -832,25 +835,115 @@
       { id: 'tt', platform: 'tiktok', label: 'TikTok', url: 'https://tiktok.com/', icon: 'auto' }
     ]
   };
-  const FONT_LINK = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link href="https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979..2050&family=Pixelify+Sans:wght@400..700&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">';
-  function pageTemplate(title, siteTitle = 'Harry') {
-    const t = esc(title), st = esc(siteTitle);
+  /** page folders that must not be used for new pages */
+  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
+  const pageSlug = (title, taken = []) => { let b = slugify(title); if (RESERVED.includes(b)) b += '-page'; let s = b, n = 1; while (taken.includes(s)) s = `${b}-${++n}`; return s; };
+
+  /* =======================================================================
+     CONSENT — nothing optional is stored on the device until the visitor
+     accepts. Until then those values only live in memory for this visit.
+     ======================================================================= */
+  const CONSENT_KEY = 'harry-consent';
+  const FUNCTIONAL = ['harry-wx', 'harry-sound', 'harry-flappy'];
+  const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage off */ } }, del(k) { try { localStorage.removeItem(k); } catch (e) { /* storage off */ } } };
+  const MEM = {}, subs = [];
+  const Consent = {
+    get() { return ls.get(CONSENT_KEY); },                 // 'all' | 'essential' | null (not asked yet)
+    allowed() { return Consent.get() === 'all'; },
+    set(v) {
+      ls.set(CONSENT_KEY, v);
+      if (v === 'all') Object.keys(MEM).forEach((k) => ls.set(k, MEM[k]));
+      else FUNCTIONAL.forEach((k) => ls.del(k));
+      subs.forEach((f) => f(v));
+    },
+    onChange(f) { subs.push(f); },
+    /** shows the banner (first visit, or `force` from the footer "Cookies" link). policy = link to the cookie policy */
+    banner(policy, force) {
+      if (!force && Consent.get()) return;
+      if (!document.getElementById('cbar-css')) {
+        const st = document.createElement('style'); st.id = 'cbar-css';
+        st.textContent = `.cbar{position:fixed;z-index:30;left:50%;bottom:max(34px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(560px,calc(100vw - 24px));padding:16px 18px;background:#f4efe1;color:#14181a;box-shadow:0 0 0 3px #14181a,6px 6px 0 3px #14181a;font:15px/1.45 Barlow,system-ui,sans-serif;animation:cbin .4s steps(4)}
+.cbar b{display:block;margin-bottom:4px;font:600 13px 'Pixelify Sans',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
+.cbar p{margin:0 0 12px}.cbar a{color:#1d7a35;font-weight:600}
+.cbar .cb-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.cbar button{font:600 13px 'Pixelify Sans',ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border:0;cursor:pointer;background:#f4efe1;color:#14181a;box-shadow:inset 0 0 0 3px #14181a}
+.cbar button.cb-yes{background:#43c463;box-shadow:inset 0 0 0 3px #14181a,3px 3px 0 #14181a}
+.cbar button:focus-visible{outline:3px solid #43c463;outline-offset:2px}
+@keyframes cbin{from{opacity:0;margin-bottom:-10px}to{opacity:1;margin-bottom:0}}`;
+        document.head.appendChild(st);
+      }
+      const old = document.querySelector('.cbar'); if (old) old.remove();
+      const el = document.createElement('div'); el.className = 'cbar'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Cookies and storage');
+      el.innerHTML = `<b>Cookies &amp; storage</b><p>No tracking and no ads. With your OK this site uses your device's storage to remember your sound setting, your Flappy high scores and the latest weather. <a href="${esc(policy)}">Cookie policy</a></p>
+        <div class="cb-row"><button type="button" class="cb-no">Essential only</button><button type="button" class="cb-yes">Accept</button></div>`;
+      el.querySelector('.cb-no').addEventListener('click', () => { Consent.set('essential'); el.remove(); });
+      el.querySelector('.cb-yes').addEventListener('click', () => { Consent.set('all'); el.remove(); });
+      document.body.appendChild(el);
+    }
+  };
+  /** storage for optional ("functional") things — persisted only with consent, otherwise remembered for this visit */
+  const store = {
+    get(k) { return Consent.allowed() ? ls.get(k) : (k in MEM ? MEM[k] : null); },
+    set(k, v) { MEM[k] = v; if (Consent.allowed()) ls.set(k, v); }
+  };
+
+  /* =======================================================================
+     LONDON SUN + LIVERPOOL WEATHER (shared by the game and pages)
+     ======================================================================= */
+  const Env = {
+    sun(date = new Date()) {
+      const rad = Math.PI / 180, lat = 51.5074, lon = -0.1278, d = (date.getTime() - Date.UTC(2000, 0, 1, 12)) / 864e5;
+      const g = (357.529 + 0.98560028 * d) * rad, q = 280.459 + 0.98564736 * d;
+      const Ls = (q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * rad, e = (23.439 - 0.00000036 * d) * rad;
+      const ra = Math.atan2(Math.cos(e) * Math.sin(Ls), Math.cos(Ls)), dec = Math.asin(Math.sin(e) * Math.sin(Ls));
+      const gmst = ((18.697374558 + 24.06570982441908 * d) % 24 + 24) % 24;
+      let ha = (gmst * 15 + lon) * rad - ra; ha = Math.atan2(Math.sin(ha), Math.cos(ha));
+      return { alt: Math.asin(Math.sin(lat * rad) * Math.sin(dec) + Math.cos(lat * rad) * Math.cos(dec) * Math.cos(ha)) / rad, morning: ha < 0 };
+    },
+    phase(date) {
+      const s = Env.sun(date);
+      if (s.alt < -7) return 'night'; if (s.alt < -0.5) return s.morning ? 'dawn' : 'dusk'; if (s.alt < 9) return s.morning ? 'dawn' : 'golden'; return 'day';
+    },
+    CODES: [[[0], 'clear', 'Clear'], [[1], 'cloudy', 'Mainly clear'], [[2], 'cloudy', 'Partly cloudy'], [[3], 'overcast', 'Overcast'], [[45, 48], 'fog', 'Fog'],
+      [[51, 53, 55, 56, 57], 'drizzle', 'Drizzle'], [[61], 'rain', 'Light rain'], [[63, 80, 81], 'rain', 'Rain'], [[65, 66, 67, 82], 'heavy', 'Heavy rain'],
+      [[71, 73, 75, 77, 85, 86], 'snow', 'Snow'], [[95, 96, 99], 'storm', 'Thunderstorm']],
+    URL: 'https://api.open-meteo.com/v1/forecast?latitude=53.4084&longitude=-2.9916&current=temperature_2m,weather_code,wind_speed_10m&wind_speed_unit=mph&timezone=Europe%2FLondon',
+    async weather() {
+      try { const c = JSON.parse(store.get('harry-wx') || 'null'); if (c && Date.now() - c.at < 20 * 60e3) return c.wx; } catch (e) { /* none cached */ }
+      const r = await fetch(Env.URL, { cache: 'no-store' }); if (!r.ok) throw new Error(r.status);
+      const cur = (await r.json()).current, row = Env.CODES.find((w) => w[0].includes(cur.weather_code)) || [0, 'cloudy', 'Cloudy'];
+      const wx = { kind: row[1], desc: row[2], temp: Math.round(cur.temperature_2m), wind: cur.wind_speed_10m };
+      store.set('harry-wx', JSON.stringify({ at: Date.now(), wx })); return wx;
+    }
+  };
+
+  /* =======================================================================
+     STARTER PAGES — each page is a folder (about/index.html → /about)
+     ======================================================================= */
+  const fontLink = (pre) => `<link rel="stylesheet" href="${pre}fonts/fonts.css">`;
+  const iconLinks = (pre) => `<link rel="icon" href="${pre}favicon.svg" type="image/svg+xml">\n<link rel="icon" href="${pre}favicon-32.png" sizes="32x32" type="image/png">\n<link rel="apple-touch-icon" href="${pre}apple-touch-icon.png">`;
+  /** a page file. Visiting it directly hands over to the home page, which shows it inside the jungle */
+  function pageTemplate(title, siteTitle = 'Harry', slug, bodyHTML) {
+    const t = esc(title), st = esc(siteTitle), sl = slug || pageSlug(title);
+    const body = bodyHTML || `  <h1>${t}</h1>\n  <p>This page is ready for your content. Open <code>${esc(sl)}/index.html</code> in your repository and replace this paragraph with your own words, pictures and links.</p>`;
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${t} · ${st}</title>
-${FONT_LINK}
+<script>if (!/[?&]standalone\\b/.test(location.search)) location.replace('../?p=' + encodeURIComponent('${sl}') + location.hash);</script>
+${iconLinks('../')}
+${fontLink('../')}
 <link rel="stylesheet" href="../page.css">
 </head>
 <body>
 <canvas class="backdrop" aria-hidden="true"></canvas>
-<header class="top"><a class="home" href="../index.html">${st}</a></header>
+<header class="top"><a class="home" href="../">${st}</a></header>
 <main class="sheet">
-  <h1>${t}</h1>
-  <p>This page is ready for your content. Open <code>pages/${esc(slugify(title))}.html</code> in your repository and replace this paragraph with your own words, pictures and links.</p>
+${body}
 </main>
+<footer class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies/">Cookies</a></footer>
 <script src="../jungle-kit.js"></script>
 <script>JungleKit.decoratePage(document.querySelector('.backdrop'));</script>
 </body>
@@ -858,8 +951,14 @@ ${FONT_LINK}
 `;
   }
 
-  /** paints a static pixel jungle frame behind a starter page, plus a few 6fps animals */
-  function decoratePage(cv) {
+  /** paints a calm pixel jungle frame behind a page (or the console) plus a few 6fps animals */
+  function decoratePage(cv, opts = {}) {
+    // an older page opened directly → show it inside the home page instead
+    if (opts.redirect !== false && !/[?&]standalone\b/.test(location.search) && location.href.startsWith(SITE_ROOT)) {
+      const rel = location.href.slice(SITE_ROOT.length).split(/[?#]/)[0].replace(/index\.html$/, '').replace(/\/$/, '');
+      if (rel && !/^(console|404)(\.html)?$/.test(rel) && !rel.includes('..')) { location.replace(SITE_ROOT + '?p=' + encodeURIComponent(rel)); return; }
+    }
+    document.querySelectorAll('.yr').forEach((y) => { y.textContent = new Date().getFullYear(); });
     if (!cv) return;
     const draw = () => {
       const PX = Math.max(2, Math.min(5, Math.round(Math.min(innerWidth, innerHeight) / 220)));
@@ -871,28 +970,28 @@ ${FONT_LINK}
       for (let i = 0; i < 26; i++) P.clump(W * (i / 25), H * (0.92 + P.r() * 0.1), 10 + P.r() * 14, TONES.leafTeal, [0, -1]);
       [[0.04, 0.14], [0.96, 0.14]].forEach(([x, w]) => P.trunk(W * x, -5, H + 5, W * w * 0.5, W * w * 0.7, TONES.barkCool));
       for (let i = 0; i < 18; i++) { P.clump(P.r() * W * 0.22, P.r() * H * 0.3, 8 + P.r() * 10, TONES.leafA, [0.5, -1]); P.clump(W - P.r() * W * 0.22, P.r() * H * 0.3, 8 + P.r() * 10, TONES.leafA, [-0.5, -1]); }
-      for (let i = 0; i < 10; i++) { P.frond(P.r() * W, H + 4, 26 + P.r() * 20, -Math.PI / 2 + (P.r() - 0.5) * 1.6, TONES.leafB); }
+      for (let i = 0; i < 10; i++) P.frond(P.r() * W, H + 4, 26 + P.r() * 20, -Math.PI / 2 + (P.r() - 0.5) * 1.6, TONES.leafB);
       for (let i = 0; i < 6; i++) P.frond(-4, H * (0.1 + i * 0.12), 30 + P.r() * 20, -0.3 + P.r() * 0.6, TONES.leafDeep);
       for (let i = 0; i < 6; i++) P.frond(W + 4, H * (0.1 + i * 0.12), 30 + P.r() * 20, Math.PI + 0.3 - P.r() * 0.6, TONES.leafDeep);
       finalize(c, W, H, { haze: 0.08, hazeColor: '#c6e4ec' });
       return PX;
     };
-    let PX = draw();
-    const host = document.createElement('div'); host.className = 'critters'; document.body.appendChild(host);
-    const add = (kind, w, css) => { const c = liveSprite(kind, w, PX); c.el.style.cssText = 'position:fixed;' + css; c.el.addEventListener('click', () => Motion.poke(c)); host.appendChild(c.el); return c; };
-    add('monkey', 26, 'left:7%;top:-1%;transform-origin:50% 0;');
-    add('toucan', 24, 'right:5%;top:28%;');
-    add('frog', 18, 'right:9%;bottom:3%;');
-    ['morpho', 'julia'].forEach((k, i) => {
-      const c = liveSprite(k, 9, PX); c.el.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;'; host.appendChild(c.el);
-      Motion.mover(c.el, (t) => ({ x: innerWidth * (0.5 + 0.4 * S(t * 0.2 + i * 2)), y: innerHeight * (0.45 + 0.35 * S(t * 0.31 + i * 3)), rot: 10 * S(t * 2), flip: Math.cos(t * 0.2 + i * 2) < 0 }));
-    });
+    setGrade(opts.grade || { mul: [1, 1, 1], sat: 1 });
+    const PX = draw();
+    if (opts.animals !== false) {
+      const host = document.createElement('div'); host.className = 'critters'; document.body.appendChild(host);
+      const add = (kind, w, css) => { const c = liveSprite(kind, w, PX); c.el.style.cssText = 'position:fixed;' + css; c.el.addEventListener('click', () => Motion.poke(c)); host.appendChild(c.el); return c; };
+      add('monkey', 26, 'left:7%;top:-1%;');
+      add('toucan', 24, 'right:5%;top:28%;');
+      add('frog', 18, 'right:9%;bottom:3%;');
+      Motion.start();
+    }
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 250); });
-    Motion.start();
   }
 
   global.JungleKit = {
     A, SPECIES, rng, hash, esc, slugify, safeHref, safeImageSrc, iconHTML, animalIconURL, glyphIconURL, PLATFORMS, ICON_ANIMALS, ANIMAL_LABELS,
-    Sprite, liveSprite, Painter, TONES, finalize, setGrade, Motion, DEFAULT_SITE, FONT_LINK, pageTemplate, decoratePage
+    Sprite, liveSprite, Painter, TONES, finalize, setGrade, Motion, DEFAULT_SITE, pageTemplate, decoratePage,
+    Consent, store, Env, SITE_ROOT, RESERVED, pageSlug, fontLink, iconLinks
   };
 })(window);

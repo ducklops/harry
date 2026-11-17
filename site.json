@@ -5,25 +5,31 @@
     {
       "id": "about",
       "title": "About",
-      "url": "pages/about.html",
+      "url": "about",
       "icon": "animal:monkey"
     },
     {
       "id": "projects",
       "title": "Projects",
-      "url": "pages/projects.html",
+      "url": "projects",
       "icon": "animal:toucan"
     },
     {
       "id": "gallery",
       "title": "Gallery",
-      "url": "pages/gallery.html",
+      "url": "gallery",
       "icon": "animal:chameleon"
+    },
+    {
+      "id": "flappy",
+      "title": "Flappy",
+      "url": "flappy",
+      "icon": "animal:macaw"
     },
     {
       "id": "contact",
       "title": "Contact",
-      "url": "pages/contact.html",
+      "url": "contact",
       "icon": "animal:frog"
     }
   ],

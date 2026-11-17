@@ -6,9 +6,10 @@
 <title>Harry</title>
 <meta name="description" content="Harry">
 <meta name="theme-color" content="#0f1f2e">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Climate+Crisis:YEAR@1979..2050&family=Pixelify+Sans:wght@400..700&family=Cormorant+Garamond:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
   :root { --u: min(1vw, 1.8vh); --px: 4px; --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --navy: #0f1f2e; }
   @media (orientation: portrait) { :root { --u: min(1.9vw, 1.1vh); } }
@@ -18,8 +19,8 @@
   canvas, img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
 
   /* ---------- 3D diorama ---------- */
-  #scene { position: fixed; inset: 0; perspective: 1000px; perspective-origin: 50% 40%; overflow: hidden; }
-  #world { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+  #scene { position: fixed; inset: 0; perspective: 1000px; perspective-origin: 50% 40%; overflow: hidden; pointer-events: none; }
+  #world { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; pointer-events: none; }
   .layer { position: absolute; inset: -14%; pointer-events: none; }
   .layer > canvas.paint { position: absolute; left: 0; top: 0; }
   .layer > canvas.fg { z-index: 3; }
@@ -37,10 +38,50 @@
   #L-vine > canvas.paint { filter: drop-shadow(0 calc(var(--px)*7) calc(var(--px)*5) rgba(4,10,16,.5)); }
 
   /* ---------- content ---------- */
-  #L-content { inset: 0; pointer-events: auto; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  #L-content { inset: 0; pointer-events: none; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
     padding: max(env(safe-area-inset-top), 28vh) calc(var(--u)*3) max(env(safe-area-inset-bottom), calc(var(--u)*3)); scrollbar-width: none; }
   @media (orientation: portrait) { #L-content { padding-top: max(env(safe-area-inset-top), 27vh); } }
   #L-content::-webkit-scrollbar { display: none; }
+  #L-content.scrolly { pointer-events: auto; }
+  #L-content .ch, #L-content .tile, #L-content .soc { pointer-events: auto; }
+  .socials { position: relative; }
+  .bush { position: absolute; z-index: 3; pointer-events: none; transition: transform .45s steps(4); }
+  .bush.l { transform-origin: 100% 100%; } .bush.r { transform-origin: 0 100%; }
+  .socials.part .bush.l { transform: translateX(-62%) rotate(-10deg); }
+  .socials.part .bush.r { transform: translateX(62%) rotate(10deg); }
+  .soc { z-index: 2; }
+  .copy a { pointer-events: auto; color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+  .copy a:hover { color: var(--lime); }
+  .copy { position: fixed; z-index: 8; left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(238,246,216,.78); text-shadow: 0 1px 0 #070e16, 0 0 6px rgba(7,14,22,.9); }
+  /* reading view — pages open over a calmed-down jungle */
+  #scene { transition: filter .5s steps(4); }
+  body.reading #scene { filter: brightness(.48) saturate(.8); }
+  body.reading #L-content { visibility: hidden; }
+  .reader { position: fixed; inset: 0; z-index: 7; overflow-y: auto; display: none; padding: max(14px, env(safe-area-inset-top)) 16px 80px; background: rgba(7,14,22,.3); }
+  body.reading .reader { display: block; animation: rin .45s steps(4); }
+  @keyframes rin { from { opacity: 0; } to { opacity: 1; } }
+  .reader-top { position: relative; display: flex; justify-content: center; align-items: center; max-width: 760px; margin: 4vh auto 0; }
+  .reader-home { font: 400 clamp(38px, 7.5vmin, 76px)/1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--ice); text-decoration: none; text-shadow: 0 .05em 0 #0b1622, 0 0 24px rgba(255,250,215,.35); }
+  .reader-home:hover { color: var(--lime); }
+  .reader-close { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; display: grid; place-items: center; color: var(--ice); text-decoration: none; font-size: 20px;
+    background: rgba(7,14,22,.6); box-shadow: inset 0 0 0 3px rgba(238,246,216,.35); }
+  .reader-close:hover, .reader-close:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); color: var(--lime); outline: none; }
+  .reader .sheet { --c: 4px; max-width: 760px; margin: 4vh auto 0; padding: clamp(22px, 4vw, 44px); background: rgba(9,18,28,.9); box-shadow: inset 0 0 0 3px rgba(238,246,216,.18);
+    font: 400 18px/1.7 Barlow, system-ui, sans-serif; color: var(--ice);
+    clip-path: polygon(0 var(--c), var(--c) var(--c), var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c))); }
+  .reader .sheet h1 { margin: 0 0 .5em; font: 600 clamp(24px, 4vw, 34px)/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--lime); }
+  .reader .sheet h2, .reader .sheet h3 { font-family: 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .08em; color: var(--lime); }
+  .reader .sheet a { color: var(--lime); }
+  .reader .sheet img, .reader .sheet video, .reader .sheet iframe { max-width: 100%; }
+  .reader .sheet blockquote { margin: 1em 0; padding-left: 1em; border-left: 4px solid var(--lime); font: italic 22px/1.4 'Cormorant Garamond', Georgia, serif; }
+  .reader .sheet table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  .reader .sheet th, .reader .sheet td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(238,246,216,.18); vertical-align: top; }
+  .reader .sheet th { font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--lime); }
+  .reader .sheet .btn-consent { display: inline-block; margin-top: 6px; padding: 10px 14px; font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--lime); text-decoration: none; }
+  .reader .sheet td code { white-space: nowrap; }
+  .reader .sheet code { background: rgba(194,234,106,.12); color: var(--lime); padding: 1px 6px; font-size: .9em; }
+  .reader .loadingtxt { font-family: 'Pixelify Sans', monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(238,246,216,.7); }
   .hero { display: flex; flex-direction: column; align-items: center; margin-top: auto; }
   h1.title { margin: 0; font-family: 'Climate Crisis', 'Arial Black', system-ui, sans-serif; font-weight: 400; font-size: calc(var(--u) * 12.5); line-height: .9; letter-spacing: .01em;
     color: var(--ice); white-space: nowrap; user-select: none;
@@ -122,6 +163,11 @@
   </div>
 </div>
 <div class="flash" id="flash" aria-hidden="true"></div>
+<div class="reader" id="reader" role="dialog" aria-modal="true" aria-label="Page">
+  <div class="reader-top"><a class="reader-home" id="readerHome" href="./">Harry</a><a class="reader-close" id="readerClose" href="./" aria-label="Back to the jungle">✕</a></div>
+  <article class="sheet" id="readerBody"></article>
+</div>
+<div class="copy" id="copy">Copyright © <span id="yr">2026</span> Ducklops · <a href="./cookies">Cookies</a></div>
 <div class="hud"><button id="soundBtn" aria-pressed="false" aria-label="Jungle sounds" title="Jungle sounds"><img id="soundIcon" class="px" alt=""></button></div>
 <noscript><div class="noscript">This jungle needs JavaScript switched on.</div></noscript>
 
@@ -371,8 +417,9 @@
     const { c } = paintCanvas(L), P = new K.Painter(c, 31);
     const gy = pick([90, 94]);
     for (let i = 0; i < 34; i++) P.clump(X(-14 + i * 3.9), Y(gy + 4 + P.r() * 10), U(3 + P.r() * 4), T.leafA, [0, -1]);
-    for (let i = 0; i < 26; i++) P.frond(X(-14 + P.r() * 128), Y(112), U(10 + P.r() * 10), -Math.PI / 2 + (P.r() - 0.5) * 2, i % 3 ? T.leafA : T.leafMid, { leaf: U(2.4) });
-    for (let i = 0; i < 9; i++) P.banana(X(-10 + P.r() * 120), Y(110), U(10 + P.r() * 8), U(1.8 + P.r()), -Math.PI / 2 + (P.r() - 0.5) * 1.6, T.leafB);
+    const clear = (x) => x > 34 && x < 66;   // leave the social icons mostly visible
+    for (let i = 0; i < 26; i++) { const x = -14 + P.r() * 128, len = U(10 + P.r() * 10), a = -Math.PI / 2 + (P.r() - 0.5) * 2; if (!clear(x)) P.frond(X(x), Y(112), len, a, i % 3 ? T.leafA : T.leafMid, { leaf: U(2.4) }); }
+    for (let i = 0; i < 9; i++) { const x = -10 + P.r() * 120, len = U(10 + P.r() * 8), w = U(1.8 + P.r()), a = -Math.PI / 2 + (P.r() - 0.5) * 1.6; if (!clear(x)) P.banana(X(x), Y(110), len, w, a, T.leafB); }
     for (let i = 0; i < 6; i++) P.bromeliad(X(5 + P.r() * 90), Y(gy + 6 + P.r() * 6), U(1.6 + P.r()));
     const lx = pick([36, 34]);
     P.branch(X(lx - 12), Y(gy - 1), X(lx + 12), Y(gy), U(2.6), T.bark, T.leafB);
@@ -462,7 +509,7 @@
   /* ---------- content ---------- */
   let SITE = K.DEFAULT_SITE, OVERRIDES = {};
   function sizePixelImgs(root) {
-    root.querySelectorAll('img.px').forEach((img) => { const set = () => { img.style.width = img.naturalWidth * PX + 'px'; }; if (img.complete && img.naturalWidth) set(); else img.addEventListener('load', set, { once: true }); });
+    root.querySelectorAll('img.px').forEach((img) => { const set = () => { const box = img.closest('.frame, .soc'), fit = box ? box.clientHeight * 0.78 / img.naturalHeight : PX; img.style.width = img.naturalWidth * Math.min(PX, Math.max(1, fit)) + 'px'; }; if (img.complete && img.naturalWidth) set(); else img.addEventListener('load', set, { once: true }); });
   }
   function renderContent() {
     const title = String(SITE.title || 'Harry');
@@ -493,7 +540,9 @@
     });
     so.hidden = !(SITE.socials || []).length;
     sizePixelImgs(document.getElementById('L-content'));
-    $('#soundIcon').src = K.glyphIconURL(soundOn ? 'headphones' : 'music', 12);
+    requestAnimationFrame(() => { const lc = document.getElementById('L-content'); lc.classList.toggle('scrolly', lc.scrollHeight > lc.clientHeight + 4); paintBushes(); });
+    $('#readerHome').textContent = title;
+    $('#soundIcon').src = K.glyphIconURL(soundOn || wantSound ? 'headphones' : 'music', 12);
   }
 
   async function loadSite() {
@@ -520,65 +569,154 @@
   }
   function poke(c, el) { M.poke(c); guide(el, c.kind); sfx(c.kind); }
 
-  /* ---------- parallax ---------- */
+  /* ---------- parallax: follows the cursor; settles flat a second after it leaves ---------- */
   const tgt = { x: 0, y: 0 }, cur = { x: 0, y: 0 };
-  addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse') { tgt.x = e.clientX / innerWidth - 0.5; tgt.y = e.clientY / innerHeight - 0.5; } }, { passive: true });
-  addEventListener('deviceorientation', (e) => { if (e.gamma == null) return; tgt.x = Math.max(-0.5, Math.min(0.5, e.gamma / 50)); tgt.y = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 50)); });
+  let leaveTimer = null;
+  const settle = () => { clearTimeout(leaveTimer); leaveTimer = setTimeout(() => { tgt.x = 0; tgt.y = 0; }, 1000); };
+  addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse') { clearTimeout(leaveTimer); if (!reading) { tgt.x = e.clientX / innerWidth - 0.5; tgt.y = e.clientY / innerHeight - 0.5; } }
+    bushCheck(e.clientX, e.clientY);
+  }, { passive: true });
+  document.documentElement.addEventListener('mouseleave', settle);
+  addEventListener('mouseout', (e) => { if (!e.relatedTarget) settle(); });
+  addEventListener('blur', settle);
+  addEventListener('deviceorientation', (e) => { if (e.gamma == null || reading) return; tgt.x = Math.max(-0.5, Math.min(0.5, e.gamma / 60)); tgt.y = Math.max(-0.5, Math.min(0.5, (e.beta - 45) / 60)); });
   addEventListener('touchstart', function ask() { removeEventListener('touchstart', ask); if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().catch(() => {}); }, { passive: true });
+  addEventListener('touchstart', (e) => { const t = e.touches[0]; if (t) bushCheck(t.clientX, t.clientY, true); }, { passive: true });
   const world = document.getElementById('world');
+  let lastFrame = performance.now();
   function frame(now) {
-    const t = now / 1000, amp = PORTRAIT ? 0.6 : 1;
-    const ix = M.reduce ? 0 : 0.12 * Math.sin(t * 0.19), iy = M.reduce ? 0 : 0.08 * Math.sin(t * 0.15 + 1);
-    cur.x += (tgt.x + ix - cur.x) * 0.05; cur.y += (tgt.y + iy - cur.y) * 0.05;
-    world.style.transform = `rotateY(${(cur.x * 8 * amp).toFixed(3)}deg) rotateX(${(-cur.y * 5 * amp).toFixed(3)}deg)`;
+    const amp = M.reduce ? 0 : PORTRAIT ? 0.55 : 1, dt = Math.min(0.1, ((now || performance.now()) - lastFrame) / 1000); lastFrame = now || performance.now();
+    if (reading) { tgt.x = 0; tgt.y = 0; }
+    const k = 1 - Math.exp(-dt * 2.6);
+    cur.x += (tgt.x - cur.x) * k; cur.y += (tgt.y - cur.y) * k;
+    if (Math.abs(cur.x) < 0.0004) cur.x = 0; if (Math.abs(cur.y) < 0.0004) cur.y = 0;
+    world.style.transform = `rotateY(${(cur.x * 6 * amp).toFixed(3)}deg) rotateX(${(-cur.y * 4 * amp).toFixed(3)}deg)`;
     requestAnimationFrame(frame);
   }
 
-  /* ---------- sound (synthesised; off until switched on) ---------- */
-  let AC = null, soundOn = false, amb = null;
-  function tone(type, f0, f1, dur, vol = 0.15, when = 0) {
-    const t = AC.currentTime + when, o = AC.createOscillator(), g = AC.createGain();
-    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(AC.destination); o.start(t); o.stop(t + dur + 0.05);
+  /* ---------- the little bush in front of the social icons ---------- */
+  let bushOpenUntil = 0, bushT = null;
+  function bushCheck(x, y, touch) {
+    const so = $('#socials'); if (!so || so.hidden || reading) return;
+    const r = so.getBoundingClientRect(), pad = touch ? 30 : 70;
+    const near = x > r.left - pad && x < r.right + pad && y > r.top - pad && y < r.bottom + pad;
+    if (near) { so.classList.add('part'); if (touch) bushOpenUntil = Date.now() + 4000; clearTimeout(bushT); }
+    else if (so.classList.contains('part')) { clearTimeout(bushT); bushT = setTimeout(() => { if (Date.now() > bushOpenUntil) so.classList.remove('part'); }, touch ? 4000 : 500); }
   }
+  function paintBushes() {
+    const so = $('#socials'); so.querySelectorAll('.bush').forEach((b) => b.remove());
+    if (so.hidden || !so.children.length) return;
+    const r = so.getBoundingClientRect(), icon = so.querySelector('.soc').getBoundingClientRect().height;
+    const w = Math.ceil((r.width * 0.62 + icon * 0.5) / PX), h = Math.ceil(icon * 0.95 / PX);
+    ['l', 'r'].forEach((side, si) => {
+      const cv = document.createElement('canvas'); cv.className = 'bush ' + side; cv.width = w; cv.height = h;
+      cv.style.width = w * PX + 'px'; cv.style.height = h * PX + 'px'; cv.style.bottom = -Math.round(icon * 0.42) + 'px';
+      cv.style[side === 'l' ? 'left' : 'right'] = -Math.round(icon * 0.35) + 'px';
+      const c = cv.getContext('2d', { willReadFrequently: true }), P = new K.Painter(c, 90 + si);
+      for (let i = 0; i < 9; i++) P.frond(w * (0.08 + i * 0.11), h + 2, h * (0.55 + P.r() * 0.5), -Math.PI / 2 + (P.r() - 0.5) * 1.2, i % 2 ? T.leafA : T.leafMid, { leaf: h * 0.16 });
+      for (let i = 0; i < 7; i++) P.clump(w * (0.05 + i * 0.15), h * (0.82 + P.r() * 0.2), h * 0.22, T.leafA, [0, -1]);
+      K.finalize(c, w, h, { dither: 14 });
+      cv.setAttribute('aria-hidden', 'true'); so.appendChild(cv);
+    });
+  }
+  so_focus: {
+    const so = document.getElementById('socials');
+    so.addEventListener('focusin', () => so.classList.add('part'));
+    so.addEventListener('focusout', () => so.classList.remove('part'));
+  }
+
+  /* =====================================================================
+     SOUNDSCAPE — generative jungle: birds, insects, frogs, howlers, rain,
+     placed in stereo with a little reverb, following the time & weather.
+     ===================================================================== */
+  let AC = null, soundOn = false, MASTER = null, BUS = null, VERB = null, BEDS = null, NOISE = null, schedIv = null;
+  const SND_KEY = 'harry-sound', R = Math.random, rp = () => (R() * 2 - 1) * 0.9;
+  function audioInit() {
+    if (AC) return;
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    const comp = AC.createDynamicsCompressor(); comp.threshold.value = -20; comp.ratio.value = 3; comp.connect(AC.destination);
+    MASTER = AC.createGain(); MASTER.gain.value = 0; MASTER.connect(comp);
+    const n = AC.sampleRate * 3.2, ir = AC.createBuffer(2, n, AC.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < n; i++) d[i] = (R() * 2 - 1) * Math.pow(1 - i / n, 2.6); }
+    VERB = AC.createConvolver(); VERB.buffer = ir; const wet = AC.createGain(); wet.gain.value = 0.55; VERB.connect(wet).connect(MASTER);
+    BUS = AC.createGain(); BUS.connect(MASTER);
+    NOISE = AC.createBuffer(1, AC.sampleRate * 4, AC.sampleRate); const nd = NOISE.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = R() * 2 - 1;
+    const bed = (type, freq, q) => { const s = AC.createBufferSource(); s.buffer = NOISE; s.loop = true; s.loopStart = R(); const f = AC.createBiquadFilter(); f.type = type; f.frequency.value = freq; f.Q.value = q; const g = AC.createGain(); g.gain.value = 0; s.connect(f).connect(g).connect(BUS); s.start(); return g; };
+    BEDS = { leaves: bed('bandpass', 750, 0.7), water: bed('lowpass', 380, 0.5), rain: bed('highpass', 1900, 0.5) };
+    const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = 0.06; lg.gain.value = 0.007; lfo.connect(lg).connect(BEDS.leaves.gain); lfo.start();
+  }
+  function setBeds() {
+    if (!BEDS) return; const t = AC.currentTime, k = ENV.wx.kind;
+    BEDS.leaves.gain.setTargetAtTime(/storm|heavy/.test(k) ? 0.028 : 0.01, t, 2);
+    BEDS.water.gain.setTargetAtTime(0.014, t, 2);
+    BEDS.rain.gain.setTargetAtTime({ drizzle: 0.022, rain: 0.045, heavy: 0.08, storm: 0.085 }[k] || 0, t, 2);
+  }
+  /** one voice's output: stereo position, and distance 0 (near) … 1 (far, more reverb) */
+  function voiceOut(pan, dist = 0.4) {
+    const p = AC.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan));
+    const dry = AC.createGain(); dry.gain.value = 1 - dist * 0.7; const wet = AC.createGain(); wet.gain.value = 0.2 + dist * 0.6;
+    p.connect(dry).connect(BUS); p.connect(wet).connect(VERB); return p;
+  }
+  function env(g, t, a, peak, hold, rel) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.setValueAtTime(peak, t + a + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + a + hold + rel); }
+  function osc(type, f, t, dur, out, peak, a = 0.01, rel = 0.05) { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); env(g, t, a, peak, Math.max(0, dur - a - rel), rel); o.connect(g).connect(out); o.start(t); o.stop(t + dur + 0.05); return o; }
+  const VOICES = {
+    trill() { const out = voiceOut(rp(), R()), t = AC.currentTime + 0.05, base = 2600 + R() * 1800, n = 6 + Math.floor(R() * 10), sp = 0.045 + R() * 0.03; for (let i = 0; i < n; i++) osc('sine', base + (i % 2 ? 260 : -180) + i * 14, t + i * sp, sp * 0.8, out, 0.045); },
+    whistle() { const out = voiceOut(rp(), R() * 0.8), t = AC.currentTime + 0.05, f0 = 1400 + R() * 900; for (let i = 0; i < 2 + Math.floor(R() * 2); i++) { const o = osc('sine', f0, t + i * 0.55, 0.38, out, 0.05, 0.04, 0.1); o.frequency.exponentialRampToValueAtTime(f0 * (1.3 + R() * 0.25), t + i * 0.55 + 0.3); } },
+    cuckoo() { const out = voiceOut(rp(), 0.6 + R() * 0.4), t = AC.currentTime + 0.05, f = 700 + R() * 300; osc('triangle', f, t, 0.22, out, 0.045, 0.02, 0.08); osc('triangle', f * 0.8, t + 0.32, 0.3, out, 0.045, 0.02, 0.12); },
+    warble() { const out = voiceOut(rp(), R()), t = AC.currentTime + 0.05, o = osc('sine', 2400, t, 0.9, out, 0.03, 0.05, 0.2); for (let i = 0; i < 12; i++) o.frequency.setValueAtTime(2000 + R() * 1800, t + i * 0.07); },
+    squawk() { const out = voiceOut(rp(), 0.5 + R() * 0.4), t = AC.currentTime + 0.05, f = AC.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1300; f.Q.value = 2; f.connect(out); const o = osc('sawtooth', 900, t, 0.28, f, 0.06, 0.01, 0.1); o.frequency.exponentialRampToValueAtTime(620, t + 0.28); },
+    cicada() { const out = voiceOut(rp(), 0.3 + R() * 0.6), t = AC.currentTime + 0.05, dur = 2 + R() * 4, o = AC.createOscillator(), am = AC.createOscillator(), ag = AC.createGain(), g = AC.createGain(), eg = AC.createGain();
+      o.frequency.value = 4200 + R() * 1600; am.type = 'square'; am.frequency.value = 35 + R() * 30; ag.gain.value = 0.5; g.gain.value = 0.5; am.connect(ag).connect(g.gain); o.connect(g).connect(eg).connect(out); env(eg, t, dur * 0.4, 0.014, dur * 0.3, dur * 0.3); [o, am].forEach((x) => { x.start(t); x.stop(t + dur + 0.1); }); },
+    cricket() { const out = voiceOut(rp(), 0.3 + R() * 0.6), t = AC.currentTime + 0.05, f = 4300 + R() * 900, n = 4 + Math.floor(R() * 6); for (let i = 0; i < n; i++) for (let k = 0; k < 3; k++) osc('sine', f, t + i * 0.55 + k * 0.045, 0.028, out, 0.025, 0.004, 0.012); },
+    frog() { const out = voiceOut(rp(), 0.4 + R() * 0.5), t = AC.currentTime + 0.05, lp = AC.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.connect(out); for (let k = 0; k < 2; k++) { const o = osc('square', 190, t + k * 0.18, 0.12, lp, 0.045, 0.01, 0.05); o.frequency.exponentialRampToValueAtTime(120, t + k * 0.18 + 0.12); } },
+    howler() { const out = voiceOut(rp(), 0.85), t = AC.currentTime + 0.05, bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 520; bp.Q.value = 3; bp.connect(out); const o = osc('sawtooth', 95, t, 2.2, bp, 0.08, 0.4, 0.8); o.frequency.linearRampToValueAtTime(150, t + 0.8); o.frequency.linearRampToValueAtTime(110, t + 2.1); },
+    owl() { const out = voiceOut(rp(), 0.7), t = AC.currentTime + 0.05; [0, 0.45, 0.7].forEach((d, i) => osc('sine', i ? 370 : 410, t + d, i ? 0.22 : 0.35, out, 0.05, 0.03, 0.12)); },
+    drip() { const out = voiceOut(rp(), 0.2 + R() * 0.5), t = AC.currentTime + 0.02, o = osc('sine', 1600 + R() * 1400, t, 0.06, out, 0.035, 0.003, 0.05); o.frequency.exponentialRampToValueAtTime(900, t + 0.06); }
+  };
+  function rates() {   // calls per second for each voice, by time of day and weather
+    const r = Object.assign({}, {
+      day: { trill: .22, whistle: .12, cuckoo: .05, warble: .1, squawk: .04, cicada: .05, howler: .012 },
+      golden: { trill: .3, whistle: .18, cuckoo: .07, warble: .15, squawk: .06, cicada: .08, howler: .02 },
+      dawn: { trill: .4, whistle: .22, cuckoo: .1, warble: .2, squawk: .05, howler: .03 },
+      dusk: { trill: .08, whistle: .06, cicada: .16, cricket: .14, frog: .07, howler: .02 },
+      night: { cricket: .3, frog: .16, owl: .03, cicada: .04 } }[ENV.phase]);
+    const k = ENV.wx.kind, damp = { drizzle: .5, rain: .25, heavy: .1, storm: .05, snow: .3, fog: .6 }[k];
+    if (damp) for (const v in r) if (v !== 'frog') r[v] *= damp;
+    if (/drizzle|rain|heavy|storm/.test(k)) { r.drip = { drizzle: .8, rain: 1.6, heavy: 2.4, storm: 2.4 }[k]; r.frog = (r.frog || .05) * 2; }
+    return r;
+  }
+  function scheduler() { if (!soundOn || document.hidden) return; const r = rates(); for (const v in r) if (R() < r[v] * 0.25) VOICES[v](); }
+  function soundStart() { audioInit(); AC.resume(); setBeds(); MASTER.gain.cancelScheduledValues(AC.currentTime); MASTER.gain.setTargetAtTime(reading ? 0.55 : 0.9, AC.currentTime, 0.8); clearInterval(schedIv); schedIv = setInterval(scheduler, 250); }
+  function soundStop() { if (!AC) return; MASTER.gain.cancelScheduledValues(AC.currentTime); MASTER.gain.setTargetAtTime(0, AC.currentTime, 0.35); clearInterval(schedIv); }
+  function setSound(on) {
+    soundOn = on; K.store.set(SND_KEY, on ? '1' : '0');
+    $('#soundBtn').setAttribute('aria-pressed', String(on)); $('#soundIcon').src = K.glyphIconURL(on ? 'headphones' : 'music', 12);
+    on ? soundStart() : soundStop();
+  }
+  function tone(type, f0, f1, dur, vol = 0.15, when = 0) { const o = osc(type, f0, AC.currentTime + when, dur, voiceOut(rp() * 0.5, 0.25), vol); o.frequency.exponentialRampToValueAtTime(Math.max(30, f1), AC.currentTime + when + dur); }
   function noise(dur, freq, q, vol = 0.2, type = 'bandpass') {
-    const n = AC.sampleRate * dur, buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-    const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = buf; f.type = type; f.frequency.value = freq; f.Q.value = q;
-    g.gain.setValueAtTime(vol, AC.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + dur); s.connect(f).connect(g).connect(AC.destination); s.start();
+    const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = NOISE; f.type = type; f.frequency.value = freq; f.Q.value = q;
+    g.gain.setValueAtTime(vol, AC.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + dur); s.connect(f).connect(g).connect(voiceOut(rp() * 0.5, 0.35)); s.start(); s.stop(AC.currentTime + dur + 0.05);
   }
-  function sfx(kind) {
-    if (!soundOn || !AC) return; const R = Math.random;
-    switch (kind) {
-      case 'monkey': case 'capuchin': for (let k = 0; k < 3; k++) tone('triangle', 420 + R() * 160, 760 + R() * 200, 0.16, 0.12, k * 0.2); break;
-      case 'macaw': case 'parrot': case 'toucan': tone('sawtooth', 1300, 700, 0.22, 0.05); tone('square', 900, 1100, 0.12, 0.03, 0.2); break;
-      case 'hummingbird': case 'flutter': noise(0.3, 2600, 3, 0.08); break;
-      case 'snake': noise(0.8, 6000, 0.7, 0.08, 'highpass'); break;
-      case 'chameleon': tone('sine', 300, 1500, 0.1, 0.12); break;
-      case 'jaguar': case 'panther': noise(0.9, 120, 2, 0.3, 'lowpass'); tone('sawtooth', 70, 55, 0.9, 0.06); break;
-      case 'tiger': noise(1.1, 200, 1, 0.45, 'lowpass'); tone('sawtooth', 100, 55, 1, 0.1); break;
-      case 'frog': for (let k = 0; k < 2; k++) tone('square', 150, 105, 0.13, 0.08, k * 0.2); break;
-      case 'crocodile': noise(0.12, 700, 1, 0.4); break;
-      case 'sloth': tone('sine', 520, 440, 1.4, 0.06); break;
-      default: tone('sine', 900, 1300, 0.08, 0.07);
-    }
+  function sfx(kind) {   // the call an animal makes when you click it
+    if (!soundOn || !AC) return;
+    const call = { monkey: () => VOICES.howler(), capuchin: () => { for (let k = 0; k < 3; k++) tone('triangle', 520 + R() * 160, 860 + R() * 200, 0.14, 0.1, k * 0.18); },
+      macaw: () => VOICES.squawk(), parrot: () => VOICES.squawk(), toucan: () => { for (let k = 0; k < 3; k++) tone('square', 420, 380, 0.09, 0.04, k * 0.16); },
+      hummingbird: () => VOICES.trill(), flutter: () => noise(0.3, 2600, 3, 0.05), snake: () => noise(0.9, 6000, 0.7, 0.06, 'highpass'),
+      chameleon: () => tone('sine', 300, 1500, 0.1, 0.1), jaguar: () => { noise(0.9, 120, 2, 0.25, 'lowpass'); tone('sawtooth', 70, 55, 0.9, 0.05); }, panther: () => { noise(0.9, 120, 2, 0.25, 'lowpass'); tone('sawtooth', 70, 55, 0.9, 0.05); },
+      tiger: () => { noise(1.1, 200, 1, 0.4, 'lowpass'); tone('sawtooth', 100, 55, 1, 0.08); }, frog: () => VOICES.frog(), crocodile: () => noise(0.12, 700, 1, 0.35),
+      sloth: () => tone('sine', 520, 440, 1.4, 0.05), lemur: () => tone('triangle', 700, 1500, 0.3, 0.08), elephant: () => trumpet() }[kind];
+    (call || (() => tone('sine', 900, 1300, 0.08, 0.06)))();
   }
-  function startAmbient() {
-    const n = AC.sampleRate * 2, buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
-    let last = 0; for (let i = 0; i < n; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.5; }
-    const s = AC.createBufferSource(), g = AC.createGain(); s.buffer = buf; s.loop = true; g.gain.value = 0.16; s.connect(g).connect(AC.destination); s.start();
-    setInterval(() => { if (!soundOn) return; const f = 1800 + Math.random() * 2200; for (let k = 0; k < 2 + Math.floor(Math.random() * 3); k++) tone('sine', f, f * (0.8 + Math.random() * 0.5), 0.09, 0.025, k * 0.12); }, 2800);
-    amb = g;
+  $('#soundBtn').addEventListener('click', () => setSound(!soundOn));
+  // remembered preference: browsers block autoplay, so resume on the visitor's first tap/click/key
+  const wantSound = K.store.get(SND_KEY) === '1';
+  if (wantSound) {
+    const evs = ['pointerdown', 'keydown', 'touchstart'];
+    const kick = (e) => { evs.forEach((ev) => removeEventListener(ev, kick, true)); if (e.target.closest && e.target.closest('#soundBtn')) return; if (!soundOn) setSound(true); };
+    evs.forEach((ev) => addEventListener(ev, kick, true));
   }
-  $('#soundBtn').addEventListener('click', async () => {
-    const b = $('#soundBtn');
-    try {
-      soundOn = !soundOn; b.setAttribute('aria-pressed', String(soundOn));
-      if (soundOn) { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); await AC.resume(); if (!amb) startAmbient(); else amb.gain.value = 0.16; }
-      else if (amb) amb.gain.value = 0;
-    } catch (e) { soundOn = false; b.setAttribute('aria-pressed', 'false'); }
-    $('#soundIcon').src = K.glyphIconURL(soundOn ? 'headphones' : 'music', 12);
-  });
 
   /* =====================================================================
      LIVE ENVIRONMENT — London time of day + Liverpool weather
@@ -626,7 +764,7 @@
     const icon = { clear: night ? 'moon' : 'sun', cloudy: night ? 'moon' : 'cloud', overcast: 'cloud', fog: 'fog', drizzle: 'rain', rain: 'rain', heavy: 'rain', storm: 'storm', snow: 'snow' }[k] || 'sun';
     const img = $('#wxIcon'); img.src = K.glyphIconURL(icon, 13, '#eef6d8'); img.style.width = 15 * 2 + 'px';
   }
-  function applyEnv() { K.setGrade(gradeFor()); build(); updateHUD(); }
+  function applyEnv() { K.setGrade(gradeFor()); build(); updateHUD(); if (AC) setBeds(); }
   async function fetchWeather() {
     const o = QS.get('weather');
     if (KINDS.includes(o)) { const changed = o !== ENV.wx.kind; ENV.wx = { kind: o, desc: o[0].toUpperCase() + o.slice(1) + ' (preview)', temp: 12, wind: 14 }; if (changed) applyEnv(); else updateHUD(); return; }
@@ -635,11 +773,11 @@
       const cur = (await r.json()).current, row = WX_CODES.find((w) => w[0].includes(cur.weather_code)) || [0, 'cloudy', 'Cloudy'];
       const changed = row[1] !== ENV.wx.kind;
       ENV.wx = { kind: row[1], desc: row[2], temp: Math.round(cur.temperature_2m), wind: cur.wind_speed_10m };
-      try { localStorage.setItem('harry-wx', JSON.stringify({ at: Date.now(), wx: ENV.wx })); } catch (e) { /* storage off */ }
+      K.store.set('harry-wx', JSON.stringify({ at: Date.now(), wx: ENV.wx }));
       if (changed) applyEnv(); else updateHUD();
     } catch (e) { if (!ENV.wx.desc) ENV.wx.desc = 'weather offline'; updateHUD(); }
   }
-  try { const c = JSON.parse(localStorage.getItem('harry-wx') || 'null'); if (c && Date.now() - c.at < 3 * 3600e3 && !QS.get('weather')) ENV.wx = c.wx; } catch (e) { /* storage off */ }
+  try { const c = JSON.parse(K.store.get('harry-wx') || 'null'); if (c && Date.now() - c.at < 3 * 3600e3 && !QS.get('weather')) ENV.wx = c.wx; } catch (e) { /* storage off */ }
   setInterval(() => { updateHUD(); const ph = computePhase(); if (ph !== ENV.phase) { ENV.phase = ph; applyEnv(); } }, 20000);
   setInterval(fetchWeather, 15 * 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateHUD(); const ph = computePhase(); if (ph !== ENV.phase) { ENV.phase = ph; applyEnv(); } fetchWeather(); } });
@@ -726,7 +864,7 @@
     lfo.frequency.value = 22; lg.gain.value = 18; lfo.connect(lg); lg.connect(o.frequency); lg.connect(o2.frequency);
     f.type = 'bandpass'; f.frequency.value = 1400; f.Q.value = 1.2;
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.22, t + 0.08); g.gain.setValueAtTime(0.22, t + 0.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.15);
-    o.connect(f); o2.connect(f); f.connect(g).connect(AC.destination);
+    o.connect(f); o2.connect(f); f.connect(g).connect(voiceOut(-0.3, 0.35));
     [o, o2, lfo].forEach((x) => { x.start(t); x.stop(t + 1.2); });
   }
   function guideText(node, title, sub) {
@@ -744,6 +882,74 @@
     if (m === 0 && lastChime !== key && !document.hidden) { lastChime = key; chime(h); }
   }, 5000);
   if (QS.get('chime') === 'now') setTimeout(() => chime(+Object.fromEntries(hourFmt.formatToParts(new Date()).map((p) => [p.type, p.value])).hour), 3000);
+
+  /* =====================================================================
+     SEAMLESS PAGES — internal links open inside this page, so the jungle,
+     its sound, time and weather carry on. Addresses stay clean: /about
+     ===================================================================== */
+  const ROOT = new URL('./', location.href);
+  const APP_PAGES = ['flappy'];   // full pages of their own (games etc.) — not shown in the reading view
+  let reading = false, readSeq = 0;
+  /** {key, fetch, pretty} for an internal page link, otherwise null */
+  function pageInfo(u) {
+    if (u.origin !== location.origin || !u.pathname.startsWith(ROOT.pathname)) return null;
+    let rel = decodeURIComponent(u.pathname.slice(ROOT.pathname.length));
+    rel = rel.replace(/(^|\/)index\.html$/i, '').replace(/\/+$/, '');
+    if (!rel || APP_PAGES.includes(rel.replace(/\.html$/i, '')) || /^(console|404)(\.html)?$/i.test(rel) || /\.(?!html$)[a-z0-9]+$/i.test(rel) || rel.includes('..') || !/^[\w\-/.]+$/.test(rel)) return null;
+    const file = /\.html$/i.test(rel) ? rel : rel + '/';           // folder pages: about/index.html
+    return { key: rel.replace(/\.html$/i, ''), fetch: new URL(file, ROOT).href, pretty: new URL(rel.replace(/\.html$/i, ''), ROOT).href };
+  }
+  async function openPage(info, push) {
+    const seq = ++readSeq;
+    if (push) history.pushState({ page: info.key }, '', info.pretty);
+    reading = true; document.body.classList.add('reading'); tgt.x = 0; tgt.y = 0;
+    if (AC && soundOn) MASTER.gain.setTargetAtTime(0.55, AC.currentTime, 0.6);
+    const body = $('#readerBody'); body.innerHTML = '<p class="loadingtxt">Loading…</p>';
+    try {
+      const r = await fetch(info.fetch, { cache: 'no-cache' }); if (!r.ok) throw new Error(r.status);
+      const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      if (seq !== readSeq) return;
+      const main = doc.querySelector('main.sheet') || doc.querySelector('main') || doc.querySelector('article') || doc.body;
+      main.querySelectorAll('script').forEach((n) => n.remove());
+      main.querySelectorAll('[src],[href],[poster]').forEach((n) => ['src', 'href', 'poster'].forEach((a) => {
+        const v = n.getAttribute(a); if (!v || /^(#|mailto:|tel:|data:)/i.test(v)) return;
+        if (/^javascript:/i.test(v)) { n.removeAttribute(a); return; }
+        n.setAttribute(a, new URL(v, r.url).href);
+      }));
+      body.innerHTML = main.innerHTML;
+      document.title = doc.title || (info.key + ' · ' + (SITE.title || 'Harry'));
+      $('#reader').scrollTop = 0; $('#readerClose').focus({ preventScroll: true });
+    } catch (e) {
+      if (seq !== readSeq) return;
+      body.innerHTML = `<h1>Lost in the jungle</h1><p>This page couldn't be found.</p><p><a href="${ROOT.href}">Back to the jungle</a></p>`;
+      document.title = 'Not found · ' + (SITE.title || 'Harry');
+    }
+  }
+  function closeReader(push) {
+    readSeq++; if (push) history.pushState({}, '', ROOT.href);
+    if (!reading) return; reading = false; document.body.classList.remove('reading'); document.title = SITE.title || 'Harry';
+    if (AC && soundOn) MASTER.gain.setTargetAtTime(0.9, AC.currentTime, 0.6);
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
+    if (a.hasAttribute('data-consent-open') || (a.getAttribute('href') || '').startsWith('#')) return;
+    const u = new URL(a.href);
+    if (u.origin === location.origin && (u.pathname === ROOT.pathname || u.pathname === ROOT.pathname + 'index.html') && !u.search) { e.preventDefault(); if (reading || location.href !== ROOT.href) closeReader(true); return; }
+    const info = pageInfo(u); if (info) { e.preventDefault(); openPage(info, true); }
+  });
+  addEventListener('popstate', () => { const info = pageInfo(new URL(location.href)); info ? openPage(info, false) : closeReader(false); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && reading) closeReader(true); });
+  /** first load: ?p=about (from a page's own redirect) or /index.html → clean address */
+  function routeOnLoad() {
+    const p = QS.get('p'), keep = new URLSearchParams(location.search); keep.delete('p');
+    const extra = keep.toString() ? '?' + keep : '';
+    const info = p ? pageInfo(new URL(p, ROOT)) : pageInfo(new URL(location.href));
+    if (info) { history.replaceState({ page: info.key }, '', info.pretty + extra); openPage(info, false); }
+    else if (/index\.html$/i.test(location.pathname) || p) history.replaceState({}, '', ROOT.href + extra);
+  }
+  document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-consent-open]')) { e.preventDefault(); K.Consent.banner(ROOT.href + 'cookies', true); } });
+  document.getElementById('yr').textContent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', year: 'numeric' }).format(new Date());
 
   /* ---------- build ---------- */
   function measure() {
@@ -774,7 +980,7 @@
 
   loadSite().then((site) => {
     SITE = Object.assign({}, K.DEFAULT_SITE, site || {});
-    const go = () => { ENV.phase = computePhase(); K.setGrade(gradeFor()); build(); updateHUD(); M.start(); requestAnimationFrame(frame); document.body.classList.remove('loading'); fetchWeather(); };
+    const go = () => { ENV.phase = computePhase(); K.setGrade(gradeFor()); build(); updateHUD(); M.start(); requestAnimationFrame(frame); document.body.classList.remove('loading'); fetchWeather(); routeOnLoad(); K.Consent.banner(ROOT.href + 'cookies'); };
     (document.fonts && document.fonts.ready ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1500))]) : Promise.resolve()).then(go);
   });
 })();

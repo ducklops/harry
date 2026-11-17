@@ -4,61 +4,40 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 
 ## What's in here
 
-| File | What it is |
+| File / folder | What it is |
 |---|---|
-| `index.html` | The home page: the jungle, the title, your page menu and social links |
-| `console.html` | The console. Log in with a GitHub token to edit pages, social links and icons |
-| `site.json` | The content (title, tagline, pages, socials). The console edits this for you |
-| `jungle-kit.js` | Shared engine: animals, pixel painter, 6 fps animation clock, icons |
-| `page.css` | Styling for the pages in `/pages` |
-| `pages/` | Starter pages. The console creates new ones when you add a page |
+| `index.html` | The home page: the jungle, the title, the menu and social links. Every page opens inside it |
+| `about/`, `projects/`, `gallery/`, `contact/` | Your pages. Each is a folder with an `index.html`, so it lives at harryh.xyz/about and so on |
+| `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy |
+| `cookies/` | The cookie policy, at harryh.xyz/cookies |
+| `console.html` | The console for editing the site (harryh.xyz/console.html) |
+| `site.json` | The content: title, tagline, pages and socials. The console edits this for you |
+| `jungle-kit.js` | The shared engine: animals, pixel painter, 6 fps clock, cookie banner, icons |
+| `page.css` | Styling used when a page is opened on its own |
+| `fonts/` | Self-hosted fonts (Climate Crisis, Pixelify Sans, Barlow, Cormorant Garamond), so nothing loads from Google |
+| `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png` | The "H" icon |
 | `icons/` | Icons you upload through the console end up here |
 
-## Put it online (GitHub Pages)
+## Updating your GitHub repository
 
-1. Create a repository, e.g. `yourname.github.io` (or any name).
-2. Upload **all** these files and folders to the repository root, keeping the folder structure.
-3. In the repository go to **Settings → Pages**. Under **Build and deployment**, set **Source: Deploy from a branch** and **Branch: main / (root)**, then **Save**.
-4. After a minute the site is live at `https://yourname.github.io/` (or `https://yourname.github.io/repo-name/`).
+1. In your repository, **delete the old `pages` folder**. The pages now live in their own folders.
+2. **Keep the `CNAME` file.** It's what links the site to harryh.xyz.
+3. Upload everything from this folder to the top of the repository (drag in all the files and folders), then commit.
+4. After a minute or two, check harryh.xyz.
 
 ## Using the console
 
-Go to `https://yourname.github.io/console.html`.
+Go to harryh.xyz/console.html, paste your GitHub key and press **Log on**. Leave **Repository** blank and the console finds your site by itself.
 
-You need a **fine-grained personal access token**:
+To get a key: GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Under **Repository access**, choose your site's repository. Under **Permissions**, set **Contents: Read and write**.
 
-1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**
-2. **Repository access:** *Only select repositories* → pick your site's repository
-3. **Permissions → Repository permissions → Contents: Read and write**
-4. Copy the token and paste it into the console. Owner and repository are filled in automatically on `*.github.io`.
+## Good to know
 
-In the console you can:
-
-- change the title and tagline
-- add, rename, reorder and remove pages (optionally creating or deleting a starter page file)
-- add, edit, reorder and remove social links
-- pick any of the pixel animals as an icon, or upload your own image (PNG/JPG/WebP/GIF/SVG, up to 1 MB)
-- **Preview draft** to see unsaved changes, then **Save & publish**. Everything is saved as one commit.
-
-The token is only ever sent to `api.github.com`. It's kept for the browser tab only, unless you tick *Remember token on this device*.
-
-## Live time and weather
-
-- **Time of day** follows London (sun position worked out in the browser): dawn, day, golden hour, dusk and night, each with its own lighting, sky, stars, moon and fireflies.
-- **Weather** follows Liverpool via [Open-Meteo](https://open-meteo.com) (free, no key), refreshed every 15 minutes: clear, cloudy, overcast, fog, drizzle, rain, heavy rain, thunderstorms with lightning, and snow.
-- Preview any combination by adding to the address, e.g. `index.html?time=night&weather=storm`
+- **Time and weather.** The jungle follows London's time of day and Liverpool's weather (from Open-Meteo) across every page. Preview other conditions with `?time=night&weather=storm`.
   - `time`: `dawn` `day` `golden` `dusk` `night`
   - `weather`: `clear` `cloudy` `overcast` `fog` `drizzle` `rain` `heavy` `storm` `snow`
-
-## Elephants
-
-- Every 60 seconds a small herd walks through the jungle.
-- On the hour (London time) an elephant walks in and trumpets the hour (five trumpets at 5 o'clock). The blast knocks an animal out of the trees, and it crawls back about 20 seconds later. Preview with `index.html?chime=now`.
-- Sounds (the trumpet, animal calls, rain ambience) play once you switch on sound with the music-note button. Browsers block autoplaying audio until a visitor clicks.
-
-## Small tweaks
-
-- **Animation frame rate:** `const FPS = 6` in `jungle-kit.js`
-- **Herd frequency:** `setTimeout(loop, 60000)` in `index.html`
-- **Clicking an animal** shows its field-guide name. The text lives in `SPECIES` in `jungle-kit.js`
-- **Fonts:** title in *Climate Crisis* (hovering a letter melts it with the font's Year axis), menu in *Pixelify Sans*, captions in *Cormorant Garamond*, all from Google Fonts
+- **Elephants.** A herd walks through every 60 seconds. On the hour, an elephant trumpets the time and knocks an animal out of the trees. Preview with `?chime=now`.
+- **Sound.** Switch it on with the music-note button. If a visitor has accepted cookies, the site remembers it, and sound resumes on their next click.
+- **Cookies.** Visitors choose **Accept** or **Essential only**. Nothing optional is stored on their device unless they accept. Add a contact email to `cookies/index.html` if you'd like one on the policy.
+- **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
+- **Animation speed.** The frame rate is `const FPS = 6` in `jungle-kit.js`.
