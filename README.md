@@ -9,6 +9,7 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `index.html` | The home page: the jungle, the title, the menu and social links. Every page opens inside it |
 | `about/`, `projects/`, `gallery/`, `contact/` | Your pages. Each is a folder with an `index.html`, so it lives at harryh.xyz/about and so on |
 | `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy |
+| `trolley/` | Trolley Trials, the jungle-market trolley game, at harryh.xyz/trolley |
 | `cookies/` | The cookie policy, at harryh.xyz/cookies |
 | `console.html` | The console for editing the site (harryh.xyz/console.html) |
 | `site.json` | The content: title, tagline, pages and socials. The console edits this for you |
@@ -40,6 +41,7 @@ To get a key: GitHub → **Settings → Developer settings → Personal access t
 - **Sound.** Switch it on with the music-note button. If a visitor has accepted cookies, the site remembers it, and sound resumes on their next click.
 - **Cookies.** Visitors choose **Accept** or **Essential only**. Nothing optional is stored on their device unless they accept. Add a contact email to `cookies/index.html` if you'd like one on the policy.
 - **Editing a page.** In the console, press **✎ Edit page** next to any page. Type straight onto the page, add headings, text, pictures, galleries, quotes, buttons, embeds (YouTube, Vimeo, Spotify, SoundCloud, TikTok, Google Maps) and dividers from the **Add** bar, drag blocks by ⠿ to move them, and drop pictures from your computer anywhere on the page. Big photos are shrunk automatically and saved in `media/`. Only the inside of the page's content box changes; anything the editor doesn't recognise is kept as an HTML block, exactly as written.
-- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy hangs in the jungle by default.
+- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy and Trolley Trials hang in the jungle by default.
 - **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
+- **Trolley Trials.** A new store every day (London time): the aisles, items, prices, budget and hazards come from the date, so everyone gets the same one. **Copy receipt** shares a text receipt; **Challenge a friend** shares a link with your route packed inside it, and their game races your ghost trolley on that day's store. Preview another day with `?day=2026-12-25`.
 - **Animation speed.** The frame rate is `const FPS = 6` in `jungle-kit.js`.

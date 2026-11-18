@@ -104,11 +104,56 @@
   const ROOT = new URL('../', location.href);
   const SHARE_URL = new URL('flappy', ROOT).href;
   const SHARE_TEXT_URL = SHARE_URL.replace(/^https?:\/\//, '');
+  /* Side-on flying versions of the perched birds, drawn at the hummingbird's scale
+     (3.75 model units per pixel) so every bird is about the same size in the air.
+     Each faces right; .p-wing hinges at the shoulder (positive = wing up). */
+  const flier = (vb, body) => () => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${body}</svg>`;
+  const hinge = (x, y) => `style="transform-origin:${x}px ${y}px"`;
+  K.A.toucanFly = flier('0 0 110 60', `
+    <path d="M36 29 L12 28 L12 37 L36 37Z" fill="#0f1012"/>
+    <path d="M38 37 q4 5 9 1 l-2 -3Z" fill="#c8282a"/>
+    <ellipse cx="50" cy="33" rx="18" ry="9" fill="#141518"/>
+    <circle cx="68" cy="28" r="9" fill="#141518"/>
+    <path d="M62 30 C70 29 75 35 71 41 C65 41 60 36 62 30Z" fill="#f2d23a"/>
+    <circle cx="70" cy="25.5" r="4" fill="#7ad04a"/><rect x="68.5" y="24" width="3.4" height="3.4" fill="#0a0a0a"/>
+    <path d="M75 20 C90 15 104 19 108 28 C100 33 88 34 76 34 C73 28 73 24 75 20Z" fill="#f08a1c"/>
+    <path d="M75 20 C90 15 104 19 108 28 C98 24 88 23 76 26Z" fill="#7cc83e"/>
+    <path d="M103 22 C106 24 108 26 108 28 C105 30 102 31 99 32Z" fill="#c8282a"/>
+    <g class="p-wing" ${hinge(54, 30)}><path d="M58 27 C46 21 30 21 22 25 C30 32 46 36 58 35Z" fill="#424c58"/><path d="M30 24 C26 24 24 25 22 25 C25 28 28 30 31 31Z" fill="#141518"/></g>`);
+  K.A.macawFly = flier('0 0 104 60', `
+    <path d="M40 30 L3 37 L5 40 L42 35Z" fill="#c8262a"/>
+    <path d="M40 35 L5 41 L4 44 L42 39Z" fill="#2a62c8"/>
+    <ellipse cx="56" cy="34" rx="18" ry="9" fill="#c8262a"/>
+    <path d="M52 42 l-6 3" stroke="#3a3a3a" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="75" cy="28" r="10" fill="#c8262a"/>
+    <ellipse cx="80" cy="29" rx="5" ry="6" fill="#f2efe6"/>
+    <rect x="78" y="25.5" width="3.6" height="3.6" fill="#0a0a0a"/>
+    <path d="M84 21 C95 21 100 31 94 40 C92 35 89 33 84 33Z" fill="#e8e2d2"/>
+    <path d="M84 33 C88 33 91 36 89 40 C87 38 85 36 82 35Z" fill="#1a1a1a"/>
+    <g class="p-wing" ${hinge(58, 31)}>
+      <path d="M62 28 C48 21 32 21 26 25 C32 32 48 37 62 36Z" fill="#2a62c8"/>
+      <path d="M62 28 C52 23 44 22 38 23 C42 30 52 35 62 36Z" fill="#f2c62a"/>
+      <path d="M62 28 C57 25 53 24 49 25 C52 30 57 34 62 36Z" fill="#c8262a"/>
+    </g>`);
+  K.A.parrotFly = flier('0 0 92 60', `
+    <path d="M32 30 L12 31 L12 38 L32 37Z" fill="#23883e"/>
+    <path d="M17 31 L12 31 L12 38 L17 38Z" fill="#a2de52"/>
+    <ellipse cx="46" cy="34" rx="17" ry="9" fill="#3aac48"/>
+    <circle cx="64" cy="28" r="9.5" fill="#3aac48"/>
+    <path d="M56 22 C61 16 70 17 72 22 C66 21 61 22 57 26Z" fill="#f2d22a"/>
+    <rect x="65" y="25" width="3.8" height="3.8" fill="#0a0a0a"/>
+    <path d="M72 24 C81 24 83 34 77 39 C76 34 74 33 71 33Z" fill="#d8c8a8"/>
+    <g class="p-wing" ${hinge(48, 31)}>
+      <path d="M52 28 C40 21 26 21 18 25 C26 32 40 37 52 36Z" fill="#1c6a30"/>
+      <path d="M31 23 C25 22 21 23 18 25 C22 29 26 32 31 33Z" fill="#2a5ec8"/>
+      <path d="M41 25 L47 25 L47 31 L41 31Z" fill="#c8262a"/>
+    </g>`);
+  // model = which drawing to fly; w = sprite width in px; cx/cy = body centre (also the hit-circle centre)
   const BIRDS = {
-    toucan: { name: 'Toucan', w: 22, rot: -0.15, cx: 0.45, cy: 0.45 },
-    macaw: { name: 'Scarlet macaw', w: 13, rot: -1.25, cx: 0.5, cy: 0.4 },
-    parrot: { name: 'Amazon parrot', w: 14, rot: -1.2, cx: 0.5, cy: 0.42 },
-    hummingbird: { name: 'Hummingbird', w: 24, rot: 0, cx: 0.5, cy: 0.5 }
+    toucan: { name: 'Toucan', model: 'toucanFly', w: 29, rot: 0, cx: 0.49, cy: 0.54 },
+    macaw: { name: 'Scarlet macaw', model: 'macawFly', w: 28, rot: 0, cx: 0.58, cy: 0.54 },
+    parrot: { name: 'Amazon parrot', model: 'parrotFly', w: 25, rot: 0, cx: 0.55, cy: 0.54 },
+    hummingbird: { name: 'Hummingbird', model: 'hummingbird', w: 24, rot: 0, cx: 0.5, cy: 0.5 }
   };
   document.querySelectorAll('.yr').forEach((y) => { y.textContent = new Date().getFullYear(); });
 
@@ -139,6 +184,7 @@
   const cv = $('#game'), ctx = cv.getContext('2d');
   let W = 200, H = 200, S = 4, GROUND = 22, BX = 60;
   const L = {};   // painted layers
+  const LP = 14;  // margin around the tree-leaf tiles
   function resize() {
     S = Math.max(1, Math.min(innerHeight / 200, innerWidth / 160));
     W = Math.min(520, Math.ceil(innerWidth / S)); H = Math.min(360, Math.ceil(innerHeight / S));
@@ -179,8 +225,9 @@
     for (let i = 0; i < 10; i++) { const x = P.r() * GW; wrap(GW, (o) => P.clump(x + o, 14, 4 + P.r() * 3, T.leafB, [0, -1])); }
     K.finalize(k.c, GW, GROUND + 14, { dither: 12 }); L.ground = k.cv;
     // canopy tops for the trees (a few variants)
-    L.canopy = [0, 1, 2].map((v) => { const c = mk(40, 20), p = new K.Painter(c.c, 30 + v); for (let i = 0; i < 6; i++) p.clump(8 + i * 5 + p.r() * 3, 11 + p.r() * 4, 5 + p.r() * 3, i % 2 ? T.leafB : T.leafMid, [0, -1]); K.finalize(c.c, 40, 20, { dither: 12 }); return c.cv; });
-    L.hang = [0, 1, 2].map((v) => { const c = mk(40, 22), p = new K.Painter(c.c, 40 + v); for (let i = 0; i < 6; i++) p.clump(8 + i * 5 + p.r() * 3, 8 + p.r() * 4, 5 + p.r() * 3, T.leafA, [0, 1]); for (let i = 0; i < 5; i++) p.line(6 + i * 7, 10, 6 + i * 7 + (p.r() - 0.5) * 2, 14 + p.r() * 8, 1, T.leafMid[2]); K.finalize(c.c, 40, 22, { dither: 12 }); return c.cv; });
+    // painted on padded tiles (LP px of margin each side) so no clump gets sliced off at the tile edge
+    L.canopy = [0, 1, 2].map((v) => { const c = mk(40 + LP * 2, 20 + LP * 2), p = new K.Painter(c.c, 30 + v); for (let i = 0; i < 6; i++) p.clump(LP + 8 + i * 5 + p.r() * 3, LP + 11 + p.r() * 4, 5 + p.r() * 3, i % 2 ? T.leafB : T.leafMid, [0, -1]); K.finalize(c.c, c.cv.width, c.cv.height, { dither: 12 }); return c.cv; });
+    L.hang = [0, 1, 2].map((v) => { const c = mk(40 + LP * 2, 22 + LP * 2), p = new K.Painter(c.c, 40 + v); for (let i = 0; i < 6; i++) p.clump(LP + 8 + i * 5 + p.r() * 3, LP + 8 + p.r() * 4, 5 + p.r() * 3, T.leafA, [0, 1]); for (let i = 0; i < 5; i++) p.line(LP + 6 + i * 7, LP + 10, LP + 6 + i * 7 + (p.r() - 0.5) * 2, LP + 14 + p.r() * 8, 1, T.leafMid[2]); K.finalize(c.c, c.cv.width, c.cv.height, { dither: 12 }); return c.cv; });
     // graded bark colours for the tree trunks
     const g = gradeFor(), gc = (h) => { let [r, gg, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const l = 0.3 * r + 0.59 * gg + 0.11 * b; [r, gg, b] = [r, gg, b].map((v) => l + (v - l) * g.sat); return `rgb(${Math.round(r * g.mul[0])},${Math.round(gg * g.mul[1])},${Math.round(b * g.mul[2])})`; };
     L.bark = ['#1e120c', '#46281c', '#764a32', '#a87452', '#3a9c3a'].map(gc);
@@ -189,14 +236,24 @@
 
   /* ---------- the bird ---------- */
   let birdKind = null, sprite = null;
-  function makeBird() { if (birdKind) { sprite = new K.Sprite(birdKind, BIRDS[birdKind].w, { pad: 1 }); poseBird(0, 0); } }
-  let poseT = 0;
+  function makeBird() { if (birdKind) { sprite = new K.Sprite(BIRDS[birdKind].model, BIRDS[birdKind].w, { pad: 1 }); poseKey = ''; poseBird(0, 9); } }
+  let poseKey = '';
+  const WING = { up: 50, mid: 8, down: -42 };
+  /** which wing frame to show: a quick hard down-stroke right after a tap, otherwise a steady flap */
+  function wingFrame(t, flapAge) {
+    if (state === 'dead') return 'up';
+    if (flapAge < 0.06) return 'up';
+    if (flapAge < 0.12) return 'mid';
+    if (flapAge < 0.24) return 'down';
+    if (flapAge < 0.3) return 'mid';
+    return ['up', 'mid', 'down', 'mid'][Math.floor(t * 8) % 4];
+  }
   function poseBird(t, flapAge) {
-    const parts = {}, up = flapAge < 0.18;
-    if (birdKind === 'macaw' || birdKind === 'parrot') parts['.p-wing'] = `rotate(${up ? 55 : Math.round(Math.sin(t * 10)) * 12}deg)`;
-    if (birdKind === 'hummingbird') parts['.p-wings'] = `rotate(${Math.floor(t * 14) % 2 ? -32 : 26}deg)`;
-    if (birdKind === 'toucan') { parts['.p-tail'] = `rotate(${up ? -18 : 6}deg)`; parts['.p-head'] = `rotate(${up ? -8 : 0}deg)`; }
-    sprite.render({ parts, op: {} });
+    const parts = {}; let key;
+    if (birdKind === 'hummingbird') { key = Math.floor(t * 14) % 2 ? 'a' : 'b'; parts['.p-wings'] = `rotate(${key === 'a' ? -32 : 26}deg)`; }
+    else { key = wingFrame(t, flapAge); parts['.p-wing'] = `rotate(${WING[key]}deg)`; }
+    if (key === poseKey) return;   // only redraw the sprite when the frame actually changes
+    poseKey = key; sprite.render({ parts, op: {} });
   }
 
   /* ---------- game state ---------- */
@@ -276,8 +333,8 @@
       ctx.fillStyle = B[0]; ctx.fillRect(x + TRUNK - 1, y0, 1, y1 - y0);
       const R = K.rng(t.seed | 0); for (let y = y0 + 3; y < y1; y += 5 + Math.floor(R() * 6)) { ctx.fillStyle = B[1]; ctx.fillRect(x + 4 + Math.floor(R() * (TRUNK - 9)), y, 1, 3); if (R() > 0.7) { ctx.fillStyle = B[4]; ctx.fillRect(x + 1, y, 2, 2); } }
     };
-    trunk(-2, gt - 6); ctx.drawImage(L.hang[t.v], x + TRUNK / 2 - 20, gt - 14);
-    trunk(gb + 6, H - GROUND + 8); ctx.drawImage(L.canopy[t.v], x + TRUNK / 2 - 20, gb - 6);
+    trunk(-2, gt - 6); ctx.drawImage(L.hang[t.v], x + TRUNK / 2 - 20 - LP, gt - 14 - LP);
+    trunk(gb + 6, H - GROUND + 8); ctx.drawImage(L.canopy[t.v], x + TRUNK / 2 - 20 - LP, gb - 6 - LP);
   }
   function draw() {
     const t = performance.now() / 1000;
@@ -288,7 +345,7 @@
     tile(L.ground, 1, H - GROUND - 12);
     if (sprite) {
       const age = flapAt < 0 ? 9 : t - flapAt;
-      if (t - poseT > 1 / 12) { poseBird(t, age); poseT = t; }      // wings move at a jumpy 12 fps
+      poseBird(t, age);      // stop-motion wing frames (redraws only on a frame change)
       const b = BIRDS[birdKind], cvs = sprite.canvas, tilt = state === 'ready' ? 0 : Math.max(-0.45, Math.min(1.2, vy / 260));
       ctx.save(); ctx.translate(BX, Math.round(by)); ctx.rotate(b.rot + tilt);
       ctx.drawImage(cvs, -Math.round(cvs.width * b.cx), -Math.round(cvs.height * b.cy)); ctx.restore();

@@ -17,6 +17,13 @@
       "place": "jungle"
     },
     {
+      "id": "trolley",
+      "title": "Trolley Trials",
+      "url": "trolley",
+      "icon": "animal:capuchin",
+      "place": "jungle"
+    },
+    {
       "id": "contact",
       "title": "Contact",
       "url": "contact",
