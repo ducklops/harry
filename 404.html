@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lost in the jungle · Harry</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f1f2e">
+<!-- GitHub Pages serves this file for any address that doesn't exist, at any depth, so links start from the site root -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/page.css">
+<style>
+  .lost { text-align: center; }
+  .lost .sloth { display: block; margin: 0 auto 6px; height: clamp(70px, 14vmin, 110px); width: auto; image-rendering: pixelated; animation: sway 3s steps(6) infinite alternate; transform-origin: 50% 0; }
+  @keyframes sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+  .lost .num { margin: 0; font: 400 clamp(84px, 22vmin, 170px)/.95 'Climate Crisis', 'Arial Black', sans-serif; color: var(--ice); text-shadow: 0 .06em 0 #070e16; }
+  .lost h1 { margin: 10px 0 6px; }
+  .lost p { margin: 0 auto; max-width: 30em; color: rgba(238,246,216,.85); }
+  .lost .path[hidden] { display: none; }
+  .lost .path { display: inline-block; max-width: 100%; margin-top: 10px; padding: 2px 8px; overflow-wrap: anywhere; background: rgba(194,234,106,.12); color: var(--lime); font: 600 14px/1.6 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .04em; }
+  .lost .guess { margin-top: 18px; font-size: 17px; }
+  .lost .guess[hidden] { display: none; }
+  .lost .go { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 22px; }
+  .lost .go a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 16px; text-decoration: none; color: var(--ice); background: rgba(15,31,46,.95); box-shadow: inset 0 0 0 3px rgba(238,246,216,.35);
+    font: 600 13px/1.2 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; }
+  .lost .go a img { height: 22px; width: auto; image-rendering: pixelated; }
+  .lost .go a.home-btn { color: var(--ink); background: var(--lime); box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .lost .go a:hover, .lost .go a:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); color: var(--lime); outline: none; }
+  .lost .go a.home-btn:hover, .lost .go a.home-btn:focus-visible { color: var(--ink); filter: brightness(1.08); box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .lost .more { margin-top: 22px; font: 600 12px 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(238,246,216,.6); }
+</style>
+</head>
+<body>
+<canvas class="backdrop" aria-hidden="true"></canvas>
+<header class="top"><a class="home" href="/">Harry</a></header>
+<main class="sheet lost">
+  <img class="sloth" id="sloth" alt="">
+  <p class="num">404</p>
+  <h1>Lost in the jungle</h1>
+  <p>Even the sloth has looked everywhere, and there's nothing here. The page may have moved, or the link has a typo.</p>
+  <span class="path" id="path"></span>
+  <p class="guess" id="guess" hidden></p>
+  <div class="go">
+    <a class="home-btn" href="/">◂ Back to the jungle</a>
+  </div>
+  <div class="more" id="moreHead">Or head to</div>
+  <div class="go" id="pages"></div>
+</main>
+<footer class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="/cookies/">Cookies</a></footer>
+<script src="/jungle-kit.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit;
+  K.decoratePage(document.querySelector('.backdrop'), { redirect: false });
+  document.getElementById('sloth').src = K.animalIconURL('sloth', 40);
+
+  // any missing address lands here; show it as harryh.xyz/404 but remember what was typed
+  let wanted = ''; try { wanted = decodeURIComponent(location.pathname).replace(/^\/+|\/+$/g, ''); } catch (e) { wanted = location.pathname.replace(/^\/+|\/+$/g, ''); }
+  if (/^404(\.html)?$/i.test(wanted)) wanted = '';
+  else history.replaceState(null, '', '/404');
+  const pathEl = document.getElementById('path');
+  if (wanted) pathEl.textContent = '/' + wanted; else pathEl.hidden = true;
+
+  // edit distance, for "did you mean" on typos like /abuot or /Flapy
+  function dist(a, b) {
+    const d = Array.from({ length: b.length + 1 }, (_, i) => i);
+    for (let i = 1; i <= a.length; i++) { let prev = d[0]; d[0] = i; for (let j = 1; j <= b.length; j++) { const t = d[j]; d[j] = Math.min(d[j] + 1, d[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1)); prev = t; } }
+    return d[b.length];
+  }
+  function show(pages) {
+    pages = (pages || []).filter((p) => p && p.url && !/^https?:/i.test(p.url) && !/^mailto:/i.test(p.url));
+    const box = document.getElementById('pages');
+    box.innerHTML = pages.map((p) => `<a href="/${K.esc(p.url.replace(/^\/+/, ''))}">${K.iconHTML(p, 'page', '', {}, 22)}${K.esc(p.title || p.url)}</a>`).join('');
+    document.getElementById('moreHead').hidden = !pages.length;
+    // the closest page to what was typed, ignoring case, .html and anything after the first folder
+    const key = wanted.toLowerCase().replace(/\.html?$/, '').replace(/^pages\//, '').split('/')[0];
+    if (!key) return;
+    let best = null, bd = Infinity;
+    pages.forEach((p) => { const slug = p.url.toLowerCase().replace(/^\/+|\/+$/g, ''), t = (p.title || '').toLowerCase().replace(/\s+/g, '-'); const d = Math.min(dist(key, slug), dist(key, t)); if (d < bd) { bd = d; best = p; } });
+    if (best && bd <= Math.max(2, Math.floor(key.length / 3))) {
+      const g = document.getElementById('guess'); g.hidden = false;
+      g.innerHTML = `Did you mean <a href="/${K.esc(best.url.replace(/^\/+/, ''))}">${K.esc(best.title || best.url)}</a>?`;
+    }
+  }
+  fetch('/site.json', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : Promise.reject())).then((s) => show(s.pages)).catch(() => show(K.DEFAULT_SITE.pages));
+})();
+</script>
+</body>
+</html>

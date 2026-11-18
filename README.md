@@ -11,6 +11,7 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy |
 | `trolley/` | Trolley Trials, the jungle-market trolley game, at harryh.xyz/trolley |
 | `cookies/` | The cookie policy, at harryh.xyz/cookies |
+| `404.html` | The "Lost in the jungle" page, at harryh.xyz/404. GitHub Pages shows it for any address that doesn't exist; it switches the address to /404 and suggests the page you probably meant. Keep it at the top of the repository |
 | `console.html` | The console for editing the site (harryh.xyz/console.html) |
 | `site.json` | The content: title, tagline, pages and socials. The console edits this for you |
 | `jungle-kit.js` | The shared engine: animals, pixel painter, 6 fps clock, cookie banner, icons |
