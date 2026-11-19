@@ -32,9 +32,9 @@
     },
     {
       "id": "gq1kw4p",
-      "title": "Gallery",
-      "url": "gallery",
-      "icon": "auto",
+      "title": "What's New",
+      "url": "whats-new",
+      "icon": "animal:lemur",
       "place": "menu"
     }
   ],
