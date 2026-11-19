@@ -1,0 +1,30 @@
+name: Latest Letterboxd review
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'   # every three hours
+  workflow_dispatch:          # plus a "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: letterboxd
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the newest review
+        run: python3 .github/scripts/letterboxd.py
+      - name: Save it if it changed
+        run: |
+          git add letterboxd.json letterboxd 2>/dev/null || git add letterboxd.json
+          if git diff --cached --quiet; then echo "No new review."; exit 0; fi
+          git config user.name "letterboxd-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Latest Letterboxd review"
+          git pull --rebase
+          git push
