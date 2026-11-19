@@ -14,6 +14,8 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `404.html` | The "Lost in the jungle" page, at harryh.xyz/404. GitHub Pages shows it for any address that doesn't exist; it switches the address to /404 and suggests the page you probably meant. Keep it at the top of the repository |
 | `console.html` | The console for editing the site (harryh.xyz/console.html) |
 | `site.json` | The content: title, tagline, pages and socials. The console edits this for you |
+| `letterboxd.json`, `letterboxd/` | Harry's most recent Letterboxd review and its poster, refreshed automatically (see below) |
+| `.github/` | The automatic job that refreshes the Letterboxd review |
 | `jungle-kit.js` | The shared engine: animals, pixel painter, 6 fps clock, cookie banner, icons |
 | `page.css` | Styling used when a page is opened on its own |
 | `fonts/` | Self-hosted fonts (Climate Crisis, Pixelify Sans, Barlow, Cormorant Garamond), so nothing loads from Google |
@@ -45,4 +47,5 @@ To get a key: GitHub → **Settings → Developer settings → Personal access t
 - **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy and Trolley Trials hang in the jungle by default.
 - **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
 - **Trolley Trials.** A new store every day (London time): the aisles, items, prices, budget and hazards come from the date, so everyone gets the same one. **Copy receipt** shares a text receipt; **Challenge a friend** shares a link with your route packed inside it, and their game races your ghost trolley on that day's store. Preview another day with `?day=2026-12-25`.
+- **Latest Letterboxd review.** Every three hours a GitHub Action (`.github/workflows/letterboxd.yml`) reads letterboxd.com/harryhayw/rss, saves the newest review to `letterboxd.json` and copies its poster into `letterboxd/`, so visitors never load anything from Letterboxd. It shows on the Gallery page as a card with the poster, stars and the start of the review (**Read the rest** opens the whole thing; reviews marked as spoilers stay hidden until tapped). To show it on another page, add an **HTML** block in the page editor containing `<div data-letterboxd></div>`. To refresh it straight away: repository → **Actions → Latest Letterboxd review → Run workflow**.
 - **Animation speed.** The frame rate is `const FPS = 6` in `jungle-kit.js`.
