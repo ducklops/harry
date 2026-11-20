@@ -212,6 +212,42 @@
   body.pe-grabbing, body.pe-grabbing * { cursor: grabbing !important; user-select: none !important; }
   .editbtn { color: var(--lime); }
   .editbtn.edited::after { content: ''; display: inline-block; width: 8px; height: 8px; margin-left: 4px; background: #f6d24a; }
+  /* ---------- trivia desk ---------- */
+  .td-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 10px 0; }
+  .td-stats > div { padding: 10px 12px; background: rgba(7,14,22,.6); box-shadow: inset 0 0 0 2px var(--line); }
+  .td-stats b { display: block; font: 400 26px/1.1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--lime); }
+  .td-stats span { display: block; margin-top: 4px; font-size: 12px; line-height: 1.35; color: var(--muted); }
+  .td-tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+  .td-tools input[type=number] { width: 70px; padding: 8px; }
+  .td-tools .check { margin: 0; }
+  .td-cal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 18px 0 8px; font: 600 14px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ice); }
+  .td-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .td-dow { padding: 2px; text-align: center; font: 400 11px 'Pixelify Sans', monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .td-day { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; padding: 6px 2px; border: 0; cursor: pointer; color: var(--ice); background: rgba(15,31,46,.9); box-shadow: inset 0 0 0 2px var(--line); font: 600 13px 'Pixelify Sans', monospace; }
+  .td-day i { font-style: normal; font-size: 18px; }
+  .td-day.off { cursor: default; opacity: .25; display: grid; place-items: center; }
+  .td-day.past { opacity: .7; } .td-day.today { box-shadow: inset 0 0 0 3px var(--lime); opacity: 1; }
+  .td-day.on { background: var(--lime); color: var(--ink); opacity: 1; }
+  .td-day:hover:not(.off) { box-shadow: inset 0 0 0 2px var(--lime); }
+  .td-day.flag::before, .td-day.warn::after { content: ''; position: absolute; top: 0; width: 0; height: 0; border-style: solid; }
+  .td-day.flag::before { left: 0; border-width: 10px 10px 0 0; border-color: #f6d24a transparent transparent transparent; }
+  .td-day.warn::after { right: 0; border-width: 0 10px 10px 0; border-color: transparent var(--red) transparent transparent; }
+  .td-day.edited { text-decoration: underline; text-decoration-color: #f6d24a; text-decoration-thickness: 3px; }
+  #tdDay { margin-top: 22px; padding-top: 18px; border-top: 2px solid var(--line); }
+  #tdDay h3 { margin: 24px 0 8px; font: 600 14px 'Pixelify Sans', monospace; letter-spacing: .18em; text-transform: uppercase; color: var(--lime); }
+  .td-dayhead { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+  .td-q { display: grid; gap: 8px; margin: 10px 0; padding: 12px; background: rgba(7,14,22,.6); box-shadow: inset 0 0 0 2px var(--line); }
+  .td-qh { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+  .td-qh b { font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ice); }
+  .td-qh span { font-size: 12px; color: var(--muted); } .td-qh .btn { margin-left: auto; }
+  .td-q label { display: grid; gap: 4px; font: 400 11px 'Pixelify Sans', monospace; letter-spacing: .08em; color: var(--muted); }
+  .td-q input[type=text] { padding: 8px 10px; font-size: 14px; }
+  .td-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+  .td-q textarea, #tdImportText { width: 100%; padding: 8px 10px; border: 0; resize: vertical; background: rgba(7,14,22,.85); color: var(--ice); box-shadow: inset 0 0 0 2px var(--line); font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .td-q textarea:focus, #tdImportText:focus { outline: none; box-shadow: inset 0 0 0 2px var(--lime); }
+  .td-boa { display: flex; flex-wrap: wrap; gap: 6px 14px; } .td-boa label { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--ice); }
+  .td-warn ul, .td-err { margin: 10px 0; padding: 10px 14px 10px 30px; color: #ffd8cf; background: rgba(224,80,62,.12); box-shadow: inset 0 0 0 2px rgba(224,80,62,.5); font-size: 14px; }
+  .msg.warn { box-shadow: inset 0 0 0 2px #f6d24a; color: #f6d24a; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -275,6 +311,10 @@
         <button class="btn go" type="submit">Add</button>
       </form>
 
+      <h2>Tree-Frog Trivia</h2>
+      <p class="help">The daily trivia game's questions, schedule and full archive. Check and edit any day, play-test it, build more days and top up the question bank.</p>
+      <button class="btn" type="button" id="openTrivia">🐸 Open the trivia desk</button>
+
       <details class="box" style="margin-top:26px">
         <summary>Preview the jungle in other weather</summary>
         <div class="in"><p class="hint" style="margin:0 0 10px">The home page follows London's time and Liverpool's weather on its own. These just let you look.</p><div class="chips" id="chips"></div></div>
@@ -333,6 +373,37 @@
       <div class="msg" id="peMsg"></div>
     </div>
 
+    <!-- ================= TRIVIA DESK ================= -->
+    <div class="body" id="triviaEd" hidden>
+      <div class="pe-head"><button class="btn sm" type="button" id="tdBack">← Back to the site</button><h1>Tree-Frog <b>Trivia desk</b></h1></div>
+      <div id="tdStatus"><p class="hint">Loading…</p></div>
+      <div class="td-tools">
+        <button class="btn" type="button" id="tdPack">⬇ Download top-up pack</button>
+        <button class="btn" type="button" id="tdImportOpen">⬆ Import questions</button>
+        <button class="btn" type="button" id="tdCheck">✓ Check every day</button>
+        <button class="btn" type="button" id="tdRefresh">↻ Refresh rarity for future days</button>
+      </div>
+      <div class="td-tools">
+        <button class="btn" type="button" id="tdBuild">＋ Build more days</button>
+        <input type="number" id="tdN" value="28" min="1" max="120" aria-label="How many days"> <span class="hint" style="margin:0">days</span>
+        <label class="check"><input type="checkbox" id="tdNet" checked> Score rarity from Wikipedia as I build</label>
+      </div>
+      <details class="box"><summary>How the trivia desk works</summary><div class="in">
+        <p><b>Days</b> are built ahead from the question bank. A GitHub Action builds more and refreshes rarity every Monday, and you can do it here too.</p>
+        <p><b>Nothing repeats</b> within 730 days. Swapping a question takes an unused one from the bank. When you swap, it asks whether to retire the old one: say yes if it was wrong, so it never comes back.</p>
+        <p><b>Top-up pack:</b> a readable text file with every question and when it was used, plus a ready-made request. Paste it into a chat with Claude, then paste the reply into Import questions.</p>
+        <p><b>Play-test</b> opens the day in a new tab exactly as you've edited it, without saving anything.</p>
+        <p>The files in the repository are encoded so answers can't be read at a glance. This desk is the readable view.</p>
+      </div></details>
+      <div id="tdCal"></div>
+      <div id="tdDay" hidden></div>
+      <div class="publish" id="tdBar">
+        <span class="unsaved" id="tdUnsaved">Everything is saved</span>
+        <button class="btn go" type="button" id="tdSave">Save</button>
+      </div>
+      <div class="msg" id="tdMsg"></div>
+    </div>
+
     <div class="statusbar"><span><span class="led off" id="led"></span><span id="statusText">Not connected</span></span><span>Changes go live about a minute after publishing</span></div>
   </div>
 </div>
@@ -345,6 +416,20 @@
       <p class="help" style="margin-top:0">Pick an animal, or use your own picture (PNG, JPG, WebP, GIF or SVG, up to 1&nbsp;MB).</p>
       <div class="picker" id="pickGrid"></div>
       <label class="drop" id="drop"><input type="file" id="fileIn" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" hidden><b>Use my own picture</b> — click, or drop it here</label>
+    </div>
+  </div>
+</dialog>
+
+<!-- trivia import -->
+<dialog id="tdImport">
+  <div class="win" style="max-width:none">
+    <div class="titlebar"><span class="name">IMPORT QUESTIONS</span><button class="tb" id="tdImportClose" style="border:0;cursor:pointer" aria-label="Close">×</button></div>
+    <div class="body">
+      <p class="help" style="margin-top:0">Paste the new sections (## questions, ## finale, ## walls, ## mini walls, ## prompts), or choose the text file. Anything already in the bank is skipped.</p>
+      <textarea id="tdImportText" rows="12" spellcheck="false" placeholder="## questions&#10;2|Which river flows through Bristol?|Avon{River Avon}|Severn|Frome|Wye"></textarea>
+      <div class="td-tools"><input type="file" id="tdImportFile" accept=".txt,text/plain"></div>
+      <div class="msg" id="tdImportInfo"></div>
+      <div class="td-tools" style="justify-content:flex-end"><button class="btn go" type="button" id="tdImportGo" disabled>Add to the bank</button></div>
     </div>
   </div>
 </dialog>
@@ -387,6 +472,7 @@
     const c = await gh(`${base}/git/commits`, { method: 'POST', body: JSON.stringify({ message, tree: t.sha, parents: [head.sha] }) });
     await gh(`${base}/git/refs/heads/${enc(AUTH.branch)}`, { method: 'PATCH', body: JSON.stringify({ sha: c.sha }) });
   }
+  window.HarryConsole = { get AUTH() { return AUTH; }, readFile, commit, b64utf8 };   // for the Tree-Frog Trivia desk (trivia/desk.js)
   /** works out which repository (and folder) holds this site */
   async function findSite(token, typed) {
     let candidates = [];
@@ -438,7 +524,7 @@
   let PAGEEDITS = {}, MEDIA = {};   // page-editor work in progress: { file → page }, { 'media/x.webp' → picture }
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const overrides = () => Object.fromEntries(Object.entries(PENDING).map(([p, v]) => [p, v.dataURL]));
-  const placeOf = (p) => p.place || (p.url === 'flappy' || p.url === 'trolley' ? 'jungle' : 'menu');
+  const placeOf = (p) => p.place || (['flappy', 'trolley', 'trivia'].includes(p.url) ? 'jungle' : 'menu');
   const isSlug = (u) => /^[a-z0-9][a-z0-9-]*$/i.test(u || '');
   const pageFile = (u) => (isSlug(u) ? u + '/index.html' : /^pages\/[\w-]+\.html$/.test(u || '') ? u : null);
   function dirty() { return !!SITE && (JSON.stringify(SITE) !== SAVED || Object.keys(PENDING).length > 0 || REMOVALS.size > 0 || Object.values(PAGEEDITS).some(peChanged)); }
@@ -623,7 +709,7 @@
      A page is a list of blocks; each block turns into plain, tidy HTML.
      ===================================================================== */
   const ROOTURL = new URL('./', location.href);
-  const APP_PAGES = ['flappy', 'trolley'];                 // full pages of their own (games) — not edited here
+  const APP_PAGES = ['flappy', 'trolley', 'trivia'];       // full pages of their own (games) — not edited here
   const A = K.esc;
   const LABEL = { heading: 'Heading', text: 'Text', image: 'Picture', gallery: 'Gallery', quote: 'Quote', button: 'Button', embed: 'Embed', divider: 'Divider', html: 'HTML' };
   const IMG_TYPES = /^image\/(png|jpeg|webp|gif|svg\+xml|avif)$/;
@@ -1180,5 +1266,7 @@
     .map(([l, q]) => `<a href="./${q ? '?' + q : ''}" target="_blank" rel="noopener">${l}</a>`).join('');
 })();
 </script>
+<script src="trivia/tft-core.js"></script>
+<script src="trivia/desk.js"></script>
 </body>
 </html>

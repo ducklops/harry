@@ -24,6 +24,13 @@
       "place": "jungle"
     },
     {
+      "id": "trivia",
+      "title": "Tree-Frog Trivia",
+      "url": "trivia",
+      "icon": "animal:frog",
+      "place": "jungle"
+    },
+    {
       "id": "contact",
       "title": "Contact",
       "url": "contact",

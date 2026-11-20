@@ -831,6 +831,7 @@
       { id: 'gallery', title: 'Gallery', url: 'gallery', icon: 'animal:chameleon' },
       { id: 'flappy', title: 'Flappy', url: 'flappy', icon: 'animal:macaw', place: 'jungle' },
       { id: 'trolley', title: 'Trolley Trials', url: 'trolley', icon: 'animal:capuchin', place: 'jungle' },
+      { id: 'trivia', title: 'Tree-Frog Trivia', url: 'trivia', icon: 'animal:frog', place: 'jungle' },
       { id: 'contact', title: 'Contact', url: 'contact', icon: 'animal:frog' }
     ],
     socials: [
@@ -840,7 +841,7 @@
     ]
   };
   /** page folders that must not be used for new pages */
-  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
+  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', 'trivia', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
   const pageSlug = (title, taken = []) => { let b = slugify(title); if (RESERVED.includes(b)) b += '-page'; let s = b, n = 1; while (taken.includes(s)) s = `${b}-${++n}`; return s; };
 
   /* =======================================================================
@@ -848,7 +849,7 @@
      accepts. Until then those values only live in memory for this visit.
      ======================================================================= */
   const CONSENT_KEY = 'harry-consent';
-  const FUNCTIONAL = ['harry-wx', 'harry-sound', 'harry-flappy', 'harry-trolley'];
+  const FUNCTIONAL = ['harry-wx', 'harry-sound', 'harry-flappy', 'harry-trolley', 'harry-trivia'];
   const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage off */ } }, del(k) { try { localStorage.removeItem(k); } catch (e) { /* storage off */ } } };
   const MEM = {}, subs = [];
   const Consent = {

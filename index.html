@@ -582,7 +582,7 @@
   function sizePixelImgs(root) {
     root.querySelectorAll('img.px').forEach((img) => { const set = () => { const box = img.closest('.frame, .soc'), fit = box ? box.clientHeight * 0.78 / img.naturalHeight : PX; img.style.width = img.naturalWidth * Math.min(PX, Math.max(1, fit)) + 'px'; }; if (img.complete && img.naturalWidth) set(); else img.addEventListener('load', set, { once: true }); });
   }
-  const placeOf = (p) => p.place || (p.url === 'flappy' || p.url === 'trolley' ? 'jungle' : 'menu');
+  const placeOf = (p) => p.place || (['flappy', 'trolley', 'trivia'].includes(p.url) ? 'jungle' : 'menu');
   /** pages set to "In the jungle" hang as wooden signs from these branch spots (viewport %) */
   function jungleSigns(L, by) {
     const spots = PORTRAIT ? [['B3', 74], ['B2', 26], ['B4', 70], ['B1', 9]] : [['B3', 86], ['B2', 20], ['B4', 79], ['B1', 7], ['B5', 89]];
@@ -969,7 +969,7 @@
      ===================================================================== */
   const ROOT = new URL('./', location.href);
   const DRAFT = /[?&]draft\b/.test(location.search);   // console preview: unpublished pages come from this device
-  const APP_PAGES = ['flappy', 'trolley'];   // full pages of their own (games etc.) — not shown in the reading view
+  const APP_PAGES = ['flappy', 'trolley', 'trivia'];   // full pages of their own (games etc.) — not shown in the reading view
   let reading = false, readSeq = 0;
   /** {key, fetch, pretty} for an internal page link, otherwise null */
   function pageInfo(u) {
