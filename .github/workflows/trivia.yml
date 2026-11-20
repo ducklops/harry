@@ -1,0 +1,33 @@
+name: Tree-Frog Trivia
+
+on:
+  schedule:
+    - cron: '23 3 * * 1'     # every Monday at about 3am
+  workflow_dispatch:         # plus a "Run workflow" button on the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trivia
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build days ahead and score rarity from Wikipedia
+        run: node .github/scripts/trivia-build.mjs
+      - name: Save it if anything changed
+        run: |
+          git add trivia/data
+          if git diff --cached --quiet; then echo "Nothing to update."; exit 0; fi
+          git config user.name "trivia-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Tree-Frog Trivia: build days and refresh rarity"
+          git pull --rebase
+          git push
