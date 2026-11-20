@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tree-Frog Trivia · Harry</title>
+<meta name="description" content="A daily trivia climb from the forest floor to the canopy. Same questions for everyone each day: rare answers, a relentless tree boa, and a vine that's running out of leaves.">
+<meta property="og:title" content="Tree-Frog Trivia">
+<meta property="og:description" content="Today's climb is open. Name the deep cuts, out-climb the boa, beat my score.">
+<meta name="theme-color" content="#0f1f2e">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  :root { --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --gold: #f6d24a; --red: #e0503e; --teal: #82bcae; --c: 4px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1622; color: var(--ice); font-family: 'Pixelify Sans', ui-monospace, monospace; -webkit-tap-highlight-color: transparent; }
+  #scene { position: fixed; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
+  .bar { position: fixed; z-index: 8; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); display: flex; justify-content: space-between; pointer-events: none; }
+  .bar a, .bar button { pointer-events: auto; display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0 12px; border: 0; cursor: pointer; text-decoration: none; color: var(--ice);
+    font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .14em; text-transform: uppercase; background: rgba(7,14,22,.6); box-shadow: inset 0 0 0 3px rgba(238,246,216,.35); }
+  .bar a:hover, .bar button:hover, .bar a:focus-visible, .bar button:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); color: var(--lime); outline: none; }
+
+  /* readouts */
+  .hud { position: fixed; z-index: 5; top: max(12px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; gap: 6px; pointer-events: none; }
+  .hud[hidden] { display: none; }
+  .hud > div { min-width: 72px; padding: 5px 9px 6px; text-align: center; background: rgba(7,14,22,.78); box-shadow: inset 0 0 0 3px rgba(238,246,216,.3); }
+  .hud span { display: block; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: rgba(238,246,216,.65); }
+  .hud b { display: block; font: 400 17px/1.2 'Climate Crisis', 'Arial Black', sans-serif; white-space: nowrap; }
+  .hud .warn b { color: var(--red); }
+  @media (max-width: 640px) { .hud { top: calc(max(12px, env(safe-area-inset-top)) + 52px); gap: 4px; } .hud > div { min-width: 0; padding: 4px 7px 5px; } .hud b { font-size: 13px; } }
+  .tag { position: fixed; z-index: 3; transform: translate(-50%, -100%); padding: 2px 6px 3px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; pointer-events: none;
+    background: rgba(7,14,22,.82); box-shadow: inset 0 0 0 2px rgba(238,246,216,.35); }
+  .tag[hidden] { display: none; }
+  .tag.boa { color: #bff0a8; } .tag.you { color: var(--gold); }
+  .fl { position: fixed; z-index: 4; transform: translate(-50%, -100%); font: 600 15px 'Pixelify Sans', monospace; letter-spacing: .06em; text-shadow: 0 2px 0 #070e16, 0 -1px 0 #070e16; pointer-events: none; white-space: nowrap; animation: rise 1.2s steps(10) forwards; }
+  @keyframes rise { to { opacity: 0; margin-top: -30px; } }
+
+  /* the question sheet */
+  .play { position: fixed; z-index: 6; left: 50%; bottom: max(10px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(640px, calc(100vw - 20px)); max-height: min(68vh, 640px); overflow-y: auto;
+    padding: clamp(14px, 3.5vw, 22px); background: rgba(7,14,22,.92); box-shadow: inset 0 0 0 3px rgba(238,246,216,.28);
+    clip-path: polygon(0 var(--c), var(--c) var(--c), var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c))); }
+  .play[hidden] { display: none; }
+  .play.in { animation: pop .3s steps(4); }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .step { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--lime); }
+  .step .r { color: rgba(238,246,216,.6); }
+  .q { margin: 0 0 12px; font: 600 clamp(18px, 4.4vw, 23px)/1.3 Barlow, system-ui, sans-serif; color: var(--ice); }
+  .hint { margin: -6px 0 12px; font: 400 14px/1.4 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.7); }
+  .opts { display: grid; gap: 8px; }
+  @media (min-width: 560px) { .opts.four { grid-template-columns: 1fr 1fr; } }
+  .opt { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 12px; border: 0; cursor: pointer; text-align: left; color: var(--ice); font: 600 16px/1.3 Barlow, system-ui, sans-serif;
+    background: rgba(15,31,46,.95); box-shadow: inset 0 0 0 3px rgba(238,246,216,.3); }
+  .opt i { flex: 0 0 auto; display: grid; place-items: center; width: 24px; height: 24px; font: 600 12px 'Pixelify Sans', monospace; font-style: normal; color: var(--ink); background: rgba(238,246,216,.75); }
+  .opt:hover:not(:disabled), .opt:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); outline: none; }
+  .opt:disabled { cursor: default; }
+  .opt.gone { opacity: .25; text-decoration: line-through; }
+  .opt.right { background: #1f6a34; box-shadow: inset 0 0 0 3px var(--lime); }
+  .opt.wrong { background: #6a1f1f; box-shadow: inset 0 0 0 3px var(--red); }
+  .opt .poll { margin-left: auto; font: 600 12px 'Pixelify Sans', monospace; color: var(--gold); }
+  .opt .bar2 { position: relative; flex: 0 0 64px; height: 8px; background: rgba(238,246,216,.15); } .opt .bar2 b { position: absolute; inset: 0 auto 0 0; background: var(--gold); }
+  .typed { display: flex; gap: 8px; }
+  .typed input { flex: 1; min-width: 0; padding: 12px; border: 0; color: var(--ink); background: var(--ice); font: 600 17px Barlow, system-ui, sans-serif; box-shadow: inset 0 0 0 3px var(--ink); border-radius: 0; }
+  .typed input:focus { outline: 3px solid var(--lime); outline-offset: 0; }
+  .btn { padding: 12px 16px; border: 0; cursor: pointer; font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--ice); background: rgba(15,31,46,.95); box-shadow: inset 0 0 0 3px rgba(238,246,216,.35); }
+  .btn.go { color: var(--ink); background: var(--lime); box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .btn.risk { color: var(--ink); background: var(--gold); box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .btn:hover, .btn:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); outline: none; }
+  .btn.go:hover, .btn.go:focus-visible, .btn.risk:hover, .btn.risk:focus-visible { filter: brightness(1.08); box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .btn:disabled { opacity: .45; cursor: default; filter: none; }
+  .btn.sm { padding: 8px 10px; font-size: 11px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .row.l { justify-content: flex-start; }
+  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice .btn { padding: 14px 10px; line-height: 1.4; text-transform: none; letter-spacing: .04em; font-size: 14px; }
+  .choice .btn b { display: block; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+  .msg { margin: 12px 0 0; font: 400 16px/1.45 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.9); }
+  .msg b { font-family: 'Pixelify Sans', monospace; letter-spacing: .04em; }
+  .msg .ok { color: var(--lime); } .msg .no { color: #ff9a8a; } .msg .gold { color: var(--gold); }
+  .cuts { margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  .cuts li { padding: 3px 7px; font: 600 13px Barlow, system-ui, sans-serif; background: rgba(238,246,216,.08); box-shadow: inset 0 0 0 2px rgba(238,246,216,.18); }
+  .cuts li small { color: var(--gold); font-family: 'Pixelify Sans', monospace; }
+  .meter { position: relative; height: 12px; margin: 10px 0 2px; background: rgba(238,246,216,.12); box-shadow: inset 0 0 0 2px rgba(238,246,216,.2); }
+  .meter b { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--teal), var(--gold)); }
+  .tools { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 0; }
+  .tools .btn { padding: 8px 10px; font-size: 11px; }
+  .tools .btn.used { opacity: .35; text-decoration: line-through; }
+
+  /* the leaf-vine timer: a leafcutter ant snips one leaf per tick */
+  .vine { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .vine canvas { flex: 1; min-width: 0; height: auto; aspect-ratio: 120 / 20; image-rendering: pixelated; image-rendering: crisp-edges; }
+  .vine .vtn { flex: 0 0 auto; min-width: 42px; text-align: right; font: 400 18px/1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--lime); }
+  .vine.low .vtn { color: var(--red); animation: blink .5s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .5; } }
+
+  /* the wall */
+  .wall { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .vinebtn { min-height: 56px; padding: 6px 4px; border: 0; cursor: pointer; color: var(--ice); font: 600 clamp(11px, 3.1vw, 15px)/1.2 Barlow, system-ui, sans-serif; overflow-wrap: break-word; hyphens: auto;
+    background: linear-gradient(#2c5a2e, #1c3e22); box-shadow: inset 0 0 0 3px rgba(162,222,82,.35), inset 0 -6px 0 rgba(0,0,0,.25); }
+  .vinebtn:hover:not(:disabled), .vinebtn:focus-visible { box-shadow: inset 0 0 0 3px var(--lime), inset 0 -6px 0 rgba(0,0,0,.25); outline: none; }
+  .vinebtn.sel { color: var(--ink); background: var(--ice); box-shadow: inset 0 0 0 3px var(--ink); }
+  .vinebtn.g0 { background: #2a63a8; } .vinebtn.g1 { background: #2f8a3a; } .vinebtn.g2 { background: #b88a14; } .vinebtn.g3 { background: #8a3a9a; }
+  .vinebtn.done { cursor: default; box-shadow: inset 0 0 0 3px rgba(0,0,0,.35); color: #fff; }
+  .vinebtn.shake { animation: shake .3s steps(3); }
+  @keyframes shake { 33% { transform: translateX(-3px); } 66% { transform: translateX(3px); } }
+  .lives { font-size: 18px; letter-spacing: 2px; }
+  .lives small { font-size: 11px; letter-spacing: .12em; opacity: .7; }
+  .glist { margin: 10px 0 0; display: grid; gap: 6px; }
+  .glist div { padding: 6px 8px; font: 600 14px/1.35 Barlow, system-ui, sans-serif; }
+  .glist .g0 { background: #2a63a8; } .glist .g1 { background: #2f8a3a; } .glist .g2 { background: #b88a14; } .glist .g3 { background: #8a3a9a; }
+  .glist small { display: block; font: 400 12px 'Pixelify Sans', monospace; letter-spacing: .08em; opacity: .85; }
+
+  /* start / results */
+  .panel { position: fixed; z-index: 7; inset: 0; display: grid; place-items: center; padding: 70px 12px 40px; overflow-y: auto; background: rgba(7,14,22,.3); }
+  .panel[hidden] { display: none; }
+  .card { width: min(600px, 100%); padding: clamp(18px, 4vw, 30px); text-align: center; background: rgba(7,14,22,.92); box-shadow: inset 0 0 0 3px rgba(238,246,216,.28);
+    clip-path: polygon(0 var(--c), var(--c) var(--c), var(--c) 0, calc(100% - var(--c)) 0, calc(100% - var(--c)) var(--c), 100% var(--c), 100% calc(100% - var(--c)), calc(100% - var(--c)) calc(100% - var(--c)), calc(100% - var(--c)) 100%, var(--c) 100%, var(--c) calc(100% - var(--c)), 0 calc(100% - var(--c)));
+    animation: pop2 .35s steps(4); }
+  @keyframes pop2 { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  h1 { margin: 0; font: 400 clamp(30px, 8vw, 50px)/1 'Climate Crisis', 'Arial Black', sans-serif; color: var(--ice); text-shadow: 0 .06em 0 #070e16; }
+  .eyebrow { font-size: 12px; letter-spacing: .22em; text-transform: uppercase; color: var(--lime); }
+  .sub { margin: 10px 0 12px; font: 400 16px/1.5 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.82); }
+  .today { display: inline-flex; align-items: center; gap: 10px; margin: 8px 0 4px; padding: 8px 14px; background: rgba(194,234,106,.12); box-shadow: inset 0 0 0 2px rgba(194,234,106,.45); }
+  .today b { font: 400 18px/1.2 'Climate Crisis', sans-serif; letter-spacing: 0; }
+  .today span { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: rgba(238,246,216,.75); }
+  .week { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; margin: 14px 0 4px; }
+  .week button { padding: 6px 2px 7px; border: 0; cursor: pointer; color: var(--ice); background: rgba(15,31,46,.9); box-shadow: inset 0 0 0 2px rgba(238,246,216,.2); font: 600 10px 'Pixelify Sans', monospace; letter-spacing: .08em; text-transform: uppercase; }
+  .week button b { display: block; font-size: 16px; line-height: 1.4; }
+  .week button small { display: block; font-size: 10px; color: var(--gold); min-height: 13px; }
+  .week button.on { box-shadow: inset 0 0 0 3px var(--lime); }
+  .week button:disabled { cursor: default; opacity: .45; }
+  .week button:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--lime); }
+  .rules { margin: 14px 0 0; padding: 0; list-style: none; text-align: left; display: grid; gap: 8px; font: 400 15px/1.45 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.86); }
+  .rules li { display: grid; grid-template-columns: 30px 1fr; gap: 8px; align-items: start; }
+  .rules .ic { font-size: 18px; text-align: center; }
+  .challenge { margin: 14px 0 0; padding: 10px 12px; background: rgba(88,184,218,.16); box-shadow: inset 0 0 0 2px rgba(191,239,248,.55); font: 400 15px/1.45 Barlow, system-ui, sans-serif; }
+  .challenge b { font-family: 'Pixelify Sans', monospace; color: #bfeff8; }
+  .challenge[hidden] { display: none; }
+  .big { font: 400 clamp(48px, 12vw, 84px)/1 'Climate Crisis', 'Arial Black', sans-serif; margin: 6px 0; text-shadow: 0 .06em 0 #070e16; }
+  .why { margin: 0; font: 400 16px/1.45 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.86); }
+  .grid { margin: 14px auto 0; width: max-content; max-width: 100%; padding: 12px 14px; text-align: left; white-space: pre-wrap; background: #f4efe1; color: #14181a; font: 600 14px/1.6 'Pixelify Sans', monospace; box-shadow: 4px 4px 0 #070e16; }
+  .note { margin: 12px 0 0; font: 400 14px/1.5 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.7); }
+  .note a { color: var(--lime); }
+  .name { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(238,246,216,.75); }
+  .name input { width: 150px; padding: 9px 10px; border: 0; color: var(--ink); background: var(--ice); font: 600 14px 'Pixelify Sans', monospace; box-shadow: inset 0 0 0 2px var(--ink); }
+  .qcbar { position: fixed; z-index: 9; left: 50%; top: max(66px, calc(env(safe-area-inset-top) + 62px)); transform: translateX(-50%); white-space: nowrap; padding: 6px 12px; background: var(--gold); color: var(--ink); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--ink); }
+  .qcbar[hidden] { display: none; }
+  @media (max-width: 640px) { .qcbar { top: calc(max(12px, env(safe-area-inset-top)) + 100px); font-size: 10px; } }
+  .toast { position: fixed; z-index: 40; left: 50%; bottom: 70px; transform: translateX(-50%); padding: 10px 16px; background: var(--lime); color: var(--ink); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--ink); max-width: calc(100vw - 24px); text-align: center; }
+  .copy { position: fixed; z-index: 7; left: 50%; bottom: max(8px, env(safe-area-inset-bottom)); transform: translateX(-50%); white-space: nowrap; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(238,246,216,.75); text-shadow: 0 1px 0 #070e16; }
+  .copy a { color: inherit; } .copy[hidden] { display: none; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .play.in, .card, .fl { animation: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="bar">
+  <a href="../" aria-label="Back to Harry's jungle">◂ Harry</a>
+  <button id="mute" aria-pressed="false" aria-label="Sound">Sound on</button>
+</div>
+<div class="qcbar" id="qcbar" hidden>QC play-test · nothing is saved</div>
+<div class="hud" id="hud" hidden>
+  <div><span id="hStyleL">Today</span><b id="hStyle">Chase</b></div>
+  <div><span id="hRungL">Rung</span><b id="hRung">1/8</b></div>
+  <div id="cGap"><span id="hGapL">Boa gap</span><b id="hGap">1</b></div>
+  <div><span>Score</span><b id="hScore">0</b></div>
+</div>
+<div class="tag you" id="tagYou" hidden>You</div>
+<div class="tag boa" id="tagBoa" hidden>Boa</div>
+<section class="play" id="play" hidden aria-live="polite"></section>
+
+<section class="panel" id="start">
+  <div class="card">
+    <div class="eyebrow">harryh.xyz · Daily trivia</div>
+    <h1>Tree-Frog Trivia</h1>
+    <p class="sub" id="sSub">Climb from the forest floor to the canopy. A new climb every day, the same for everyone.</p>
+    <div class="today"><b id="sStyle">…</b><span id="sDay">Today</span></div>
+    <div class="challenge" id="sChallenge" hidden></div>
+    <ul class="rules" id="sRules"></ul>
+    <div class="row" id="sRow"><button class="btn go" id="go" disabled>Loading…</button></div>
+    <div class="week" id="week" aria-label="This week's climbs"></div>
+    <p class="note" id="sNote"></p>
+  </div>
+</section>
+
+<section class="panel" id="over" hidden>
+  <div class="card">
+    <div class="eyebrow" id="oHead">Climb complete</div>
+    <div class="big" id="oScore">0</div>
+    <p class="why" id="oWhy"></p>
+    <div class="grid" id="oGrid"></div>
+    <label class="name">Your name <input id="oName" maxlength="14" placeholder="for challenges" autocomplete="nickname"></label>
+    <div class="row">
+      <button class="btn go" id="share">Share result</button>
+      <button class="btn" id="dare">Challenge a friend</button>
+      <button class="btn" id="back">Back to the week</button>
+    </div>
+    <p class="note" id="keepNote" hidden>Your results are kept for this visit only. <a href="../cookies" data-consent-open>Allow storage</a> to keep your streak on this device.</p>
+  </div>
+</section>
+
+<div class="copy" id="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
+
+<script src="../jungle-kit.js"></script>
+<script src="tft-core.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit, T = TFT, TN = K.TONES, $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const QS = new URLSearchParams(location.search);
+  const ROOT = new URL('../', location.href);
+  const SHARE_URL = new URL('trivia/', ROOT).href, SHARE_TEXT_URL = SHARE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const TODAY = T.londonDay(), ESC = K.esc, R = T.RULES;
+  const QC = QS.get('qc');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const fmt = (n) => Math.round(n).toLocaleString('en-GB');
+  document.querySelectorAll('.yr').forEach((y) => { y.textContent = new Date().getFullYear(); });
+
+  /* ---------- progress (kept on the device only with cookie consent) ---------- */
+  let DATA = { res: {}, name: '', mute: false };
+  try { DATA = Object.assign(DATA, JSON.parse(K.store.get('harry-trivia') || '{}')); } catch (e) { /* fresh */ }
+  function save() {
+    const keep = {}; Object.keys(DATA.res || {}).sort().slice(-40).forEach((k) => { keep[k] = DATA.res[k]; }); DATA.res = keep;
+    K.store.set('harry-trivia', JSON.stringify(DATA));
+  }
+  K.Consent.onChange(() => save());
+  function streak() {
+    let n = 0, d = TODAY;
+    if (!(DATA.res[d] && DATA.res[d].done)) d = T.addDays(d, -1);
+    while (DATA.res[d] && DATA.res[d].done) { n++; d = T.addDays(d, -1); }
+    return n;
+  }
+
+  /* ---------- little sounds (start after your first tap) ---------- */
+  let AC = null;
+  function audio() { if (AC || DATA.mute) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
+  function sfx(kind) {
+    if (!AC || DATA.mute) return; const t = AC.currentTime;
+    const beep = (type, f0, f1, dur, vol, when = 0) => { const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.setValueAtTime(f0, t + when); o.frequency.exponentialRampToValueAtTime(f1, t + when + dur); g.gain.setValueAtTime(vol, t + when); g.gain.exponentialRampToValueAtTime(0.0001, t + when + dur); o.connect(g).connect(AC.destination); o.start(t + when); o.stop(t + when + dur + 0.02); };
+    const hiss = (dur, vol) => { const b = AC.createBuffer(1, AC.sampleRate * dur, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length); const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); f.type = 'highpass'; f.frequency.value = 3000; g.gain.value = vol; s.buffer = b; s.connect(f).connect(g).connect(AC.destination); s.start(); };
+    if (kind === 'right') { beep('square', 330, 520, 0.07, 0.05); beep('square', 330, 600, 0.09, 0.05, 0.1); }          // a little ribbit
+    if (kind === 'wrong') beep('sawtooth', 200, 90, 0.28, 0.06);
+    if (kind === 'tick') beep('triangle', 1250, 1150, 0.035, 0.05);                                                     // woodblock
+    if (kind === 'snip') beep('square', 2600, 2200, 0.02, 0.015);
+    if (kind === 'hop') { [0, 0.06, 0.12].forEach((w, i) => beep('square', 520 + i * 160, 560 + i * 160, 0.05, 0.045, w)); }
+    if (kind === 'hiss') hiss(0.45, 0.12);
+    if (kind === 'push') beep('triangle', 700, 300, 0.12, 0.07);
+    if (kind === 'deep') { beep('triangle', 523, 523, 0.08, 0.06); beep('triangle', 784, 784, 0.08, 0.06, 0.08); beep('triangle', 1047, 1047, 0.16, 0.06, 0.16); }
+    if (kind === 'win') { [523, 659, 784, 1047].forEach((f, i) => beep('square', f, f, 0.12, 0.05, i * 0.1)); }
+    if (kind === 'lose') { [392, 330, 262].forEach((f, i) => beep('triangle', f, f * 0.98, 0.18, 0.06, i * 0.16)); }
+  }
+  const muteBtn = $('#mute');
+  const syncMute = () => { muteBtn.textContent = DATA.mute ? 'Sound off' : 'Sound on'; muteBtn.setAttribute('aria-pressed', String(!DATA.mute)); };
+  muteBtn.addEventListener('click', () => { DATA.mute = !DATA.mute; save(); syncMute(); if (!DATA.mute) audio(); });
+  addEventListener('pointerdown', audio, { once: true });
+  syncMute();
+
+  /* =====================================================================
+     THE LEAF-VINE TIMER — a pixel vine with one leaf per tick. A leafcutter
+     ant marches along it, snips each leaf as it passes and carries it off.
+     ===================================================================== */
+  class VineTimer {
+    constructor(cv, num, wrap) { this.cv = cv; this.c = cv.getContext('2d'); this.num = num; this.wrap = wrap; cv.width = 120; cv.height = 20; this.fall = []; this.on = false; }
+    start(sec, onEnd) {
+      this.total = sec; this.n = sec <= 20 ? Math.round(sec) : 15; this.t0 = performance.now(); this.onEnd = onEnd; this.on = true; this.snipped = 0; this.lastSec = Math.ceil(sec);
+      const x0 = 9, x1 = 111; this.leaves = Array.from({ length: this.n }, (_, i) => ({ x: Math.round(x1 - ((x1 - x0) * (i + 0.5)) / this.n), up: i % 2 === 0, cut: false }));
+      this.x0 = x0; this.x1 = x1; this.tick();
+      return this;
+    }
+    left() { return Math.max(0, this.total - (performance.now() - this.t0) / 1000); }
+    stop() { const l = this.left(); this.on = false; cancelAnimationFrame(this.raf); return l; }
+    tick() {
+      if (!this.on) return;
+      const left = this.left(), el = this.total - left, k = el / this.total;
+      const ant = this.x1 + 4 - (this.x1 + 4 - this.x0 + 6) * k;
+      this.leaves.forEach((L) => { if (!L.cut && ant < L.x - 1) { L.cut = true; this.snipped++; this.fall.push({ x: L.x, y: L.up ? 4 : 13, vx: (Math.random() - 0.5) * 6, vy: -4, age: 0 }); sfx('snip'); } });
+      const s = Math.ceil(left);
+      if (s !== this.lastSec) { this.lastSec = s; if (s <= 5 && s > 0) sfx('tick'); }
+      this.num.textContent = s; this.wrap.classList.toggle('low', left <= 5);
+      this.wrap.setAttribute('aria-label', s + ' seconds left');
+      this.draw(ant, Math.floor(el * 12), left / this.total);
+      if (left <= 0) { this.on = false; this.onEnd && this.onEnd(); return; }
+      this.raf = requestAnimationFrame(() => this.tick());
+    }
+    draw(ant, frame, frac) {
+      const c = this.c, px = (x, y, col, w = 1, h = 1) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); };
+      c.clearRect(0, 0, 120, 20);
+      const vy = (x) => 10 + Math.round(Math.sin(x / 8) * 1.5);
+      // the vine
+      for (let x = 2; x < 118; x++) { px(x, vy(x), '#5e3826'); px(x, vy(x) - 1, '#8e5e40'); }
+      px(1, vy(1) - 2, '#5e3826', 2, 4); px(117, vy(117) - 2, '#5e3826', 2, 4);
+      // leaves: green, then amber as time runs low
+      const late = frac <= 0.25, blink = frac <= 0.12 && frame % 6 < 3;
+      const pal = late ? ['#764a32', '#f0803a', '#f6d24a'] : ['#164c2e', '#4cae3a', '#a2de52'];
+      this.leaves.forEach((L) => {
+        if (L.cut) { px(L.x, vy(L.x) + (L.up ? -2 : 1), '#46281c', 1, 1); return; }
+        const y0 = vy(L.x), d = L.up ? -1 : 1, base = y0 + d;
+        const sway = (frame + L.x) % 24 < 12 ? 0 : (L.up ? 0 : 0);
+        // stem
+        px(L.x, base, '#3a9c3a');
+        const rows = [[0, 0], [-1, 1], [-2, 2], [-2, 2], [-1, 1], [0, 0]];
+        rows.forEach(([a, b], i) => {
+          const y = base + d * (i + 1);
+          for (let x = a; x <= b; x++) px(L.x + x + sway, y, x < 0 ? pal[0] : pal[1]);
+        });
+        px(L.x + sway, base + d * 3, blink ? pal[2] : pal[2]); px(L.x + sway, base + d * 4, pal[2]);
+      });
+      // falling snips
+      this.fall = this.fall.filter((f) => f.age < 60);
+      this.fall.forEach((f) => { f.age++; f.vy += 0.35; f.x += f.vx * 0.06; f.y += f.vy * 0.12; const col = f.age % 8 < 4 ? pal[1] : pal[0]; px(f.x, f.y, col, 2, 1); px(f.x + (f.age % 8 < 4 ? 1 : 0), f.y + 1, pal[0], 1, 1); });
+      // the leafcutter ant, walking left, leaf held high
+      const ax = Math.round(ant), ay = vy(Math.max(2, Math.min(117, ax))) - 2, step = frame % 2;
+      if (ax > -8 && ax < 128) {
+        const body = '#a8202e', hi = '#e0503e', dark = '#1e120c';
+        px(ax, ay - 1, body, 2, 2); px(ax, ay - 1, hi);                                         // head
+        px(ax + 2, ay, body); px(ax + 3, ay - 1, body, 2, 2);                                   // waist · thorax
+        px(ax + 5, ay - 1, body, 3, 3); px(ax + 6, ay - 1, hi);                                 // abdomen
+        px(ax - 1, ay - 2, dark); px(ax - 2, ay - 3, dark);                                     // antenna
+        [1, 3, 5].forEach((o, i) => { const up = (i + step) % 2; px(ax + o - up, ay + 1, dark); px(ax + o - up + (up ? 0 : 1), ay + 2, dark); });   // legs
+        if (this.snipped) { px(ax + 1, ay - 2, dark, 1, 1); px(ax - 1, ay - 7, pal[0], 5, 2); px(ax, ay - 8, pal[1], 4, 2); px(ax + 1, ay - 9, pal[2], 2, 1); px(ax + 1, ay - 5, dark, 1, 3); }
+      }
+    }
+  }
+
+  /* =====================================================================
+     THE SCENE — one tall jungle tree from the forest floor to the emergent
+     layer. Rungs are branches; the frog hops up them, the boa follows.
+     ===================================================================== */
+  const cv = $('#scene'), ctx = cv.getContext('2d');
+  const ENV = { phase: QS.get('time') || K.Env.phase(), wx: QS.get('weather') || 'clear' };
+  let SCALE = 3, W = 200, H = 200, WH = 600, GROUND = 40, WORLD = null, CX = 100, BR = 50;
+  const BOARD = { n: 8, kind: 'chase', safe: [] };
+  const ACT = { frog: { r: 1, from: 1, t0: 0, dur: 0 }, boa: { r: 0, from: 0, t0: 0, dur: 0 }, showBoa: false, view: 0 };
+  let cam = 0, rain = [];
+  function gradeFor() {
+    const P = { day: [1, 1, 1], golden: [1.07, 0.96, 0.82], dawn: [0.9, 0.82, 0.92], dusk: [0.8, 0.64, 0.76], night: [0.36, 0.44, 0.68] }[ENV.phase] || [1, 1, 1];
+    const Wx = { clear: [1, 1], cloudy: [0.95, 0.92], overcast: [0.86, 0.72], fog: [0.95, 0.65], drizzle: [0.84, 0.7], rain: [0.78, 0.62], heavy: [0.7, 0.55], storm: [0.64, 0.5], snow: [1.02, 0.6] }[ENV.wx] || [1, 1];
+    return { mul: P.map((v) => v * Wx[0]), sat: Wx[1] };
+  }
+  function skyTop() {
+    const dull = /overcast|fog|drizzle|rain|heavy|snow|storm/.test(ENV.wx);
+    if (ENV.phase === 'night') return ['#070e16', '#1e4152'];
+    if (ENV.phase === 'dusk') return dull ? ['#13293a', '#96a8c4'] : ['#4a2a6a', '#f6aa3e'];
+    if (ENV.phase === 'dawn') return dull ? ['#25505e', '#d6dbe6'] : ['#25505e', '#fff09a'];
+    if (dull) return ['#62789c', '#cad8e4'];
+    if (ENV.phase === 'golden') return ['#4a8cc0', '#f6aa3e'];
+    return ['#4a8cc0', '#c6e4ec'];
+  }
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.ceil(w); c.height = Math.ceil(h); return { cv: c, c: c.getContext('2d', { willReadFrequently: true }) }; };
+  const rungY = (r) => { const g = WH - GROUND, top = WH * 0.07; return g - (g - top) * (r / BOARD.n); };
+  const sideOf = (r) => (r % 2 ? -1 : 1);
+  const branchTip = (r) => ({ x: r <= 0 ? CX - BR * 0.75 : CX + sideOf(r) * BR, y: r <= 0 ? WH - GROUND + 4 : rungY(r) });
+  function resize() {
+    SCALE = Math.max(2, Math.round(Math.min(innerWidth, innerHeight * 0.9) / 230));
+    W = Math.ceil(innerWidth / SCALE); H = Math.ceil(innerHeight / SCALE);
+    cv.width = W; cv.height = H; cv.style.width = W * SCALE + 'px'; cv.style.height = H * SCALE + 'px';
+    ctx.imageSmoothingEnabled = false;
+    paintWorld();
+  }
+  function paintWorld() {
+    WH = Math.max(Math.round(H * 2.5), 560); GROUND = Math.round(Math.max(26, H * 0.12));
+    CX = Math.round(W * 0.5); BR = Math.round(Math.min(W * 0.3, 70));
+    K.setGrade(gradeFor());
+    const k = mk(W, WH), P = new K.Painter(k.c, 4242), [s0, s1] = skyTop();
+    const yL = (f) => rungY(BOARD.n * f);   // layer boundaries
+    const fy = (y) => Math.max(0, Math.min(1, y / WH));
+    P.vgrad(0, 0, W, WH, [[0, s0], [fy(yL(0.82)), s1], [fy(yL(0.7)), '#4c8a88'], [fy(yL(0.5)), '#25505e'], [fy(yL(0.28)), '#164c2e'], [1, '#0b1622']]);
+    if (ENV.phase !== 'night') P.rgrad(W * 0.78, WH * 0.03, WH * 0.12, [[0, 'rgba(255,251,230,.95)'], [1, 'rgba(255,251,230,0)']]);
+    else { const Rr = K.rng(5); for (let i = 0; i < W * 30 / 40; i++) { k.c.fillStyle = Rr() > 0.6 ? '#e8f0f4' : '#96a8c4'; k.c.fillRect(Math.floor(Rr() * W), Math.floor(Rr() * yL(0.85)), 1, 1); } P.circ(W * 0.8, WH * 0.03, 6, '#e8f0f4'); }
+    for (let i = 0; i < 4; i++) P.cloud(W * (0.1 + i * 0.27), WH * (0.015 + P.r() * 0.03), 10 + P.r() * 12);
+    // far trunks through every layer
+    for (let i = 0; i < 7; i++) { const x = (i + 0.3 + P.r() * 0.4) * W / 7; if (Math.abs(x - CX) < BR * 0.4) continue; P.trunk(x, yL(0.78), WH, 3 + P.r() * 3, 5 + P.r() * 4, TN.barkCool, { moss: false }); }
+    // emergent crowns poking above the canopy
+    for (let i = 0; i < 5; i++) { const x = P.r() * W, y = yL(0.8 + P.r() * 0.12); P.trunk(x, y, yL(0.6), 2, 4, TN.barkCool, { moss: false }); for (let j = 0; j < 4; j++) P.clump(x + (P.r() - 0.5) * 20, y + P.r() * 6, 7 + P.r() * 6, TN.leafTeal, [0.3, -1]); }
+    // canopy: a thick roof of leaves
+    for (let i = 0; i < W / 4; i++) P.clump(P.r() * W, yL(0.55 + P.r() * 0.22), 8 + P.r() * 12, i % 3 ? TN.leafA : TN.leafB, [0.2, -1]);
+    for (let i = 0; i < W / 28; i++) { const x = P.r() * W; P.liana([[x, yL(0.62)], [x + (P.r() - 0.5) * 30, yL(0.52)], [x + (P.r() - 0.5) * 30, yL(0.42)], [x + (P.r() - 0.5) * 12, yL(0.3 + P.r() * 0.08)]], 1.6, TN.barkCool, { leaves: 9, leafTone: TN.leafMid, wind: 3, windTone: TN.leafA }); }
+    // understory: palms and young trees in the gloom
+    for (let i = 0; i < W / 14; i++) { const x = P.r() * W, y = yL(0.3 + P.r() * 0.18); P.trunk(x, y, WH - GROUND, 2, 3, TN.barkCool, { moss: true }); for (let j = 0; j < 6; j++) P.frond(x, y, 12 + P.r() * 12, -Math.PI / 2 + (j - 2.5) * 0.55, j % 2 ? TN.leafA : TN.leafMid); }
+    for (let i = 0; i < W / 10; i++) P.banana(P.r() * W, yL(0.12 + P.r() * 0.14), 16 + P.r() * 12, 6 + P.r() * 3, -Math.PI / 2 + (P.r() - 0.5) * 1.6, TN.leafB);
+    // forest floor: earth, roots, ferns and bromeliads
+    k.c.fillStyle = '#1e120c'; k.c.fillRect(0, WH - GROUND, W, GROUND);
+    k.c.fillStyle = '#301c14'; for (let i = 0; i < W; i++) k.c.fillRect(Math.floor(P.r() * W), WH - GROUND + 2 + Math.floor(P.r() * (GROUND - 4)), 2, 1);
+    for (let i = 0; i < W / 6; i++) P.frond(P.r() * W, WH - GROUND + 3, 10 + P.r() * 10, -Math.PI / 2 + (P.r() - 0.5) * 1.8, i % 2 ? TN.leafB : TN.leafMid, { leaf: 3 });
+    for (let i = 0; i < 4; i++) P.bromeliad(P.r() * W, WH - GROUND + 2, 0.7 + P.r() * 0.5, TN.red);
+    // the climbing tree
+    const tw0 = Math.max(6, Math.round(W * 0.05)), tw1 = tw0 + 6;
+    P.trunk(CX, rungY(BOARD.n) - 26, WH - GROUND + 6, tw0, tw1, TN.bark, { moss: true });
+    for (let i = 0; i < 3; i++) P.branch(CX, WH - GROUND + 2, CX + (i - 1) * 16, WH - GROUND + 6, 3, TN.bark, null);   // roots
+    for (let r = 1; r <= BOARD.n; r++) {
+      const t = branchTip(r), y = rungY(r), safe = BOARD.safe.includes(r);
+      P.branch(CX, y + 2, t.x + sideOf(r) * 8, y - 2, safe ? 4 : 3, TN.bark, TN.leafMid);
+      P.clump(t.x + sideOf(r) * 12, y - 6, 6, TN.leafB, [0, -1]);
+      if (safe) { k.c.fillStyle = '#a87452'; k.c.fillRect(Math.min(t.x, t.x + sideOf(r) * 14) - 4, y + 1, 22, 3); }
+    }
+    // the crown on top
+    for (let i = 0; i < 9; i++) P.clump(CX + (P.r() - 0.5) * BR * 1.6, rungY(BOARD.n) - 26 + P.r() * 14, 8 + P.r() * 8, i % 2 ? TN.leafLime : TN.leafB, [0, -1]);
+    K.finalize(k.c, W, WH, { dither: 16, haze: 0.06, hazeColor: '#c6e4ec' });
+    // layer signs and rung numbers (after the pixel pass so they stay crisp)
+    const lab = (text, x, y, col = '#eef6d8') => { k.c.font = '8px "Pixelify Sans", monospace'; k.c.textBaseline = 'middle'; const w = Math.ceil(k.c.measureText(text).width) + 6; k.c.fillStyle = 'rgba(7,14,22,.78)'; k.c.fillRect(Math.round(x), Math.round(y - 5), w, 10); k.c.fillStyle = col; k.c.fillText(text, Math.round(x + 3), Math.round(y)); return w; };
+    [[0, 'Forest floor'], [0.25, 'Understory'], [0.5, 'Canopy'], [0.75, 'Emergent']].forEach(([f, name]) => lab(name.toUpperCase(), 3, f === 0 ? WH - GROUND - 8 : yL(f) - 3, '#c2ea6a'));
+    for (let r = 1; r <= BOARD.n; r++) { const y = rungY(r), s = sideOf(r), x = s > 0 ? CX - 22 - (r >= 10 ? 4 : 0) : CX + 10; lab(String(r), x, y - 1, BOARD.safe.includes(r) ? '#f6d24a' : '#eef6d8'); }
+    WORLD = k.cv;
+    makeSprites();
+  }
+  let SPR = null;
+  function makeSprites() {
+    const fw = Math.max(18, Math.round(BR * 0.42)), sw = Math.max(30, Math.round(BR * 0.7));
+    const frog = new K.Sprite('frog', fw, { pad: 1 }), snake = new K.Sprite('snake', sw, { pad: 1 });
+    const snap = (sp, st) => { const c = sp.render(st), o = mk(c.width, c.height); o.c.drawImage(c, 0, 0); return o.cv; };
+    const flip = (img) => { const o = mk(img.width, img.height); o.c.translate(img.width, 0); o.c.scale(-1, 1); o.c.drawImage(img, 0, 0); return o.cv; };
+    const f = [snap(frog, {}), snap(frog, { parts: { '.p-pouch': 'scale(1.7)' } }), snap(frog, { parts: { '.p-lids': 'scale(1,.2)' } })];
+    const s = [snap(snake, { parts: { '.p-tongue': 'scale(.1)' } }), snap(snake, { parts: { '.p-tongue': 'scale(1)' } })];
+    SPR = { frog: f, frogL: f.map(flip), snake: s, snakeL: s.map(flip) };
+  }
+  function playH() { const p = $('#play'); return p.hidden ? 0 : p.getBoundingClientRect().height + 16; }
+  function posAt(o, now) {
+    const k = o.dur ? Math.min(1, (now - o.t0) / o.dur) : 1, a = branchTip(o.from), b = branchTip(o.r);
+    const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e - Math.sin(Math.PI * k) * 14, k };
+  }
+  let TAGS = true;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (!WORLD) return;
+    const fp = posAt(ACT.frog, now), visH = Math.max(H * 0.3, (innerHeight - playH() - 50) / SCALE);
+    const focus = ACT.view ? rungY(BOARD.n * ACT.view) : fp.y;
+    const target = Math.max(0, Math.min(WH - H, focus - Math.max(30, visH * 0.62) - 50 / SCALE));
+    cam += (target - cam) * 0.08; if (Math.abs(target - cam) < 0.3) cam = target;
+    const cy = Math.round(cam);
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(WORLD, 0, -cy);
+    const t6 = Math.floor(now / (1000 / 6));
+    // the boa
+    let bp = null;
+    if (ACT.showBoa && SPR) {
+      bp = posAt(ACT.boa, now);
+      const left = ACT.boa.r > 0 && sideOf(ACT.boa.r) < 0, img = (left ? SPR.snakeL : SPR.snake)[t6 % 9 < 2 ? 1 : 0];
+      const below = Math.min(0, ACT.boa.r) * 6;
+      ctx.drawImage(img, Math.round(bp.x - img.width / 2), Math.round(bp.y - img.height * 0.8 - cy - below));
+    }
+    // the frog
+    if (SPR) {
+      const left = ACT.frog.r > 0 && sideOf(ACT.frog.r) < 0, set = left ? SPR.frogL : SPR.frog;
+      const img = fp.k < 1 ? set[0] : set[t6 % 30 === 0 ? 2 : t6 % 14 < 2 ? 1 : 0];
+      ctx.drawImage(img, Math.round(fp.x - img.width / 2), Math.round(fp.y - img.height + 1 - cy));
+    }
+    // rain
+    if (/rain|drizzle|heavy|storm/.test(ENV.wx)) {
+      const n = ENV.wx === 'drizzle' ? 40 : ENV.wx === 'rain' ? 80 : 130;
+      while (rain.length < n) rain.push({ x: Math.random() * W, y: Math.random() * H, v: 2 + Math.random() * 2 });
+      ctx.fillStyle = 'rgba(198,228,236,.55)';
+      rain.forEach((d) => { d.y += d.v; d.x -= 0.4; if (d.y > H) { d.y = -4; d.x = Math.random() * W; } ctx.fillRect(Math.round(d.x), Math.round(d.y), 1, 3); });
+    }
+    // name tags
+    const tag = (el, p, show) => { el.hidden = !show; if (show) { el.style.left = p.x * SCALE + 'px'; el.style.top = (p.y - cy - 18) * SCALE + 'px'; } };
+    tag($('#tagYou'), fp, TAGS && !!SPR && fp.y - cy > 10 && (fp.y - cy) * SCALE < innerHeight - playH());
+    tag($('#tagBoa'), bp || { x: 0, y: 0 }, TAGS && !!bp && bp.y - cy > 10 && (bp.y - cy) * SCALE < innerHeight - playH());
+  }
+  function setBoard(n, kind, safe = []) { BOARD.n = n; BOARD.kind = kind; BOARD.safe = safe; paintWorld(); }
+  function moveFrog(r, ms = 650) { ACT.frog = { from: ACT.frog.r, r, t0: performance.now(), dur: ms }; if (ms) sfx('hop'); return sleep(ms + 80); }
+  function moveBoa(r, ms = 700) { ACT.boa = { from: ACT.boa.r, r, t0: performance.now(), dur: ms }; return sleep(ms + 80); }
+  function floater(text, who = 'frog', col = '#c2ea6a') {
+    const p = posAt(who === 'boa' ? ACT.boa : ACT.frog, performance.now()), el = document.createElement('div');
+    el.className = 'fl'; el.textContent = text; el.style.color = col; el.style.left = p.x * SCALE + 'px'; el.style.top = (p.y - Math.round(cam) - 22) * SCALE + 'px';
+    document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
+  }
+
+  /* =====================================================================
+     HUD + the question sheet
+     ===================================================================== */
+  const HUD = { style: '', score: 0 };
+  function hud(o = {}) {
+    Object.assign(HUD, o);
+    $('#hud').hidden = !o.show && $('#hud').hidden;
+    $('#hStyle').textContent = HUD.style;
+    $('#hScore').textContent = fmt(HUD.score);
+    const chase = BOARD.kind === 'chase';
+    $('#cGap').hidden = !chase;
+    $('#hRungL').textContent = BOARD.kind === 'wall' ? 'Layer' : 'Rung';
+    $('#hRung').textContent = BOARD.kind === 'wall' ? 'Canopy' : `${Math.max(0, ACT.frog.r)}/${BOARD.n}`;
+    if (chase) { const gap = ACT.frog.r - ACT.boa.r; $('#hGap').textContent = gap; $('#cGap').classList.toggle('warn', gap <= 1); }
+  }
+  const play = $('#play');
+  let KEYS = {};
+  addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('input') && e.key !== 'Enter') return;
+    const f = KEYS[e.key.toLowerCase()] || KEYS[e.code]; if (f) { e.preventDefault(); f(); }
+  });
+  function sheet(html, keys = {}) {
+    KEYS = keys; play.innerHTML = html; play.hidden = false; play.scrollTop = 0;
+    play.classList.remove('in'); void play.offsetWidth; play.classList.add('in');
+    const inp = $('input', play); if (inp) setTimeout(() => inp.focus({ preventScroll: true }), 60);
+    return play;
+  }
+  const vineHTML = '<div class="vine" role="timer" aria-label="Time left"><canvas class="vt" width="120" height="20"></canvas><span class="vtn">20</span></div>';
+  /** runs a timed step: mount(done) wires up the sheet; resolves with whatever done() was given, or { timeout } */
+  function timed(sec, mount) {
+    return new Promise((resolve) => {
+      let over = false; const vt = new VineTimer($('.vt', play), $('.vtn', play), $('.vine', play));
+      const done = (v) => { if (over) return; over = true; const left = vt.stop(); KEYS = {}; resolve(Object.assign({ left }, v)); };
+      vt.start(sec, () => done({ timeout: true }));
+      mount(done, vt);
+    });
+  }
+  function next(label = 'Next', ms) {
+    return new Promise((resolve) => {
+      const row = document.createElement('div'); row.className = 'row'; row.innerHTML = `<button class="btn go">${ESC(label)} ▸</button>`;
+      play.appendChild(row); const b = $('button', row); b.focus({ preventScroll: true });
+      let t = ms ? setTimeout(go, ms) : null;
+      function go() { clearTimeout(t); KEYS = {}; resolve(); }
+      b.addEventListener('click', go); KEYS = { enter: go, ' ': go };
+    });
+  }
+  const optOrder = (q, n) => T.shuffle([q.a].concat(q.w.slice(0, n - 1)), T.rng(T.hash(DAY.iso + ':' + q.id)));
+  const keyNum = (n) => Object.fromEntries([...Array(n)].map((_, i) => [String(i + 1), i]));
+
+  /* ---------- a multiple-choice or typed question ---------- */
+  async function askMCQ(q, o) {
+    const n = o.n || 4, opts = optOrder(q, n), typed = !!o.typed;
+    sheet(`<div class="step"><span>${ESC(o.title)}</span><span class="r">${ESC(o.right || '')}</span></div>${vineHTML}
+      <p class="q">${ESC(q.q)}</p>
+      ${typed ? `<form class="typed" autocomplete="off"><input id="ans" placeholder="Type your answer" maxlength="80" autocapitalize="off" spellcheck="false" aria-label="Your answer"><button class="btn go">Go</button></form>`
+        : `<div class="opts ${n === 4 ? 'four' : ''}">${opts.map((x, i) => `<button class="opt" data-i="${i}"><i>${i + 1}</i><span>${ESC(x)}</span></button>`).join('')}</div>`}
+      ${o.tools ? `<div class="tools">${o.tools}</div>` : ''}<div id="extra"></div>`);
+    const res = await timed(R.timer, (done) => {
+      if (typed) $('form', play).addEventListener('submit', (e) => { e.preventDefault(); const v = $('#ans').value; if (v.trim()) done({ text: v }); });
+      else { $$('.opt', play).forEach((b) => b.addEventListener('click', () => done({ pick: +b.dataset.i }))); const km = keyNum(n); KEYS = Object.fromEntries(Object.entries(km).map(([k, i]) => [k, () => { const b = $$('.opt', play)[i]; if (b && !b.disabled && !b.classList.contains('gone')) done({ pick: i }); }])); }
+      if (o.wire) o.wire(done, opts);
+    });
+    if (res.walk || res.swap) return res;
+    let ok = false, said = '';
+    if (typed) {
+      const m = res.text ? T.matchAnswer(res.text, [{ n: q.a, a: q.alt || [] }], q.w.map((w) => ({ n: w, a: [] }))) : { ok: false };
+      ok = m.ok; said = res.text || '';
+      $('#ans').disabled = true; $('button', $('form', play)).disabled = true;
+      res.corrected = m.ok && m.corrected;
+    } else {
+      $$('.opt', play).forEach((b, i) => { b.disabled = true; if (opts[i] === q.a) b.classList.add('right'); else if (i === res.pick) b.classList.add('wrong'); });
+      ok = res.pick != null && opts[res.pick] === q.a;
+    }
+    sfx(ok ? 'right' : 'wrong');
+    const ex = $('#extra');
+    ex.innerHTML = `<p class="msg">${res.timeout ? '<b class="no">The ant got the last leaf.</b> ' : ok ? '<b class="ok">Right!</b> ' : '<b class="no">Not quite.</b> '}${typed && ok && res.corrected ? `Counted as <b>${ESC(q.a)}</b>.` : (!ok || typed) ? `The answer was <b>${ESC(q.a)}</b>.` : ''}</p>`;
+    return Object.assign(res, { ok, said });
+  }
+
+  /* ---------- a "Name a…" prompt ---------- */
+  async function askPrompt(P, i, n, tag) {
+    let tries = 0, m = null, said = '';
+    while (true) {
+      sheet(`<div class="step"><span>${ESC(tag)} · deep cut ${i + 1} of ${n}</span><span class="r">rarer = bigger head start</span></div>${vineHTML}
+        <p class="q">${ESC(P.q)}</p>${P.hint ? `<p class="hint">${ESC(P.hint)}</p>` : ''}
+        <form class="typed" autocomplete="off"><input id="ans" placeholder="The rarer the better" maxlength="80" autocapitalize="off" spellcheck="false" aria-label="Your answer"><button class="btn go">Go</button></form>
+        ${tries ? '<p class="msg"><b class="gold">We didn\'t recognise that, so you get one more go.</b></p>' : ''}<div id="extra"></div>`);
+      const res = await timed(R.timer, (done) => { $('form', play).addEventListener('submit', (e) => { e.preventDefault(); const v = $('#ans').value; if (v.trim()) done({ text: v }); }); });
+      said = res.text || '';
+      m = res.text ? T.matchAnswer(res.text, P.ans, P.dec) : { ok: false, timeout: true };
+      if (!m.ok && !m.decoy && !res.timeout && res.text && tries === 0) { tries++; sfx('wrong'); continue; }
+      $('#ans').disabled = true; $('button', $('form', play)).disabled = true;
+      break;
+    }
+    const r = m.ok ? m.item.r : 0;
+    const sorted = P.ans.slice().sort((a, b) => b.r - a.r), deep = sorted.slice(0, 4), obvious = sorted.slice(-2).reverse();
+    sfx(m.ok ? (r >= 70 ? 'deep' : 'right') : 'wrong');
+    $('#extra').innerHTML = `<p class="msg">${m.ok ? `<b class="ok">${ESC(m.item.n)}</b>${m.corrected ? ' <small>(counted from “' + ESC(said) + '”)</small>' : ''} scores <b class="gold">${r}</b> for rarity.`
+        : m.decoy ? `<b class="no">${ESC(m.item.n)}</b> doesn't fit, so that's 0.` : said ? '<b class="no">Not on our list</b>, so that\'s 0.' : '<b class="no">Out of time</b>, so that\'s 0.'}</p>
+      <div class="meter" aria-hidden="true"><b style="width:${r}%"></b></div>
+      <p class="msg" style="font-size:14px">Deepest cuts:</p><ul class="cuts">${deep.map((a) => `<li>${ESC(a.n)} <small>${a.r}</small></li>`).join('')}</ul>
+      <p class="msg" style="font-size:14px">Most obvious:</p><ul class="cuts">${obvious.map((a) => `<li>${ESC(a.n)} <small>${a.r}</small></li>`).join('')}</ul>`;
+    await next(i + 1 < n ? 'Next prompt' : 'Start climbing');
+    return { ok: m.ok, r, name: m.ok ? m.item.n : '' };
+  }
+
+  /* ---------- the final pushback: rapid connections, 30 seconds ---------- */
+  async function finale(items, top) {
+    let k = 0, pushes = 0, ended = false;
+    sheet(`<div class="step"><span>Final pushback · 30 seconds</span><span class="r" id="fCount">0 pushes</span></div>${vineHTML}<div id="fBox"></div>`);
+    const res = await timed(R.finaleTimer, (done) => {
+      const show = () => {
+        if (k >= items.length) { done({ all: true }); return; }
+        const it = items[k], opts = T.shuffle([it.a].concat(it.w), T.rng(T.hash(DAY.iso + ':f:' + it.id)));
+        $('#fBox').innerHTML = `<p class="q">What links: ${it.v.map(ESC).join(' · ')}?</p><div class="opts">${opts.map((x, i) => `<button class="opt" data-i="${i}"><i>${i + 1}</i><span>${ESC(x)}</span></button>`).join('')}</div>`;
+        const pick = (i) => {
+          if (ended) return; const ok = opts[i] === it.a, btns = $$('.opt', play);
+          btns.forEach((b) => { b.disabled = true; }); btns[i].classList.add(ok ? 'right' : 'wrong');
+          if (ok) { pushes++; sfx('push'); moveBoa(ACT.boa.r - 1, 280); floater('−1', 'boa', '#bff0a8'); $('#fCount').textContent = pushes + (pushes === 1 ? ' push' : ' pushes'); hud(); }
+          else { sfx('wrong'); btns[opts.indexOf(it.a)].classList.add('right'); }
+          k++; setTimeout(show, ok ? 260 : 700);
+        };
+        $$('.opt', play).forEach((b) => b.addEventListener('click', () => pick(+b.dataset.i)));
+        KEYS = { 1: () => pick(0), 2: () => pick(1), 3: () => pick(2) };
+      };
+      show();
+    });
+    ended = true;
+    const bonus = res.all ? Math.round(res.left) * 10 : 0;
+    $('#fBox').innerHTML = `<p class="msg"><b class="ok">${pushes}</b> ${pushes === 1 ? 'push' : 'pushes'}: the boa slides back to ${ACT.boa.r < 0 ? 'below the roots' : 'rung ' + ACT.boa.r}.${bonus ? ` You cleared every clue with time to spare: <b class="gold">+${bonus}</b>.` : ''}</p>`;
+    await next('See the result');
+    return { pushes, bonus, gap: top - ACT.boa.r };
+  }
+
+  /* =====================================================================
+     CANOPY CHASE (also the Summit's mini chase)
+     ===================================================================== */
+  async function playChase(C, rules, label, base = 0) {
+    setBoard(rules.rungs, 'chase'); ACT.view = 0;
+    ACT.frog = { r: 0, from: 0, t0: 0, dur: 0 }; ACT.boa = { r: rules.boaStart, from: rules.boaStart, t0: 0, dur: 0 }; ACT.showBoa = false;
+    hud({ style: label, score: base, show: true });
+    // 1 · the deep cuts
+    const draft = [];
+    for (let i = 0; i < C.prompts.length; i++) draft.push(await askPrompt(C.prompts[i], i, C.prompts.length, label));
+    const rare = draft.reduce((s, d) => s + d.r, 0), head = rules.head.filter((t) => rare >= t).length;
+    hud({ score: base + rare });
+    sheet(`<div class="step"><span>${ESC(label)}</span><span class="r">head start</span></div>
+      <p class="q">${rare} rarity points: ${head ? `a <b>${head}-rung</b> head start.` : 'no head start this time.'}</p>
+      <p class="msg">You start on rung <b>${1 + head}</b> of ${rules.rungs}. The emerald tree boa starts down in the roots and climbs a rung whenever it gets a question right. Reach rung ${rules.rungs} before it reaches you.</p>
+      <p class="msg" style="font-size:14px">Thresholds: ${rules.head.map((t, i) => `${t}+ → ${i + 1} rung${i ? 's' : ''}`).join(' · ')}</p>`);
+    await moveFrog(1 + head, 900);
+    ACT.showBoa = true; sfx('hiss'); hud();
+    await next('Climb');
+    // 2 · the board
+    const marks = []; let escaped = false, caught = false;
+    for (let i = 0; i < C.qs.length; i++) {
+      const q = C.qs[i];
+      sheet(`<div class="step"><span>${ESC(label)} · question ${i + 1} of ${C.qs.length}</span><span class="r">you ${ACT.frog.r} · boa ${ACT.boa.r}</span></div>
+        <p class="q">Safe climb or risky leap?</p>
+        <div class="choice"><button class="btn go" id="safe"><b>Safe climb</b>Pick from 3 options · +1 rung</button><button class="btn risk" id="leap"><b>Risky leap</b>No options, type it · +2 rungs</button></div>
+        <p class="hint" style="margin-top:10px">Get a leap wrong and you don't move.</p>`);
+      const leap = await new Promise((r) => { $('#safe').addEventListener('click', () => r(false)); $('#leap').addEventListener('click', () => r(true)); KEYS = { s: () => r(false), 1: () => r(false), l: () => r(true), 2: () => r(true) }; });
+      const res = await askMCQ(q, { n: 3, typed: leap, title: `${label} · question ${i + 1} of ${C.qs.length}`, right: leap ? 'risky leap · +2' : 'safe climb · +1' });
+      marks.push(leap ? (res.ok ? 'L' : 'M') : (res.ok ? 'S' : 'X'));
+      if (res.ok) { await moveFrog(Math.min(rules.rungs, ACT.frog.r + (leap ? 2 : 1))); floater(leap ? '+2' : '+1'); }
+      hud();
+      if (ACT.frog.r >= rules.rungs) { escaped = true; break; }
+      // the boa's turn: same answers for everyone today
+      const boaRight = !!C.boa[i];
+      $('#extra').insertAdjacentHTML('beforeend', `<p class="msg">${boaRight ? '🐍 <b class="no">The boa got it right</b> and climbs a rung.' : '🐍 <b class="ok">The boa got it wrong</b> and stays put.'}</p>`);
+      if (boaRight) { sfx('hiss'); await moveBoa(ACT.boa.r + 1); floater('+1', 'boa', '#bff0a8'); hud(); }
+      if (ACT.boa.r >= ACT.frog.r) { caught = true; break; }
+      await next(i + 1 < C.qs.length ? 'Next question' : 'Last chance…', 4500);
+    }
+    if (!escaped && !caught) { caught = true; sfx('hiss'); await moveBoa(Math.max(ACT.boa.r, ACT.frog.r)); }
+    // 3 · the final pushback
+    let fin = { pushes: 0, bonus: 0, gap: 0 };
+    if (escaped) {
+      sfx('win');
+      sheet(`<div class="step"><span>${ESC(label)}</span><span class="r">escaped!</span></div>
+        <p class="q">You reached the top of the canopy!</p>
+        <p class="msg">Now push the boa back down. You've got ${R.finaleTimer} seconds of quick-fire connections: every right answer knocks it down a rung.</p>`);
+      await next('Go!');
+      fin = await finale(C.fin, rules.rungs);
+    } else {
+      sfx('lose');
+      sheet(`<div class="step"><span>${ESC(label)}</span><span class="r">caught</span></div>
+        <p class="q">${ACT.boa.r >= ACT.frog.r && ACT.frog.r < rules.rungs ? 'The boa caught up with you on rung ' + ACT.frog.r + '.' : 'Out of questions before the top.'}</p>
+        <p class="msg">Rarity points still count, plus a little for every rung you climbed.</p>`);
+      await next('See the result');
+    }
+    const score = escaped ? rare + 100 * fin.gap + 200 + fin.bonus : rare + 40 * ACT.frog.r;
+    return { score, escaped, rare, head, marks, gap: escaped ? fin.gap : 0, pushes: fin.pushes, draft, rung: ACT.frog.r, boa: ACT.boa.r };
+  }
+
+  /* =====================================================================
+     VINE LADDER (also the Summit's mini ladder)
+     ===================================================================== */
+  async function playLadder(Lr, rules, label, base = 0, lifelines = ['shake', 'troop', 'swap']) {
+    setBoard(rules.d.length, 'ladder', rules.safe); ACT.view = 0; ACT.showBoa = false;
+    ACT.frog = { r: 0, from: 0, t0: 0, dur: 0 };
+    hud({ style: label, score: base, show: true });
+    const used = {}, spares = Lr.spare.slice(), marks = [], N = rules.d.length;
+    let rung = 0, banked = 0, walked = false, fell = false;
+    const pts = (r) => (r > 0 ? rules.points[r - 1] : 0);
+    const safeBelow = (r) => Math.max(0, ...rules.safe.filter((s) => s <= r));
+    sheet(`<div class="step"><span>${ESC(label)}</span><span class="r">${N} rungs</span></div>
+      <p class="q">Climb from the forest floor to the ${N === 12 ? 'emergent layer' : 'canopy'}.</p>
+      <p class="msg">Each rung is worth more (top prize <b class="gold">${fmt(rules.points[N - 1])}</b>). Get one wrong and you fall back to the last safe ledge (rung${rules.safe.length > 1 ? 's' : ''} <b class="gold">${rules.safe.join(' and ')}</b>). You can walk away with what you've got before any question.</p>
+      <p class="msg" style="font-size:14px">Lifelines: ${lifelines.map((l) => ({ shake: '🍃 Shake the branch (50:50)', troop: '🐒 Ask the troop', swap: '🔁 Swap the vine' })[l]).join(' · ')}</p>`);
+    await next('Start the climb');
+    for (let i = 0; i < N; i++) {
+      let q = Lr.qs[i], swapped = false;
+      while (true) {
+        const toolsHTML = lifelines.map((l) => `<button class="btn ${used[l] ? 'used' : ''}" data-tool="${l}" ${used[l] ? 'disabled' : ''}>${{ shake: '🍃 50:50', troop: '🐒 Troop', swap: '🔁 Swap' }[l]}</button>`).join('') + (rung ? `<button class="btn" data-tool="walk">🚶 Walk away with ${fmt(pts(rung))}</button>` : '');
+        const res = await askMCQ(q, {
+          n: 4, title: `${label} · rung ${i + 1} of ${N}${rules.safe.includes(i + 1) ? ' · safe ledge' : ''}`, right: `${T.layerOf(i + 1, N)} · ${fmt(pts(i + 1))}`, tools: toolsHTML,
+          wire: (done, opts) => {
+            $$('[data-tool]', play).forEach((b) => b.addEventListener('click', () => {
+              const t = b.dataset.tool;
+              if (t === 'walk') { done({ walk: true }); return; }
+              if (used[t]) return; used[t] = true; b.disabled = true; b.classList.add('used'); sfx('push');
+              if (t === 'shake') { const wrong = opts.map((x, j) => j).filter((j) => opts[j] !== q.a); T.shuffle(wrong, T.rng(T.hash(DAY.iso + q.id + 'ff'))).slice(0, 2).forEach((j) => { const ob = $$('.opt', play)[j]; ob.classList.add('gone'); ob.disabled = true; }); }
+              if (t === 'troop') { const p = Lr.poll[q.id] || { a: 50, w: [20, 20, 10] }; $$('.opt', play).forEach((ob, j) => { const v = opts[j] === q.a ? p.a : p.w[q.w.indexOf(opts[j])] || 0; ob.insertAdjacentHTML('beforeend', `<span class="bar2"><b style="width:${v}%"></b></span><span class="poll">${v}%</span>`); }); }
+              if (t === 'swap') done({ swap: true });
+            }));
+          }
+        });
+        if (res.swap) {
+          const d = q.d; spares.sort((a, b) => Math.abs(a.d - d) - Math.abs(b.d - d)); const sp = spares.shift();
+          if (sp) { q = sp; swapped = true; continue; }
+        }
+        if (res.walk) { walked = true; break; }
+        marks.push(res.ok ? (swapped ? 'W' : 'S') : 'X');
+        if (res.ok) { rung = i + 1; await moveFrog(rung); floater('+' + fmt(pts(rung) - pts(rung - 1)), 'frog', '#f6d24a'); hud({ score: base + pts(rung) }); await next(rung === N ? 'Reach the top' : 'Next rung', 3500); }
+        else { fell = true; const s = safeBelow(rung); await next('Fall', 3500); await moveFrog(s, 700); rung = s; hud({ score: base + pts(rung) }); }
+        break;
+      }
+      if (walked || fell) break;
+    }
+    banked = pts(rung);
+    if (rung === N) sfx('win'); else if (fell) sfx('lose');
+    return { score: banked, rung, walked, fell, top: rung === N, marks, used: Object.keys(used) };
+  }
+
+  /* =====================================================================
+     TANGLED WALL (also the Summit's mini wall)
+     ===================================================================== */
+  async function playWall(Wd, label, base = 0, mini = false) {
+    setBoard(8, 'wall'); ACT.showBoa = false; ACT.frog = { r: 5, from: 5, t0: 0, dur: 0 }; ACT.view = 0.62;
+    hud({ style: label, score: base, show: true });
+    const G = Wd.g, n = G.length, items = Wd.order.map((ix) => ({ v: G[Math.floor(ix / 4)].v[ix % 4], g: Math.floor(ix / 4) }));
+    sheet(`<div class="step"><span>${ESC(label)}</span><span class="r">${n * 4} vines</span></div>
+      <p class="q">Untangle the vines into ${n} groups of four.</p>
+      <p class="msg">Tap four vines that share a connection. Watch for red herrings: some vines fit more than one group. ${mini ? 'You have 3 lives.' : 'Once two groups are found you have 3 lives.'} Then name each connection for bonus points.</p>
+      <p class="msg" style="font-size:14px">${mini ? '100 per group, 100 per connection, 100 bonus for all four.' : '100 per group, 100 per connection, 200 bonus for all eight.'}</p>`);
+    await next('Untangle');
+    const found = []; let lives = mini ? 3 : null, sel = [];
+    const render = () => {
+      const order = found.flatMap((g) => items.filter((it) => it.g === g)).concat(items.filter((it) => !found.includes(it.g)));
+      $('#wall').innerHTML = order.map((it) => `<button class="vinebtn ${found.includes(it.g) ? 'done g' + found.indexOf(it.g) : sel.includes(it) ? 'sel' : ''}" data-k="${items.indexOf(it)}" ${found.includes(it.g) ? 'disabled' : ''}>${ESC(it.v)}</button>`).join('');
+      $('#lives').innerHTML = lives == null ? '<small>3 lives after two groups</small>' : '🐸'.repeat(lives) + '<span style="opacity:.25">' + '🐸'.repeat(3 - lives) + '</span>';
+      $$('.vinebtn:not(.done)', play).forEach((b) => b.addEventListener('click', () => tap(items[+b.dataset.k], b)));
+    };
+    let finish = null;
+    const tap = (it, b) => {
+      if (sel.includes(it)) sel = sel.filter((x) => x !== it); else sel.push(it);
+      if (sel.length < 4) { render(); return; }
+      const g = sel[0].g;
+      if (sel.every((x) => x.g === g)) { found.push(g); sel = []; sfx('right'); if (!mini && found.length === 2 && lives == null) lives = 3; }
+      else {
+        sfx('wrong'); const bad = sel; sel = []; if (lives != null) lives--;
+        render(); $$('.vinebtn', play).forEach((x) => { if (bad.includes(items[+x.dataset.k])) x.classList.add('shake'); });
+        if (lives === 0) { finish({ out: true }); }
+        return;
+      }
+      if (found.length === n - 1) { found.push([...Array(n).keys()].find((x) => !found.includes(x))); render(); finish({ all: true }); return; }
+      render();
+    };
+    sheet(`<div class="step"><span>${ESC(label)}</span><span class="r lives" id="lives"></span></div>${vineHTML}<div class="wall" id="wall"></div><div id="extra"></div>`);
+    const res = await timed(mini ? R.miniWallTimer : R.wallTimer, (done) => { finish = done; render(); });
+    const solved = found.length;
+    const groupsFound = new Set(found);
+    if (res.all) sfx('deep');
+    // reveal anything left, in order
+    for (let g = 0; g < n; g++) if (!found.includes(g)) found.push(g);
+    $$('.vinebtn', play).forEach((b) => { b.disabled = true; });
+    render(); $$('.vinebtn', play).forEach((b) => { b.disabled = true; });
+    $('#extra').innerHTML = `<p class="msg">${res.all ? '<b class="ok">All untangled!</b>' : res.out ? '<b class="no">Out of lives.</b>' : '<b class="no">The ant got the last leaf.</b>'} You found <b>${groupsFound.size}</b> of ${n} groups${solved > groupsFound.size ? '' : ''}. Now name the connections.</p>`;
+    await next('Name the connections');
+    // name each connection
+    const named = [];
+    for (let i = 0; i < n; i++) {
+      const g = found[i], grp = G[g];
+      sheet(`<div class="step"><span>${ESC(label)} · connection ${i + 1} of ${n}</span><span class="r">${groupsFound.has(g) ? 'you found this one' : 'revealed'}</span></div>${vineHTML}
+        <div class="glist"><div class="g${i}">${grp.v.map(ESC).join(' · ')}</div></div>
+        <p class="q" style="margin-top:12px">What's the connection?</p>
+        <form class="typed" autocomplete="off"><input id="ans" placeholder="Type the link" maxlength="80" autocapitalize="off" spellcheck="false" aria-label="The connection"><button class="btn go">Go</button></form><div id="extra"></div>`);
+      const r2 = await timed(R.timer, (done) => { $('form', play).addEventListener('submit', (e) => { e.preventDefault(); const v = $('#ans').value; if (v.trim()) done({ text: v }); }); });
+      const ok = !!r2.text && T.matchLink(r2.text, (grp.k || []).concat([grp.l]));
+      sfx(ok ? 'right' : 'wrong'); named.push(ok);
+      $('#ans').disabled = true;
+      $('#extra').innerHTML = `<p class="msg">${ok ? '<b class="ok">Yes!</b>' : r2.timeout ? '<b class="no">Out of time.</b>' : '<b class="no">Not quite.</b>'} The link: <b>${ESC(grp.l)}</b>.</p>`;
+      hud({ score: base + groupsFound.size * 100 + named.filter(Boolean).length * 100 });
+      await next(i + 1 < n ? 'Next connection' : 'See the result', 3500);
+    }
+    const g = groupsFound.size, l = named.filter(Boolean).length, all = g === n && l === n;
+    const score = g * 100 + l * 100 + (all ? (mini ? 100 : 200) : 0);
+    return { score, groups: g, links: l, n, named, groupsFound: [...Array(n).keys()].map((i) => groupsFound.has(found[i])) };
+  }
+
+  /* =====================================================================
+     THE DAY: start screen, week strip, results, sharing, challenges
+     ===================================================================== */
+  let DAY = null, PLAY_ISO = TODAY, CHAL = null, LAST = null, BUSY = false, BUILT = null;
+  const MANIFEST = fetch('data/index.json', { cache: 'no-cache' }).then((r) => r.json()).then((m) => { BUILT = m.days || {}; weekStrip(); }).catch(() => { /* fine: days load on demand */ });
+  const S = (k) => T.STYLES[k];
+  const allowed = (iso) => QC === iso || (T.dayDiff(iso, TODAY) >= 0 && T.dayDiff(iso, TODAY) <= 6);
+  async function loadDay(iso) {
+    if (QC && QC === iso) { try { const x = JSON.parse(localStorage.getItem('harry-trivia-qc') || 'null'); if (x && x.iso === iso && x.day) return x.day; } catch (e) { /* use the file */ } }
+    const r = await fetch(`data/days/${iso}.tft`, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status === 404 ? 'missing' : 'network');
+    return T.decode(await r.text());
+  }
+  function rulesFor(style) {
+    const li = (ic, t) => `<li><span class="ic">${ic}</span><span>${t}</span></li>`;
+    if (style === 'chase') return li('🌿', 'Answer 3 “Name a…” prompts. The rarer your answer, the bigger your head start up the tree.') + li('🐍', 'Then 7 questions against the emerald tree boa. It gets the same questions right for everyone, every day.') + li('🟨', 'Play safe (3 options, +1 rung) or take a risky leap (no options, +2).') + li('⏱️', 'Escape the canopy, then push the boa back down with 30 seconds of quick connections.');
+    if (style === 'ladder') return li('🪜', '12 rungs from the forest floor to the emergent layer, each worth more than the last.') + li('🛟', 'Safe ledges at rungs 3 and 9. A wrong answer drops you to the last one you passed.') + li('🍃', 'Three lifelines: Shake the branch (50:50), Ask the troop, Swap the vine.') + li('🚶', 'Walk away with your points before any question.');
+    if (style === 'wall') return li('🌿', '16 vines hide 4 groups of 4. Tap four that belong together.') + li('🐟', 'Red herrings everywhere: some vines seem to fit two groups.') + li('🐸', 'Once two groups are found you have 3 lives. The whole wall is on one 2½-minute vine.') + li('💬', 'Then name each connection for bonus points.');
+    return li('🌿', 'A mini wall: 8 vines, 2 groups, 3 lives.') + li('🪜', 'A short ladder: 5 rungs, one 50:50.') + li('🐍', 'A quick chase: one deep cut, 4 questions and the pushback.') + li('⛰️', 'Your three scores add up to one Summit score.');
+  }
+  function weekStrip() {
+    const el = $('#week'); let html = '';
+    for (let i = 6; i >= -1; i--) {
+      const iso = T.addDays(TODAY, -i), st = T.styleOf(iso), r = DATA.res[iso], future = i < 0, missing = !future && BUILT && !BUILT[iso];
+      html += `<button data-iso="${iso}" class="${iso === PLAY_ISO ? 'on' : ''}" ${future ? 'disabled title="Tomorrow"' : missing ? 'disabled title="No climb that day"' : ''}>${future ? 'Next' : i === 0 ? 'Today' : T.prettyDay(iso).split(' ')[0]}<b>${S(st).icon}</b><small>${r && r.done ? fmt(r.sc) : future ? S(st).short : ''}</small></button>`;
+    }
+    el.innerHTML = html;
+    $$('button', el).forEach((b) => b.addEventListener('click', () => { if (b.disabled) return; choose(b.dataset.iso); }));
+  }
+  async function choose(iso) {
+    PLAY_ISO = iso; DAY = null; weekStrip();
+    $('#go').disabled = true; $('#go').textContent = 'Loading…'; $('#sNote').textContent = '';
+    $('#sStyle').textContent = S(T.styleOf(iso)).icon + ' ' + S(T.styleOf(iso)).name;
+    $('#sDay').textContent = iso === TODAY ? 'Today · ' + T.prettyDay(iso) : T.prettyDay(iso, true);
+    $('#sSub').textContent = S(T.styleOf(iso)).blurb;
+    $('#sRules').innerHTML = rulesFor(T.styleOf(iso));
+    try { DAY = await loadDay(iso); } catch (e) {
+      $('#go').textContent = 'Not ready yet'; $('#sNote').textContent = e.message === 'missing' ? 'This climb hasn\'t been built yet. Check back soon.' : 'Couldn\'t load the climb. Check your connection and try again.';
+      return;
+    }
+    if (PLAY_ISO !== iso) return;
+    const mine = DATA.res[iso];
+    $('#sRow').innerHTML = mine && mine.done && !QC
+      ? `<button class="btn go" id="go">See my result</button><button class="btn" id="practice">Practice run</button>`
+      : `<button class="btn go" id="go">${iso === TODAY ? 'Start today\'s climb' : 'Play this climb'}</button>`;
+    $('#go').addEventListener('click', () => (mine && mine.done && !QC ? showResult(mine, iso) : begin(false)));
+    if ($('#practice')) $('#practice').addEventListener('click', () => begin(true));
+    const st = streak();
+    $('#sNote').innerHTML = (iso !== TODAY && !QC ? 'Earlier days count for your scores but not your streak. ' : '') + (st > 1 ? `🔥 ${st}-day streak. ` : '') + (K.Consent.allowed() ? '' : 'Results are kept for this visit only. <a href="../cookies" data-consent-open>Allow storage</a> to keep a streak.');
+  }
+  function renderChallenge() {
+    const el = $('#sChallenge'); if (!CHAL) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = `<b>${ESC(CHAL.n || 'A friend')}</b> scored <b>${fmt(CHAL.sc)}</b> on the ${ESC(T.prettyDay(CHAL.iso))} ${ESC(S(CHAL.s).name)}.${allowed(CHAL.iso) ? ' Can you beat them?' : ' That climb has closed, but here\'s today\'s.'}<div style="margin-top:6px;font-family:'Pixelify Sans',monospace;white-space:pre-wrap">${ESC((CHAL.g || []).join('\n'))}</div>`;
+  }
+  async function begin(practice) {
+    if (BUSY || !DAY) return; BUSY = true; audio();
+    $('#start').hidden = true; $('#over').hidden = true; $('#copy').hidden = true;
+    const iso = DAY.iso, live = !practice && !QC;
+    if (live) { DATA.res[iso] = Object.assign({ sc: 0, s: DAY.style, started: 1 }, DATA.res[iso] || {}); save(); }
+    let result;
+    try {
+      if (DAY.style === 'chase') { const r = await playChase(DAY.chase, R.chase, 'Canopy Chase'); result = { score: r.score, parts: { chase: r } }; }
+      else if (DAY.style === 'ladder') { const r = await playLadder(DAY.ladder, R.ladder, 'Vine Ladder'); result = { score: r.score, parts: { ladder: r } }; }
+      else if (DAY.style === 'wall') { const r = await playWall(DAY.wall, 'Tangled Wall'); result = { score: r.score, parts: { wall: r } }; }
+      else {
+        const w = await playWall(DAY.summit.wall, 'Summit · mini wall', 0, true);
+        const l = await playLadder(DAY.summit.ladder, R.miniLadder, 'Summit · mini ladder', w.score, ['shake']);
+        const c = await playChase(DAY.summit.chase, R.miniChase, 'Summit · quick chase', w.score + l.score);
+        result = { score: w.score + l.score + c.score, parts: { wall: w, ladder: l, chase: c } };
+      }
+    } catch (e) { console.error(e); BUSY = false; play.hidden = true; $('#start').hidden = false; return; }
+    play.hidden = true; KEYS = {};
+    const out = { iso, s: DAY.style, sc: result.score, g: gridLines(DAY.style, result), done: 1, why: whyLine(DAY.style, result) };
+    if (live) { DATA.res[iso] = out; save(); }
+    BUSY = false;
+    showResult(out, iso, practice);
+  }
+  /* ---------- the emoji track ---------- */
+  function gridLines(style, res) {
+    const L = [], p = res.parts;
+    const chaseLine = (c, rules) => {
+      L.push(`🌿 Deep cuts ${c.draft.map((d) => (d.ok ? d.r : '✗')).join(' · ')} → +${c.head} rung${c.head === 1 ? '' : 's'}`);
+      L.push('🐸 ' + c.marks.map((m) => ({ S: '🟩', L: '🟨', M: '🟥', X: '⬛' })[m]).join('') + (c.escaped ? ' 🌳' : ' 🐍'));
+      L.push(c.escaped ? `🐍 pushed back ${c.pushes} · ${c.gap} rungs clear` : `🐍 caught on rung ${c.rung}`);
+    };
+    const ladderLine = (l, rules) => L.push('🪜 ' + l.marks.map((m) => ({ S: '🟩', W: '🟩', X: '🟥' })[m]).join('') + (l.walked ? ' 🚶' : l.top ? ' 🏆' : '') + (l.used.length ? ' ' + l.used.map((u) => ({ shake: '🍃', troop: '🐒', swap: '🔁' })[u]).join('') : '') + ` · rung ${l.rung}/${rules.d.length}`);
+    const wallLine = (w) => L.push('🧩 ' + [...Array(w.n)].map((_, i) => (w.groupsFound[i] ? ['🟦', '🟩', '🟨', '🟪'][i] : '⬜')).join('') + ' · ' + w.named.map((x) => (x ? '✅' : '❌')).join(''));
+    if (style === 'chase') chaseLine(p.chase, R.chase);
+    if (style === 'ladder') ladderLine(p.ladder, R.ladder);
+    if (style === 'wall') wallLine(p.wall);
+    if (style === 'summit') { wallLine(p.wall); ladderLine(p.ladder, R.miniLadder); chaseLine(p.chase, R.miniChase); }
+    return L;
+  }
+  function whyLine(style, res) {
+    const p = res.parts;
+    if (style === 'chase') return p.chase.escaped ? `You escaped the canopy and pushed the boa ${p.chase.gap} rungs clear.` : `The boa caught you on rung ${p.chase.rung}.`;
+    if (style === 'ladder') return p.ladder.top ? 'You reached the emergent layer!' : p.ladder.walked ? `You walked away from rung ${p.ladder.rung}.` : `You fell back to rung ${p.ladder.rung}.`;
+    if (style === 'wall') return `${p.wall.groups} of 4 groups untangled, ${p.wall.links} of 4 connections named.`;
+    return `Wall ${fmt(p.wall.score)} + ladder ${fmt(p.ladder.score)} + chase ${fmt(p.chase.score)}.`;
+  }
+  function shareText(r) {
+    return [`🐸 Tree-Frog Trivia · ${S(r.s).name} · ${T.prettyDay(r.iso)}`].concat(r.g || []).concat([`${fmt(r.sc)} points`, SHARE_TEXT_URL]).join('\n');
+  }
+  function showResult(r, iso, practice) {
+    LAST = r; play.hidden = true; $('#hud').hidden = true; $('#tagYou').hidden = $('#tagBoa').hidden = true; TAGS = false;
+    $('#start').hidden = true; $('#over').hidden = false; $('#copy').hidden = false;
+    $('#oHead').textContent = practice ? 'Practice run · not saved' : QC ? 'QC play-test · not saved' : S(r.s).name + ' · ' + T.prettyDay(iso);
+    $('#oScore').textContent = fmt(r.sc);
+    let why = r.why || '';
+    if (CHAL && CHAL.iso === iso) { const d = r.sc - CHAL.sc; why += d > 0 ? ` You beat ${CHAL.n || 'your friend'} by ${fmt(d)}!` : d === 0 ? ` Dead heat with ${CHAL.n || 'your friend'}.` : ` ${CHAL.n || 'Your friend'} wins by ${fmt(-d)}.`; }
+    const st = streak(); if (!practice && !QC && st > 1 && iso === TODAY) why += ` 🔥 ${st}-day streak.`;
+    $('#oWhy').textContent = why.trim();
+    $('#oGrid').textContent = shareText(r);
+    $('#oName').value = DATA.name || '';
+    $('#keepNote').hidden = K.Consent.allowed() || practice || !!QC;
+  }
+  function toast(msg) { document.querySelectorAll('.toast').forEach((t) => t.remove()); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+  async function shareOut(text, title, url) {
+    if (navigator.share) { try { await navigator.share(url ? { title, text, url } : { title, text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(url ? text + '\n' + url : text); toast('Copied, ready to paste'); } catch (e) { prompt('Copy this:', url ? text + '\n' + url : text); }
+  }
+  const keepName = () => { const v = $('#oName').value.trim().slice(0, 14); if (v !== DATA.name) { DATA.name = v; save(); } };
+  $('#share').addEventListener('click', () => { keepName(); if (LAST) shareOut(shareText(LAST), 'Tree-Frog Trivia'); });
+  $('#dare').addEventListener('click', () => {
+    keepName(); if (!LAST) return;
+    const link = SHARE_URL + '#c=' + T.packResult({ n: DATA.name || '', iso: LAST.iso, s: LAST.s, sc: LAST.sc, g: LAST.g });
+    shareOut(`🐸 Tree-Frog Trivia challenge: I scored ${fmt(LAST.sc)} on the ${T.prettyDay(LAST.iso)} ${S(LAST.s).name}. Beat me:`, 'Tree-Frog Trivia challenge', link);
+  });
+  $('#back').addEventListener('click', () => { keepName(); $('#over').hidden = true; $('#start').hidden = false; ACT.view = 0; resetScene(); choose(PLAY_ISO); });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-consent-open]')) { e.preventDefault(); K.Consent.banner('../cookies', true); } });
+  function resetScene() { TAGS = true; setBoard(8, 'chase'); ACT.frog = { r: 0, from: 0, t0: 0, dur: 0 }; ACT.showBoa = false; ACT.view = 0.15; }
+
+  /* ---------- boot ---------- */
+  function loadChallenge() {
+    const m = location.hash.match(/#c=([\w-]+)/); CHAL = null;
+    if (m) { try { CHAL = T.unpackResult(m[1]); } catch (e) { toast('That challenge link didn\'t work'); } }
+    renderChallenge();
+    return CHAL && allowed(CHAL.iso) ? CHAL.iso : null;
+  }
+  addEventListener('hashchange', () => { if (BUSY) return; const iso = loadChallenge(); if (!$('#start').hidden || !$('#over').hidden) { $('#over').hidden = true; $('#start').hidden = false; choose(iso || TODAY); } });
+  addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+  if (QC) { $('#qcbar').hidden = false; PLAY_ISO = QC; }
+  else if (T.isISO(QS.get('day')) && allowed(QS.get('day'))) PLAY_ISO = QS.get('day');
+  const chalIso = loadChallenge(); if (chalIso && !QC) PLAY_ISO = chalIso;
+  (document.fonts && document.fonts.load ? document.fonts.load('8px "Pixelify Sans"').catch(() => {}) : Promise.resolve()).then(() => { resize(); resetScene(); requestAnimationFrame(frame); });
+  if (!QS.get('weather')) K.Env.weather().then((wx) => { if (wx.kind !== ENV.wx) { ENV.wx = wx.kind; rain = []; paintWorld(); } }).catch(() => { /* stay clear */ });
+  if (QS.has('debug')) window.__tft = { get DAY() { return DAY; }, get ACT() { return ACT; }, get KEYS() { return KEYS; }, T, choose, begin, get DATA() { return DATA; } };
+  choose(PLAY_ISO);
+  K.Consent.banner('../cookies');
+})();
+</script>
+</body>
+</html>
