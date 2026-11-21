@@ -589,6 +589,8 @@
     L.push('>   ## finale        Connection|Member;Member;Member;Member   (any 3 members must give the link away)');
     L.push('>   ## walls         4 lines then a blank line:  Connection|keywords that count as naming it;more|Vine;Vine;Vine;Vine');
     L.push('>                    Put in red herrings: vines that seem to fit another group on the same wall. All 16 vines different.');
+    L.push('>                    Mix topics: never make all four groups sub-types of one subject (e.g. mountains by country), since');
+    L.push('>                    that needs specialist knowledge of every vine. A group\'s label must be exact (Ireland ≠ Northern Ireland).');
     L.push('>   ## mini walls    the same, 2 lines per wall');
     L.push('>   ## prompts       Name a …|Answer{alias}^fame;Answer^fame;…|Tempting wrong answer;Another');
     L.push('>                    Every valid answer must be listed. fame 1 (obscure) to 5 (everyone says it).');
