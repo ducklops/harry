@@ -43,15 +43,18 @@
   /* ---------- overview ---------- */
   function overview() {
     const last = lastBuilt(), ahead = Math.max(0, T.dayDiff(TODAY, last)), runway = T.bankRunway(BANK, MAN, T.addDays(last, 1)), c = T.bankCounts(BANK, MAN, T.addDays(last, 1));
-    const warn = ahead < 21 || runway < 21;
+    // "covered" = days already built + days the unused bank could still build after them.
+    // Only nag about topping up once total cover drops below 6 weeks.
+    const covered = ahead + runway, coverEnd = T.addDays(last, runway), lowBank = covered < 42;
+    const warn = ahead < 21 || lowBank;
     $('#tdStatus').innerHTML = `
       <div class="td-stats">
         <div><b>${ahead}</b><span>days built ahead<br>(to ${E(T.prettyDay(last, true))})</span></div>
-        <div><b>${runway}</b><span>more days the<br>unused bank covers</span></div>
+        <div><b>${covered}</b><span>days of games covered<br>(to ${E(T.prettyDay(coverEnd, true))}, ${runway} still in the bank)</span></div>
         <div><b>${c.mcq[1] + c.mcq[2] + c.mcq[3] + c.mcq[4]}</b><span>questions left<br>${[1, 2, 3, 4].map((d) => 'd' + d + ' ' + c.mcq[d]).join(' · ')}</span></div>
         <div><b>${c.prompts}</b><span>“Name a…” prompts<br>finale ${c.links} · walls ${c.walls} · mini ${c.half}</span></div>
       </div>
-      ${warn ? `<p class="msg err">${ahead < 21 ? `Only ${ahead} days are built ahead. ` : ''}${runway < 21 ? `The unused bank only covers about ${runway} more days. Download the top-up pack, get new questions written, then Import them.` : 'Press Build more days.'}</p>` : ''}
+      ${warn ? `<p class="msg err">${ahead < 21 ? `Only ${ahead} days are built ahead. ` : ''}${lowBank ? `Games are only covered to ${E(T.prettyDay(coverEnd, true))}. Download the top-up pack, get new questions written, then Import them.` : 'Press Build more days.'}</p>` : ''}
       <p class="hint">Nothing repeats within ${T.NO_REPEAT} days: once a question, clue, wall or prompt is used it's retired for two years.</p>`;
   }
   /* ---------- the archive calendar ---------- */
