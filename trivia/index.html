@@ -3,10 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tree-Frog Trivia · Harry</title>
-<meta name="description" content="A daily trivia climb from the forest floor to the canopy. Same questions for everyone each day: rare answers, a relentless tree boa, and a vine that's running out of leaves.">
+<title>Tree-Frog Trivia · A free daily trivia quiz game</title>
+<meta name="description" content="A free daily trivia quiz with a jungle twist. Climb from the forest floor to the canopy, name the rarest answers and outrun the tree boa. A new quiz every day.">
+<meta name="keywords" content="daily trivia, quiz game, general knowledge quiz, connections puzzle, free online quiz">
+<link rel="canonical" href="https://harryh.xyz/trivia/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/trivia/">
 <meta property="og:title" content="Tree-Frog Trivia">
 <meta property="og:description" content="Today's climb is open. Name the deep cuts, out-climb the boa, beat my score.">
+<meta property="og:image" content="https://harryh.xyz/share/trivia.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tree-Frog Trivia start screen: a pixel-art jungle tree with the frog at the bottom">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tree-Frog Trivia">
+<meta name="twitter:description" content="Today's climb is open. Name the deep cuts, out-climb the boa, beat my score.">
+<meta name="twitter:image" content="https://harryh.xyz/share/trivia.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": ["VideoGame", "WebApplication"], "name": "Tree-Frog Trivia", "url": "https://harryh.xyz/trivia/", "description": "A free daily trivia quiz with a jungle twist. Climb from the forest floor to the canopy, name the rarest answers and outrun the tree boa. A new quiz every day.", "image": "https://harryh.xyz/share/trivia.jpg", "genre": ["Trivia", "Quiz", "Puzzle"], "gamePlatform": ["Web browser", "Mobile", "Desktop"], "applicationCategory": "GameApplication", "operatingSystem": "Any", "playMode": "SinglePlayer", "inLanguage": "en-GB", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}, "publisher": {"@type": "Organization", "name": "Ducklops"}, "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}}</script>
 <meta name="theme-color" content="#0f1f2e">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
@@ -15,7 +31,10 @@
 <style>
   :root { --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --gold: #f6d24a; --red: #e0503e; --teal: #82bcae; --c: 4px; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1622; color: var(--ice); font-family: 'Pixelify Sans', ui-monospace, monospace; -webkit-tap-highlight-color: transparent; }
+  /* no double-tap zoom on phones (pinch-zoom still works) */
+  *, *::before, *::after { touch-action: manipulation; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0b1622; color: var(--ice); font-family: 'Pixelify Sans', ui-monospace, monospace; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  input, textarea { -webkit-user-select: text; user-select: text; }
   #scene { position: fixed; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
   .bar { position: fixed; z-index: 8; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right)); display: flex; justify-content: space-between; pointer-events: none; }
   .bar a, .bar button { pointer-events: auto; display: grid; place-items: center; min-width: 44px; height: 44px; padding: 0 12px; border: 0; cursor: pointer; text-decoration: none; color: var(--ice);
@@ -30,6 +49,15 @@
   .hud b { display: block; font: 400 17px/1.2 'Climate Crisis', 'Arial Black', sans-serif; white-space: nowrap; }
   .hud .warn b { color: var(--red); }
   @media (max-width: 640px) { .hud { top: calc(max(12px, env(safe-area-inset-top)) + 52px); gap: 4px; } .hud > div { min-width: 0; padding: 4px 7px 5px; } .hud b { font-size: 13px; } }
+  /* layer signs and rung numbers: real text over the pixel scene, so they stay sharp at any size */
+  #signs { position: fixed; left: 0; top: 0; z-index: 2; pointer-events: none; will-change: transform; }
+  #signs[hidden] { display: none; }
+  .sign { position: absolute; transform: translateY(-50%); padding: .3em .55em .35em; font: 600 var(--sf, 14px)/1 'Pixelify Sans', ui-monospace, monospace; letter-spacing: .12em; white-space: nowrap; color: var(--ice);
+    background: rgba(7,14,22,.88); box-shadow: inset 0 0 0 2px rgba(238,246,216,.32); -webkit-font-smoothing: antialiased; }
+  .sign.layer { color: var(--lime); text-transform: uppercase; box-shadow: inset 0 0 0 2px rgba(194,234,106,.45); }
+  .sign.right { transform: translate(-100%, -50%); }
+  .sign.rung { min-width: 1.9em; padding: .3em .4em .35em; text-align: center; letter-spacing: 0; }
+  .sign.safe { color: var(--gold); box-shadow: inset 0 0 0 2px rgba(246,210,74,.6); }
   .tag { position: fixed; z-index: 3; transform: translate(-50%, -100%); padding: 2px 6px 3px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; pointer-events: none;
     background: rgba(7,14,22,.82); box-shadow: inset 0 0 0 2px rgba(238,246,216,.35); }
   .tag[hidden] { display: none; }
@@ -143,7 +171,7 @@
   .note { margin: 12px 0 0; font: 400 14px/1.5 Barlow, system-ui, sans-serif; color: rgba(238,246,216,.7); }
   .note a { color: var(--lime); }
   .name { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: rgba(238,246,216,.75); }
-  .name input { width: 150px; padding: 9px 10px; border: 0; color: var(--ink); background: var(--ice); font: 600 14px 'Pixelify Sans', monospace; box-shadow: inset 0 0 0 2px var(--ink); }
+  .name input { width: 150px; padding: 9px 10px; border: 0; color: var(--ink); background: var(--ice); font: 600 16px 'Pixelify Sans', monospace; box-shadow: inset 0 0 0 2px var(--ink); }
   .qcbar { position: fixed; z-index: 9; left: 50%; top: max(66px, calc(env(safe-area-inset-top) + 62px)); transform: translateX(-50%); white-space: nowrap; padding: 6px 12px; background: var(--gold); color: var(--ink); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; box-shadow: 3px 3px 0 var(--ink); }
   .qcbar[hidden] { display: none; }
   @media (max-width: 640px) { .qcbar { top: calc(max(12px, env(safe-area-inset-top)) + 100px); font-size: 10px; } }
@@ -156,6 +184,7 @@
 </head>
 <body>
 <canvas id="scene" aria-hidden="true"></canvas>
+<div id="signs" aria-hidden="true"></div>
 <div class="bar">
   <a href="../" aria-label="Back to Harry's jungle">◂ Harry</a>
   <button id="mute" aria-pressed="false" aria-label="Sound">Sound on</button>
@@ -209,6 +238,7 @@
 (function () {
   'use strict';
   const K = JungleKit, T = TFT, TN = K.TONES, $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  K.noDoubleTapZoom();
   const QS = new URLSearchParams(location.search);
   const ROOT = new URL('../', location.href);
   const SHARE_URL = new URL('trivia/', ROOT).href, SHARE_TEXT_URL = SHARE_URL.replace(/^https?:\/\//, '').replace(/\/$/, '');
@@ -398,12 +428,30 @@
     // the crown on top
     for (let i = 0; i < 9; i++) P.clump(CX + (P.r() - 0.5) * BR * 1.6, rungY(BOARD.n) - 26 + P.r() * 14, 8 + P.r() * 8, i % 2 ? TN.leafLime : TN.leafB, [0, -1]);
     K.finalize(k.c, W, WH, { dither: 16, haze: 0.06, hazeColor: '#c6e4ec' });
-    // layer signs and rung numbers (after the pixel pass so they stay crisp)
-    const lab = (text, x, y, col = '#eef6d8') => { k.c.font = '8px "Pixelify Sans", monospace'; k.c.textBaseline = 'middle'; const w = Math.ceil(k.c.measureText(text).width) + 6; k.c.fillStyle = 'rgba(7,14,22,.78)'; k.c.fillRect(Math.round(x), Math.round(y - 5), w, 10); k.c.fillStyle = col; k.c.fillText(text, Math.round(x + 3), Math.round(y)); return w; };
-    [[0, 'Forest floor'], [0.25, 'Understory'], [0.5, 'Canopy'], [0.75, 'Emergent']].forEach(([f, name]) => lab(name.toUpperCase(), 3, f === 0 ? WH - GROUND - 8 : yL(f) - 3, '#c2ea6a'));
-    for (let r = 1; r <= BOARD.n; r++) { const y = rungY(r), s = sideOf(r), x = s > 0 ? CX - 22 - (r >= 10 ? 4 : 0) : CX + 10; lab(String(r), x, y - 1, BOARD.safe.includes(r) ? '#f6d24a' : '#eef6d8'); }
+    // layer signs and rung numbers are HTML text laid over the scene (see placeSigns), so they stay sharp
     WORLD = k.cv;
+    placeSigns(yL);
     makeSprites();
+  }
+  const SIGNS = $('#signs');
+  let signsY = null;
+  function placeSigns(yL) {
+    const fs = Math.min(18, Math.max(14, SCALE * 5));
+    SIGNS.style.setProperty('--sf', fs + 'px');
+    const el = (text, cls, x, y) => { const d = document.createElement('div'); d.className = 'sign ' + cls; d.textContent = text; d.style.left = Math.round(x * SCALE) + 'px'; d.style.top = Math.round(y * SCALE) + 'px'; return d; };
+    const out = [];
+    // a layer sign sits on the side of the tree away from the branch at that height, so the frog never lands on it
+    [[0, 'Forest floor'], [0.25, 'Understory'], [0.5, 'Canopy'], [0.75, 'Emergent']].forEach(([f, name]) => {
+      const r = BOARD.n * f, onLeft = f === 0 || (Number.isInteger(r) && r > 0 && sideOf(r) < 0);
+      const y = f === 0 ? WH - GROUND - 8 : yL(f) - 3;
+      out.push(onLeft ? el(name, 'layer right', W - 3, y) : el(name, 'layer', 3, y));
+    });
+    for (let r = 1; r <= BOARD.n; r++) {
+      const y = rungY(r) - 1, s = sideOf(r), safe = BOARD.safe.includes(r) ? ' safe' : '';
+      out.push(s > 0 ? el(String(r), 'rung right' + safe, CX - 10, y) : el(String(r), 'rung' + safe, CX + 10, y));
+    }
+    SIGNS.replaceChildren(...out);
+    signsY = null;
   }
   let SPR = null;
   function makeSprites() {
@@ -430,6 +478,7 @@
     const target = Math.max(0, Math.min(WH - H, focus - Math.max(30, visH * 0.62) - 50 / SCALE));
     cam += (target - cam) * 0.08; if (Math.abs(target - cam) < 0.3) cam = target;
     const cy = Math.round(cam);
+    if (cy !== signsY) { signsY = cy; SIGNS.style.transform = `translateY(${-cy * SCALE}px)`; }
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(WORLD, 0, -cy);
     const t6 = Math.floor(now / (1000 / 6));
