@@ -53,7 +53,8 @@ man.used = T.stateToUsed(st);
 
 const last = Object.keys(man.days).sort().pop();
 const runway = T.bankRunway(bank, man, T.addDays(last, 1));
-if (T.dayDiff(today, last) < 21 || runway < 21) warn(`Built to ${last}; the unused bank covers about ${runway} more days. Time to top up.`);
+const covered = Math.max(0, T.dayDiff(today, last)) + runway;   // built ahead + what the unused bank can still build
+if (covered < 42) warn(`Games are only covered to ${T.addDays(last, runway)} (${covered} days). Time to top up.`);
 man.last = last; man.updated = today;
 fs.writeFileSync(path.join(DIR, 'index.json'), JSON.stringify(man, null, 1) + '\n');
 fs.writeFileSync(path.join(DIR, 'views.tft'), T.encode(views));
