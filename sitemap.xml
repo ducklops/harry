@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://harryh.xyz/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image><image:loc>https://harryh.xyz/share/home.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/trivia/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image><image:loc>https://harryh.xyz/share/trivia.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/trolley/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <image:image><image:loc>https://harryh.xyz/share/trolley.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/flappy/</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://harryh.xyz/share/flappy.jpg</image:loc></image:image>
+  </url>
+</urlset>

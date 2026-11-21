@@ -22,6 +22,9 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `fonts/` | Self-hosted fonts (Climate Crisis, Pixelify Sans, Barlow, Cormorant Garamond), so nothing loads from Google |
 | `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png` | The "H" icon |
 | `icons/` | Icons you upload through the console end up here |
+| `robots.txt` | Tells search engines what to read: everything except the console and the old `pages` folder, and where the sitemap is |
+| `sitemap.xml` | The list of pages for search engines: home and the three games. Add a line if you make a new game |
+| `share/` | The 1200×630 preview pictures shown when a game is shared or turns up in search (`home.jpg`, `trivia.jpg`, `flappy.jpg`, `trolley.jpg`) |
 
 ## Tree-Frog Trivia
 
@@ -89,4 +92,6 @@ To get a key: GitHub → **Settings → Developer settings → Personal access t
 - **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
 - **Trolley Trials.** A new store every day (London time): the aisles, items, prices, budget and hazards come from the date, so everyone gets the same one. **Copy receipt** shares a text receipt; **Challenge a friend** shares a link with your route packed inside it, and their game races your ghost trolley on that day's store. Preview another day with `?day=2026-12-25`.
 - **Latest Letterboxd review.** Every three hours a GitHub Action (`.github/workflows/letterboxd.yml`) reads letterboxd.com/harryhayw/rss, saves the newest review to `letterboxd.json` and copies its poster into `letterboxd/`, so visitors never load anything from Letterboxd. It shows on the Gallery page as a card with the poster, stars and the start of the review (**Read the rest** opens the whole thing; reviews marked as spoilers stay hidden until tapped). To show it on another page, add an **HTML** block in the page editor containing `<div data-letterboxd></div>`. To refresh it straight away: repository → **Actions → Latest Letterboxd review → Run workflow**.
+- **Search engines.** Each game has its own title, description, preview picture and structured data (schema.org) in its `<head>`, so search results and shared links look right. After uploading, add harryh.xyz to [Google Search Console](https://search.google.com/search-console) and [Bing Webmaster Tools](https://www.bing.com/webmasters) and submit `https://harryh.xyz/sitemap.xml`.
+- **Phones.** Double-tapping no longer zooms the page in the games or the jungle (pinch-to-zoom still works). It's `touch-action: manipulation` in each page's CSS plus `JungleKit.noDoubleTapZoom()`. Text boxes are 16px or bigger so iPhones don't zoom when you type.
 - **Animation speed.** The frame rate is `const FPS = 6` in `jungle-kit.js`.

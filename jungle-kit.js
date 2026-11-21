@@ -994,9 +994,34 @@ ${body}
     let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 250); });
   }
 
+  /* =====================================================================
+     NO DOUBLE-TAP ZOOM — iPhones zoom the page when you tap twice quickly,
+     which wrecks fast-tapping games. CSS touch-action does most of the work;
+     this catches what iOS still lets through. Pinch-to-zoom is left alone,
+     and text boxes keep their normal double-tap (select a word).
+     ===================================================================== */
+  function noDoubleTapZoom() {
+    if (noDoubleTapZoom.on) return; noDoubleTapZoom.on = true;
+    const KEEP = 'input, textarea, select, [contenteditable]:not([contenteditable="false"])';
+    const ACT = 'button, a[href], label, summary, [role="button"], [data-tap], .critter';
+    let last = 0, lx = 0, ly = 0;
+    document.addEventListener('touchend', (e) => {
+      if (e.touches.length || e.changedTouches.length !== 1) { last = 0; return; }       // pinches and multi-finger
+      const t = e.changedTouches[0], now = e.timeStamp || performance.now();
+      const quick = now - last < 400 && Math.abs(t.clientX - lx) < 48 && Math.abs(t.clientY - ly) < 48;
+      last = now; lx = t.clientX; ly = t.clientY;
+      if (!quick) return;
+      const el = e.target && e.target.nodeType === 1 ? e.target : e.target && e.target.parentElement;
+      if (!el || el.closest(KEEP)) return;
+      e.preventDefault();                                   // stops the zoom (and the browser's own click)…
+      const hit = el.closest(ACT);
+      if (hit && !hit.disabled) hit.click();                // …so the tap still presses what it landed on
+    }, { passive: false });
+  }
+
   global.JungleKit = {
     A, SPECIES, rng, hash, esc, slugify, safeHref, safeImageSrc, iconHTML, animalIconURL, glyphIconURL, PLATFORMS, ICON_ANIMALS, ANIMAL_LABELS,
     Sprite, liveSprite, Painter, TONES, finalize, setGrade, Motion, DEFAULT_SITE, pageTemplate, decoratePage,
-    Consent, store, Env, SITE_ROOT, RESERVED, pageSlug, fontLink, iconLinks
+    Consent, store, Env, SITE_ROOT, RESERVED, pageSlug, fontLink, iconLinks, noDoubleTapZoom
   };
 })(window);

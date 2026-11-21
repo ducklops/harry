@@ -1,0 +1,13 @@
+# robots.txt for harryh.xyz
+# Everything is open to search engines except the editing console and old leftovers.
+# The game data in /trivia/data/ stays open so search engines can load the games properly;
+# the questions are encoded, so answers can't be read or searched.
+
+User-agent: *
+Allow: /
+Disallow: /console.html
+Disallow: /pages/
+Disallow: /*?qc=
+Disallow: /*&qc=
+
+Sitemap: https://harryh.xyz/sitemap.xml

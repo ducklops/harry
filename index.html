@@ -3,8 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Harry</title>
-<meta name="description" content="Harry">
+<title>Harry · A pixel-art jungle with free daily games</title>
+<meta name="description" content="Harry's pixel-art jungle, with free daily browser games: Tree-Frog Trivia, Trolley Trials and Jungle Flappy. The jungle follows the time of day and the weather.">
+<link rel="canonical" href="https://harryh.xyz/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/">
+<meta property="og:title" content="Harry">
+<meta property="og:description" content="A pixel-art jungle with free daily games. Come and have a look around.">
+<meta property="og:image" content="https://harryh.xyz/share/home.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Harry's pixel-art jungle home page with animals, a waterfall and wooden signs to the games">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://harryh.xyz/share/home.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Harry", "alternateName": "harryh.xyz", "url": "https://harryh.xyz/", "description": "Harry's pixel-art jungle, with free daily browser games: Tree-Frog Trivia, Trolley Trials and Jungle Flappy. The jungle follows the time of day and the weather.", "inLanguage": "en-GB", "publisher": {"@type": "Organization", "name": "Ducklops"}, "hasPart": [{"@type": "VideoGame", "name": "Tree-Frog Trivia", "url": "https://harryh.xyz/trivia/"}, {"@type": "VideoGame", "name": "Jungle Flappy", "url": "https://harryh.xyz/flappy/"}, {"@type": "VideoGame", "name": "Trolley Trials", "url": "https://harryh.xyz/trolley/"}]}</script>
 <meta name="theme-color" content="#0f1f2e">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -14,6 +29,8 @@
   :root { --u: min(1vw, 1.8vh); --px: 4px; --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --navy: #0f1f2e; }
   @media (orientation: portrait) { :root { --u: min(1.9vw, 1.1vh); } }
   * { box-sizing: border-box; }
+  /* no double-tap zoom on phones (pinch-zoom still works) */
+  *, *::before, *::after { touch-action: manipulation; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: #13293a; color: var(--ice); font-family: 'Pixelify Sans', ui-monospace, monospace; }
   body { -webkit-tap-highlight-color: transparent; }
   canvas, img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
@@ -246,6 +263,8 @@
 (function () {
   'use strict';
   const K = JungleKit, M = K.Motion, T = K.TONES;
+  K.noDoubleTapZoom();
+  const homeTitle = () => (SITE.title || 'Harry') + ' · A pixel-art jungle with free daily games';
   const $ = (s) => document.querySelector(s);
   const layers = {};
   document.querySelectorAll('.layer').forEach((l) => { layers[l.id.slice(2).toLowerCase()] = l; });
@@ -601,7 +620,7 @@
   }
   function renderContent() {
     const title = String(SITE.title || 'Harry');
-    document.title = title;
+    document.title = homeTitle();
     const t = $('#title'); t.setAttribute('aria-label', title);
     t.innerHTML = [...title].map((ch) => `<span class="ch" aria-hidden="true">${ch === ' ' ? '&nbsp;' : K.esc(ch)}</span>`).join('');
     t.querySelectorAll('.ch').forEach((ch) => { ch._yr = 1979; ch._tgt = 1979; ch.addEventListener('pointerenter', () => { ch._tgt = 2018; clearTimeout(ch._to); ch._to = setTimeout(() => { ch._tgt = 1979; }, 1300); }); });
@@ -1043,7 +1062,7 @@
   }
   function closeReader(push) {
     readSeq++; if (push) history.pushState({}, '', ROOT.href);
-    if (!reading) return; reading = false; document.body.classList.remove('reading'); document.title = SITE.title || 'Harry';
+    if (!reading) return; reading = false; document.body.classList.remove('reading'); document.title = homeTitle();
     if (AC && soundOn) MASTER.gain.setTargetAtTime(0.9, AC.currentTime, 0.6);
   }
   document.addEventListener('click', (e) => {
