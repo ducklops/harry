@@ -10,6 +10,9 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `about/`, `projects/`, `gallery/`, `contact/` | Your pages. Each is a folder with an `index.html`, so it lives at harryh.xyz/about and so on |
 | `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy |
 | `trolley/` | Trolley Trials, the jungle-market trolley game, at harryh.xyz/trolley |
+| `arcade/` | The Jungle Arcade, at harryh.xyz/arcade: three CRT cabinets standing in the jungle, each playing a tiny preview of its game. It hangs as one **Arcade** sign in the jungle |
+| `swing/`, `stack/`, `snap/` | The arcade's three endless games: Vine Swing, Canopy Stack and Tongue Snap |
+| `arcade-kit.js`, `arcade-kit.css` | The shared frame for the three arcade games: menu, missions, ranks, shop, result screen, sounds and share card |
 | `trivia/` | Tree-Frog Trivia, the daily trivia climb, at harryh.xyz/trivia. `trivia/data/` holds the question bank and the built days (encoded, see below) |
 | `cookies/` | The cookie policy, at harryh.xyz/cookies |
 | `404.html` | The "Lost in the jungle" page, at harryh.xyz/404. GitHub Pages shows it for any address that doesn't exist; it switches the address to /404 and suggests the page you probably meant. Keep it at the top of the repository |
@@ -23,8 +26,28 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 | `favicon.svg`, `favicon-32.png`, `apple-touch-icon.png` | The "H" icon |
 | `icons/` | Icons you upload through the console end up here |
 | `robots.txt` | Tells search engines what to read: everything except the console and the old `pages` folder, and where the sitemap is |
-| `sitemap.xml` | The list of pages for search engines: home and the three games. Add a line if you make a new game |
-| `share/` | The 1200×630 preview pictures shown when a game is shared or turns up in search (`home.jpg`, `trivia.jpg`, `flappy.jpg`, `trolley.jpg`) |
+| `sitemap.xml` | The list of pages for search engines: home, the games and the arcade. Add a line if you make a new game |
+| `share/` | The 1200×630 preview pictures shown when a game is shared or turns up in search (`home.jpg`, `trivia.jpg`, `flappy.jpg`, `trolley.jpg`, `arcade.jpg`, `swing.jpg`, `stack.jpg`, `snap.jpg`) |
+
+## The Jungle Arcade
+
+harryh.xyz/arcade is a clearing in the jungle with three arcade cabinets. Each screen plays a little looping preview; tap a cabinet to play. Only the **Arcade** sign hangs in the jungle, so the games don't crowd the branches. Each game has a **◂ Arcade** button to get back.
+
+All three are endless, played with one button or one tap, and start gently before getting harder the longer a run goes on. They share the same extras:
+- **Currency and a shop.** Every run earns bananas, nuts or dewdrops. Spend them on new characters (8 per game) and upgrades (5 per game, each with a few levels).
+- **Missions.** Three at a time, such as "Swing 400 m in one run". Finishing one pays out straight away and brings in a harder one. Every three missions raises your rank (Seedling, Sprout, Sapling … Jungle legend).
+- **Changing scenery.** Time of day moves on as you play (Vine Swing and Tongue Snap) or the sky changes as you climb (Canopy Stack), and new hazards turn up.
+- **Result screen** with your best, what you earned and mission progress, plus **Share** and **Save image** (a score card).
+- **Pause** with the button, **Esc** or **P**; the game also pauses itself if you switch tabs.
+- Progress is kept on the device only if cookies are accepted (`harry-swing`, `harry-stack`, `harry-snap`, listed in the cookie policy).
+
+| Game | How it plays | What changes as you go |
+|---|---|---|
+| **Vine Swing** (`swing/`) | Hold to grab the nearest vine (it blinks when it's in reach), let go to fling. Cross the crocodile river, collect bananas. Fast swinging builds **flow** (up to ×5 bananas). Flinging past a vine without grabbing it is a **skip** bonus; a fast fling does a **flip**. Lily pads bounce you back up once. A **BEST** flag marks your record in the river. | A new time of day every 400 m. Rotten vines that snap from 300 m, swaying vines from 600 m, longer gaps, fewer lily pads, and wasps that knock you off from 1 km. |
+| **Canopy Stack** (`stack/`) | Tap to drop the swinging plank onto the treehouse. Overhangs are chopped off; **perfect** drops keep the width, and a streak of perfects grows it back. Animals move in at milestones (a tree frog at 10 floors, a toucan at 32 and so on). | The sky changes from forest floor to canopy, clouds, sunset and stars. Planks speed up, come from alternate sides from floor 25, gust about from floor 60, and clouds drift in front from floor 100. |
+| **Tongue Snap** (`snap/`) | Tap where you want the chameleon's tongue to go (Space aims at the nearest bug). Bugs keep its **belly** full; it slowly empties and the run ends when it's empty. Catch in a row for a multiplier, line bugs up for doubles. Eating a wasp costs a chunk of belly. | A new time of day every 45 seconds, with fireflies at dusk and night. Wasps from 25 s, hornets from 2 minutes, faster bugs and a hungrier chameleon. |
+
+To tweak a game, the characters, prices, upgrade costs and mission targets are near the top of each game's `index.html`; the difficulty lives further down (`generate()` in Vine Swing, `speed()` in Canopy Stack, `spawn()` and the belly drain in Tongue Snap). Add `?time=night` to preview a time of day.
 
 ## Tree-Frog Trivia
 
@@ -88,7 +111,7 @@ To get a key: GitHub → **Settings → Developer settings → Personal access t
 - **Sound.** Switch it on with the music-note button. If a visitor has accepted cookies, the site remembers it, and sound resumes on their next click.
 - **Cookies.** Visitors choose **Accept** or **Essential only**. Nothing optional is stored on their device unless they accept. Add a contact email to `cookies/index.html` if you'd like one on the policy.
 - **Editing a page.** In the console, press **✎ Edit page** next to any page. Type straight onto the page, add headings, text, pictures, galleries, quotes, buttons, embeds (YouTube, Vimeo, Spotify, SoundCloud, TikTok, Google Maps) and dividers from the **Add** bar, drag blocks by ⠿ to move them, and drop pictures from your computer anywhere on the page. Big photos are shrunk automatically and saved in `media/`. Only the inside of the page's content box changes; anything the editor doesn't recognise is kept as an HTML block, exactly as written.
-- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy, Trolley Trials and Tree-Frog Trivia hang in the jungle by default.
+- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy, Trolley Trials, Tree-Frog Trivia and the Arcade hang in the jungle by default.
 - **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
 - **Trolley Trials.** A new store every day (London time): the aisles, items, prices, budget and hazards come from the date, so everyone gets the same one. **Copy receipt** shares a text receipt; **Challenge a friend** shares a link with your route packed inside it, and their game races your ghost trolley on that day's store. Preview another day with `?day=2026-12-25`.
 - **Latest Letterboxd review.** Every three hours a GitHub Action (`.github/workflows/letterboxd.yml`) reads letterboxd.com/harryhayw/rss, saves the newest review to `letterboxd.json` and copies its poster into `letterboxd/`, so visitors never load anything from Letterboxd. It shows on the Gallery page as a card with the poster, stars and the start of the review (**Read the rest** opens the whole thing; reviews marked as spoilers stay hidden until tapped). To show it on another page, add an **HTML** block in the page editor containing `<div data-letterboxd></div>`. To refresh it straight away: repository → **Actions → Latest Letterboxd review → Run workflow**.

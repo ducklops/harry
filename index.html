@@ -19,7 +19,7 @@
 <meta property="og:image:alt" content="Harry's pixel-art jungle home page with animals, a waterfall and wooden signs to the games">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://harryh.xyz/share/home.jpg">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Harry", "alternateName": "harryh.xyz", "url": "https://harryh.xyz/", "description": "Harry's pixel-art jungle, with free daily browser games: Tree-Frog Trivia, Trolley Trials and Jungle Flappy. The jungle follows the time of day and the weather.", "inLanguage": "en-GB", "publisher": {"@type": "Organization", "name": "Ducklops"}, "hasPart": [{"@type": "VideoGame", "name": "Tree-Frog Trivia", "url": "https://harryh.xyz/trivia/"}, {"@type": "VideoGame", "name": "Jungle Flappy", "url": "https://harryh.xyz/flappy/"}, {"@type": "VideoGame", "name": "Trolley Trials", "url": "https://harryh.xyz/trolley/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Harry", "alternateName": "harryh.xyz", "url": "https://harryh.xyz/", "description": "Harry's pixel-art jungle, with free browser games: Tree-Frog Trivia, Trolley Trials, Jungle Flappy and the Jungle Arcade (Vine Swing, Canopy Stack and Tongue Snap). The jungle follows the time of day and the weather.", "inLanguage": "en-GB", "publisher": {"@type": "Organization", "name": "Ducklops"}, "hasPart": [{"@type": "VideoGame", "name": "Tree-Frog Trivia", "url": "https://harryh.xyz/trivia/"}, {"@type": "VideoGame", "name": "Jungle Flappy", "url": "https://harryh.xyz/flappy/"}, {"@type": "VideoGame", "name": "Trolley Trials", "url": "https://harryh.xyz/trolley/"}, {"@type": "CollectionPage", "name": "Jungle Arcade", "url": "https://harryh.xyz/arcade/"}, {"@type": "VideoGame", "name": "Vine Swing", "url": "https://harryh.xyz/swing/"}, {"@type": "VideoGame", "name": "Canopy Stack", "url": "https://harryh.xyz/stack/"}, {"@type": "VideoGame", "name": "Tongue Snap", "url": "https://harryh.xyz/snap/"}]}</script>
 <meta name="theme-color" content="#0f1f2e">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
@@ -416,7 +416,7 @@
     K.finalize(c, Math.ceil(LW), Math.ceil(LH), { haze: hz(0.07), hazeColor: '#bfe0dc', dither: 14 });
     const b1a = pick([11, 18]), b1b = pick([20, 30]), b3a = pick([80, 68]), b3b = pick([91, 90]);
     sprite(L, 'macaw', b1a, by('B1', b1a), pick([5.4, 5]), [0.5, 0.57], { tree: true });
-    sprite(L, 'monkey', b1b, by('B1', b1b), pick([8.5, 8]), [0.5, 0.02], { origin: '50% 2%', tree: true });
+    sprite(L, 'monkey', b1b, by('B1', b1b), pick([8.5, 8]), [0.44, 0.02], { origin: '44% 2%', tree: true });
     sprite(L, 'jaguar', pick([13, 16]), by('B2', pick([13, 16])), pick([17, 14]), [0.5, 0.62]);
     sprite(L, 'toucan', b3a, by('B3', b3a), pick([7, 6.5]), [0.4, 0.84], { flip: true, tree: true });
     sprite(L, 'parrot', b3b, by('B3', b3b), pick([4.4, 4.4]), [0.5, 0.71], { flip: true, tree: true });
@@ -601,10 +601,10 @@
   function sizePixelImgs(root) {
     root.querySelectorAll('img.px').forEach((img) => { const set = () => { const box = img.closest('.frame, .soc'), fit = box ? box.clientHeight * 0.78 / img.naturalHeight : PX; img.style.width = img.naturalWidth * Math.min(PX, Math.max(1, fit)) + 'px'; }; if (img.complete && img.naturalWidth) set(); else img.addEventListener('load', set, { once: true }); });
   }
-  const placeOf = (p) => p.place || (['flappy', 'trolley', 'trivia'].includes(p.url) ? 'jungle' : 'menu');
+  const placeOf = (p) => p.place || (['flappy', 'trolley', 'trivia', 'arcade'].includes(p.url) ? 'jungle' : 'menu');
   /** pages set to "In the jungle" hang as wooden signs from these branch spots (viewport %) */
   function jungleSigns(L, by) {
-    const spots = PORTRAIT ? [['B3', 74], ['B2', 26], ['B4', 70], ['B1', 9]] : [['B3', 86], ['B2', 20], ['B4', 79], ['B1', 7], ['B5', 89]];
+    const spots = PORTRAIT ? [['B3', 74], ['B2', 26], ['B4', 70], ['B1', 30]] : [['B3', 86], ['B2', 20], ['B4', 79], ['B1', 7], ['B5', 89]];
     const gm = gradeFor().mul, bright = ((gm[0] + gm[1] + gm[2]) / 3 * 1.1).toFixed(2);
     (SITE.pages || []).filter((p) => placeOf(p) === 'jungle').slice(0, spots.length).forEach((p, i) => {
       const [b, vx] = spots[i], vy = by(b, vx); if (vy == null) return;
@@ -988,7 +988,7 @@
      ===================================================================== */
   const ROOT = new URL('./', location.href);
   const DRAFT = /[?&]draft\b/.test(location.search);   // console preview: unpublished pages come from this device
-  const APP_PAGES = ['flappy', 'trolley', 'trivia'];   // full pages of their own (games etc.) — not shown in the reading view
+  const APP_PAGES = ['flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap'];   // full pages of their own (games etc.) — not shown in the reading view
   let reading = false, readSeq = 0;
   /** {key, fetch, pretty} for an internal page link, otherwise null */
   function pageInfo(u) {

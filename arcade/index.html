@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jungle Arcade · Free endless browser games</title>
+<meta name="description" content="Three free pixel-art endless games in a jungle arcade: Vine Swing, Canopy Stack and Tongue Snap. Easy to pick up, hard to put down. No download needed.">
+<meta name="keywords" content="arcade games, endless games, free browser games, pixel art games, one button games">
+<link rel="canonical" href="https://harryh.xyz/arcade/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/arcade/">
+<meta property="og:title" content="Jungle Arcade">
+<meta property="og:description" content="Vine Swing, Canopy Stack and Tongue Snap: three endless games in the jungle.">
+<meta property="og:image" content="https://harryh.xyz/share/arcade.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Three pixel-art arcade cabinets standing in the jungle">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jungle Arcade">
+<meta name="twitter:description" content="Vine Swing, Canopy Stack and Tongue Snap: three endless games in the jungle.">
+<meta name="twitter:image" content="https://harryh.xyz/share/arcade.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Jungle Arcade", "url": "https://harryh.xyz/arcade/", "description": "Three free pixel-art endless games: Vine Swing, Canopy Stack and Tongue Snap.", "image": "https://harryh.xyz/share/arcade.jpg", "inLanguage": "en-GB", "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}, "hasPart": [{"@type": "VideoGame", "name": "Vine Swing", "url": "https://harryh.xyz/swing/"}, {"@type": "VideoGame", "name": "Canopy Stack", "url": "https://harryh.xyz/stack/"}, {"@type": "VideoGame", "name": "Tongue Snap", "url": "https://harryh.xyz/snap/"}]}</script>
+<meta name="theme-color" content="#0f1f2e">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  :root { --ice: #eef6d8; --lime: #c2ea6a; --ink: #070e16; --px: 3px; }
+  * { box-sizing: border-box; }
+  *, *::before, *::after { touch-action: manipulation; }
+  html, body { margin: 0; min-height: 100%; background: #0b1622; color: var(--ice); font-family: 'Pixelify Sans', ui-monospace, monospace; -webkit-tap-highlight-color: transparent; }
+  #bg { position: fixed; inset: 0; width: 100vw; height: 100vh; image-rendering: pixelated; image-rendering: crisp-edges; z-index: 0; }
+  .bar { position: fixed; z-index: 5; top: max(12px, env(safe-area-inset-top)); left: max(12px, env(safe-area-inset-left)); }
+  .bar a { display: grid; place-items: center; height: 44px; padding: 0 12px; color: var(--ice); text-decoration: none; font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .14em; text-transform: uppercase; background: rgba(7,14,22,.6); box-shadow: inset 0 0 0 3px rgba(238,246,216,.35); }
+  .bar a:hover, .bar a:focus-visible { box-shadow: inset 0 0 0 3px var(--lime); color: var(--lime); outline: none; }
+  main { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: max(70px, env(safe-area-inset-top)) 12px 60px; }
+  h1 { margin: 6px 0 4px; font: 400 clamp(34px, 7vw, 64px)/1 'Climate Crisis', 'Arial Black', sans-serif; text-align: center; text-shadow: 0 .06em 0 #070e16, 0 0 24px rgba(194,234,106,.35); }
+  .tag { margin: 8px 0 22px; padding: 6px 12px; text-align: center; font: 400 16px/1.5 Barlow, system-ui, sans-serif; color: var(--ice); background: rgba(7,14,22,.7); max-width: 520px; }
+  .row { display: flex; gap: clamp(14px, 3vw, 34px); align-items: flex-end; justify-content: center; width: 100%; }
+  @media (max-width: 760px) {
+    .row { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 9vw 18px; margin: 0 -12px; width: 100vw; scrollbar-width: none; }
+    .row::-webkit-scrollbar { display: none; }
+    .swipe { display: block !important; }
+  }
+  .swipe { display: none; margin-top: 2px; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: rgba(238,246,216,.8); text-shadow: 0 1px 0 #070e16; }
+
+  /* ---- a cabinet ---- */
+  .cab { --body: #2c883a; --dark: #164c2e; --hi: #82d044; --glow: 130,208,68;
+    flex: 0 0 auto; width: clamp(220px, 26vw, 270px); scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ice); transition: transform .15s steps(3); position: relative; }
+  .cab.stack { --body: #a8602a; --dark: #5e3826; --hi: #e8a868; --glow: 246,170,62; }
+  .cab.snap { --body: #2a62c8; --dark: #1a3a7a; --hi: #82d0e8; --glow: 130,208,232; }
+  .cab:hover, .cab:focus-visible { transform: translateY(-6px); outline: none; }
+  .cab:focus-visible .screen { outline: 3px solid var(--lime); outline-offset: 4px; }
+  .marquee { width: 100%; padding: 12px 8px 10px; text-align: center; background: linear-gradient(180deg, #fff6c8, #f6d24a); color: #2a1a10; box-shadow: inset 0 0 0 var(--px) var(--ink), inset 0 calc(var(--px) * -3) 0 rgba(0,0,0,.12), 0 0 26px rgba(246,210,74,.55);
+    font: 400 clamp(17px, 2vw, 21px)/1 'Climate Crisis', 'Arial Black', sans-serif; letter-spacing: .02em; position: relative; }
+  .marquee::before, .marquee::after { content: ''; position: absolute; top: -10px; width: 26px; height: 14px; background: radial-gradient(circle at 50% 100%, #3a9c3a 0 6px, transparent 7px), radial-gradient(circle at 20% 80%, #237438 0 5px, transparent 6px); }
+  .marquee::before { left: 6px; } .marquee::after { right: 10px; transform: scaleX(-1); }
+  .head { width: 100%; padding: 14px 16px 16px; background: var(--body); box-shadow: inset 0 0 0 var(--px) var(--ink), inset var(--px) var(--px) 0 calc(var(--px) * 2) var(--hi), inset calc(var(--px) * -3) 0 0 var(--dark); }
+  .screen { position: relative; aspect-ratio: 4 / 3; border-radius: 16px / 14px; overflow: hidden; background: #040806;
+    box-shadow: 0 0 0 calc(var(--px) * 2) #14181a, 0 0 0 calc(var(--px) * 3) #3a3e40, 0 0 22px rgba(var(--glow), .45); animation: flick 6s steps(1) infinite; }
+  .screen canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; filter: saturate(1.15) contrast(1.05); }
+  .screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: repeating-linear-gradient(180deg, rgba(0,0,0,.28) 0 1px, transparent 1px 3px), radial-gradient(ellipse at 50% 40%, rgba(255,255,255,.08), transparent 55%), radial-gradient(ellipse at center, transparent 58%, rgba(0,0,0,.55) 100%);
+    box-shadow: inset 0 0 26px rgba(0,0,0,.75); }
+  .cab:hover .screen canvas { filter: saturate(1.3) contrast(1.1) brightness(1.1); }
+  @keyframes flick { 0%, 96% { filter: none; } 97% { filter: brightness(1.25); } 98% { filter: brightness(.92); } }
+  .deck { width: 106%; height: 56px; margin-top: -2px; background: var(--dark); clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%); position: relative; box-shadow: inset 0 var(--px) 0 var(--hi); }
+  .deck .stick { position: absolute; left: 22%; top: 8px; width: 8px; height: 22px; background: #14181a; }
+  .deck .stick::before { content: ''; position: absolute; left: -7px; top: -10px; width: 22px; height: 22px; border-radius: 50%; background: #e0503e; box-shadow: inset -3px -3px 0 #8c1a28, inset 3px 3px 0 #f0803a; }
+  .deck .btns { position: absolute; right: 18%; top: 16px; display: flex; gap: 10px; }
+  .deck .btns i { width: 18px; height: 18px; border-radius: 50%; background: #f6d24a; box-shadow: inset -2px -2px 0 #b88a12, 0 3px 0 #14181a; }
+  .deck .btns i + i { background: #82d0e8; box-shadow: inset -2px -2px 0 #2a62c8, 0 3px 0 #14181a; }
+  .base { width: 100%; padding: 12px 12px 14px; background: var(--body); box-shadow: inset 0 0 0 var(--px) var(--ink), inset calc(var(--px) * -3) 0 0 var(--dark); text-align: center; }
+  .base .how { display: block; min-height: 2.8em; font: 400 14px/1.4 Barlow, system-ui, sans-serif; color: var(--ice); text-shadow: 0 1px 0 rgba(7,14,22,.6); }
+  .base .best { display: block; margin-top: 8px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #fff6c8; }
+  .base .play { display: inline-block; margin-top: 10px; padding: 10px 18px; color: var(--ink); background: var(--lime); font: 600 13px 'Pixelify Sans', monospace; letter-spacing: .16em; text-transform: uppercase; box-shadow: inset 0 0 0 3px var(--ink), 3px 3px 0 var(--ink); }
+  .cab:hover .play { filter: brightness(1.08); }
+  .slot { width: 46%; height: 26px; background: #14181a; box-shadow: inset 0 0 0 var(--px) #3a3e40; display: flex; justify-content: center; align-items: center; gap: 10px; }
+  .slot i { width: 3px; height: 12px; background: #e0503e; box-shadow: 0 0 6px #e0503e; animation: blink 1.4s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .more { margin-top: 26px; padding: 12px 16px; background: rgba(7,14,22,.7); box-shadow: inset 0 0 0 3px rgba(238,246,216,.25); font: 400 15px/1.6 Barlow, system-ui, sans-serif; text-align: center; max-width: 560px; }
+  .more a { color: var(--lime); font-weight: 600; }
+  .copy { margin-top: 22px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: rgba(238,246,216,.8); text-shadow: 0 1px 0 #070e16; }
+  .copy a { color: inherit; }
+  @media (prefers-reduced-motion: reduce) { .screen, .slot i { animation: none; } .cab { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="bar"><a href="../" aria-label="Back to Harry's jungle">◂ Harry</a></div>
+<main>
+  <h1>Jungle Arcade</h1>
+  <p class="tag">Three endless games, easy to pick up and hard to put down. Pick a cabinet.</p>
+  <div class="row" id="row">
+    <a class="cab swing" href="../swing/" aria-label="Play Vine Swing">
+      <div class="marquee">Vine Swing</div>
+      <div class="head"><div class="screen"><canvas width="112" height="84" data-game="swing"></canvas></div></div>
+      <div class="deck" aria-hidden="true"><span class="stick"></span><span class="btns"><i></i><i></i></span></div>
+      <div class="base"><span class="how">Hold to grab a vine, let go to fling. Don’t drop in the river.</span><span class="best" data-best="harry-swing" data-unit="m"></span><span class="play">Play</span></div>
+      <div class="slot" aria-hidden="true"><i></i><i></i></div>
+    </a>
+    <a class="cab stack" href="../stack/" aria-label="Play Canopy Stack">
+      <div class="marquee">Canopy Stack</div>
+      <div class="head"><div class="screen"><canvas width="112" height="84" data-game="stack"></canvas></div></div>
+      <div class="deck" aria-hidden="true"><span class="stick"></span><span class="btns"><i></i><i></i></span></div>
+      <div class="base"><span class="how">Tap to drop each plank. Build your treehouse up to the stars.</span><span class="best" data-best="harry-stack" data-unit="floors"></span><span class="play">Play</span></div>
+      <div class="slot" aria-hidden="true"><i></i><i></i></div>
+    </a>
+    <a class="cab snap" href="../snap/" aria-label="Play Tongue Snap">
+      <div class="marquee">Tongue Snap</div>
+      <div class="head"><div class="screen"><canvas width="112" height="84" data-game="snap"></canvas></div></div>
+      <div class="deck" aria-hidden="true"><span class="stick"></span><span class="btns"><i></i><i></i></span></div>
+      <div class="base"><span class="how">Tap to flick your tongue at bugs. Keep your belly full. Avoid wasps.</span><span class="best" data-best="harry-snap" data-unit="pts"></span><span class="play">Play</span></div>
+      <div class="slot" aria-hidden="true"><i></i><i></i></div>
+    </a>
+  </div>
+  <div class="swipe">Swipe for more cabinets ▸</div>
+  <p class="more">More games hang from the branches back in the jungle: <a href="../flappy/">Jungle Flappy</a>, <a href="../trolley/">Trolley Trials</a> and <a href="../trivia/">Tree-Frog Trivia</a>.</p>
+  <div class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
+</main>
+
+<script src="../jungle-kit.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit, T = K.TONES, QS = new URLSearchParams(location.search);
+  K.noDoubleTapZoom();
+  document.querySelectorAll('.yr').forEach((y) => { y.textContent = new Date().getFullYear(); });
+  const phase = QS.get('time') || K.Env.phase();
+  const mk = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return { cv: c, c: c.getContext('2d', { willReadFrequently: true }) }; };
+
+  /* ---------- best scores (only if storage is allowed) ---------- */
+  function bests() {
+    document.querySelectorAll('[data-best]').forEach((el) => {
+      let d = null; try { d = JSON.parse(K.store.get(el.dataset.best) || 'null'); } catch (e) { d = null; }
+      el.textContent = d && d.best ? `Your best: ${Math.round(d.best).toLocaleString('en-GB')} ${el.dataset.unit}` : 'Not played yet';
+    });
+  }
+  bests(); K.Consent.onChange(bests);
+
+  /* ---------- the jungle clearing behind the cabinets ---------- */
+  const SKY = {
+    night: [[0, '#070e16'], [0.6, '#0f1f2e'], [1, '#1e4152']], dusk: [[0, '#13293a'], [0.35, '#4a2a6a'], [0.7, '#e0503e'], [1, '#f6aa3e']],
+    dawn: [[0, '#25505e'], [0.45, '#e0a8f0'], [1, '#fff09a']], golden: [[0, '#4a8cc0'], [0.5, '#c6e4ec'], [1, '#f6aa3e']], day: [[0, '#4a8cc0'], [0.4, '#82bede'], [0.75, '#c6e4ec'], [1, '#e2f0e6']]
+  };
+  const GRADE = { day: [1, 1, 1], golden: [1.07, 0.96, 0.82], dawn: [0.9, 0.82, 0.92], dusk: [0.8, 0.64, 0.76], night: [0.45, 0.52, 0.74] };
+  const bg = document.getElementById('bg');
+  function paintBg() {
+    const PXS = Math.max(2, Math.round(Math.min(innerWidth, innerHeight) / 220)), W = Math.ceil(innerWidth / PXS), H = Math.ceil(innerHeight / PXS);
+    bg.width = W; bg.height = H; const c = bg.getContext('2d'); const P = new K.Painter(c, 11);
+    K.setGrade({ mul: GRADE[phase] || [1, 1, 1], sat: 1 });
+    P.vgrad(0, 0, W, H, SKY[phase] || SKY.day);
+    if (phase === 'night') { const R = K.rng(3); for (let i = 0; i < W * H / 150; i++) { c.fillStyle = R() > 0.6 ? '#e8f0f4' : '#96a8c4'; c.fillRect(Math.floor(R() * W), Math.floor(R() * H * 0.5), 1, 1); } }
+    else P.rgrad(W * 0.5, H * 0.2, H * 0.6, [[0, 'rgba(255,251,230,.8)'], [1, 'rgba(255,251,230,0)']]);
+    for (let i = 0; i < W / 9; i++) P.clump(P.r() * W, H * (0.5 + P.r() * 0.18), 10 + P.r() * 16, T.leafTeal, [0, -1]);
+    c.fillStyle = '#2e606a'; c.fillRect(0, H * 0.64, W, H);
+    const trunks = Math.max(3, Math.round(W / 70));
+    for (let i = 0; i < trunks; i++) { const x = (i + 0.2 + P.r() * 0.6) * W / trunks; P.trunk(x, -4, H * 0.86, 8 + P.r() * 6, 12 + P.r() * 8, i % 2 ? T.bark : T.barkCool, { moss: true }); }
+    for (let i = 0; i < W / 6; i++) P.clump(P.r() * W, P.r() * H * 0.16, 10 + P.r() * 14, i % 3 ? T.leafA : T.leafB, [0, 1]);
+    for (let i = 0; i < W / 22; i++) { const x = P.r() * W; P.liana([[x, -4], [x + 8, H * 0.15], [x - 8, H * 0.3], [x + 3, H * (0.2 + P.r() * 0.35)]], 1.6, T.leafA, { leaves: 4, leafTone: T.leafB }); }
+    // clearing floor
+    c.fillStyle = '#46281c'; c.fillRect(0, H * 0.84, W, H); c.fillStyle = '#301c14'; for (let i = 0; i < W * 2; i++) c.fillRect(Math.floor(P.r() * W), Math.floor(H * 0.85 + P.r() * H * 0.15), 2, 1);
+    for (let i = 0; i < W / 7; i++) P.frond(P.r() * W, H * 0.86, 14 + P.r() * 16, -Math.PI / 2 + (P.r() - 0.5) * 1.8, i % 2 ? T.leafB : T.leafMid, { leaf: 5 });
+    for (let i = 0; i < W / 30; i++) P.bromeliad(P.r() * W, H * (0.88 + P.r() * 0.08), 6 + P.r() * 4, i % 2 ? T.red : ['#4a2a6a', '#7a46a8', '#b47ad8', '#e0a8f0', '#fff09a']);
+    K.finalize(c, W, H, { dither: 20, grade: phase === 'night' ? 0.5 : 0.85 });
+    K.setGrade({ mul: [1, 1, 1], sat: 1 });
+  }
+  paintBg(); addEventListener('resize', () => { clearTimeout(paintBg.t); paintBg.t = setTimeout(paintBg, 200); });
+
+  /* ---------- tiny attract-mode previews on each screen ---------- */
+  const R0 = K.rng(21);
+  const SW = 112, SH = 84;
+  const monkey = new K.Sprite('monkey', 10, { pad: 1, grade: 0 }); monkey.render({});
+  const cham = new K.Sprite('chameleon', 34, { pad: 1, grade: 0 }); cham.render({ op: { '.p-tongue': 0 } });
+  const fly = (on) => { const k = mk(4, 3); k.c.fillStyle = '#dcecf4'; if (on) { k.c.fillRect(0, 0, 1, 1); k.c.fillRect(3, 0, 1, 1); } else { k.c.fillRect(0, 1, 1, 1); k.c.fillRect(3, 1, 1, 1); } k.c.fillStyle = '#14181a'; k.c.fillRect(1, 1, 2, 2); return k.cv; };
+  const FLY = [fly(0), fly(1)];
+  const bfly = (c1, on) => { const k = mk(5, 4); k.c.fillStyle = c1; if (on) { k.c.fillRect(0, 0, 2, 3); k.c.fillRect(3, 0, 2, 3); } else { k.c.fillRect(1, 0, 1, 3); k.c.fillRect(3, 0, 1, 3); } k.c.fillStyle = '#14181a'; k.c.fillRect(2, 0, 1, 4); return k.cv; };
+  const BFLY = ['#3aa8f0', '#f08a1a'].map((c) => [bfly(c, 0), bfly(c, 1)]);
+  // static pieces for each screen
+  function scenery(seed, stops, ground) {
+    const k = mk(SW * 2, SH), P = new K.Painter(k.c, seed); P.vgrad(0, 0, SW * 2, SH, stops);
+    for (let i = 0; i < 16; i++) P.clump(P.r() * SW * 2, SH * (0.55 + P.r() * 0.2), 8 + P.r() * 8, T.leafTeal, [0, -1]);
+    for (let i = 0; i < 4; i++) P.trunk((i + 0.3) * SW / 2, -2, SH, 4, 6, T.barkCool, { moss: false });
+    for (let i = 0; i < 18; i++) P.clump(P.r() * SW * 2, P.r() * 8, 6 + P.r() * 6, T.leafA, [0, 1]);
+    if (ground) ground(k.c, P);
+    K.finalize(k.c, SW * 2, SH, { dither: 12 }); return k.cv;
+  }
+  const S_SWING = scenery(3, SKY.day, (c) => { c.fillStyle = '#1e4152'; c.fillRect(0, SH - 8, SW * 2, 8); c.fillStyle = '#82bcae'; c.fillRect(0, SH - 8, SW * 2, 1); });
+  const S_SNAP = scenery(5, SKY.golden, null);
+  const BRANCH = (() => { const k = mk(SW, 24), P = new K.Painter(k.c, 8); P.branch(-6, 10, SW + 6, 8, 6, T.bark, T.leafB); K.finalize(k.c, SW, 24, { dither: 10 }); return k.cv; })();
+  const BANANA = (() => { const k = mk(4, 4); k.c.fillStyle = '#f2c62a'; k.c.fillRect(0, 2, 3, 1); k.c.fillRect(1, 3, 2, 1); k.c.fillRect(3, 0, 1, 3); k.c.fillStyle = '#4a2a14'; k.c.fillRect(3, 0, 1, 1); return k.cv; })();
+  const line = (c, x0, y0, x1, y1, col) => { c.fillStyle = col; const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0)); for (let i = 0; i <= n; i++) c.fillRect(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1); };
+
+  const PREVIEW = {
+    swing(c, t) { // swing → fling → grab, forever
+      const GAP = 46, Lr = 24, TH = 0.85, TS = 0.75, TF = 0.32, per = TS + TF, i = Math.floor(t / per), u = t - i * per;
+      const ax = i * GAP, ay = 9; let x, y, ang, rope = null;
+      if (u < TS) { const ph = -TH * Math.cos(Math.PI * u / TS); x = ax + Math.sin(ph) * Lr; y = ay + Math.cos(ph) * Lr; ang = -ph; rope = [ax, ay]; }
+      else { const k = (u - TS) / TF, x0 = ax + Math.sin(TH) * Lr, x1 = ax + GAP - Math.sin(TH) * Lr; x = x0 + (x1 - x0) * k; y = ay + Math.cos(TH) * Lr - Math.sin(Math.PI * k) * 9; ang = -TH + 2 * TH * k; }
+      const cam = x - 42;
+      const bw = SW * 2, o = -((cam * 0.5) % bw + bw) % bw; c.drawImage(S_SWING, Math.round(o), 0); c.drawImage(S_SWING, Math.round(o + bw), 0);
+      for (let j = i - 2; j <= i + 4; j++) { const vx = Math.round(j * GAP - cam); line(c, vx + 3, 0, vx, ay, '#237438'); c.fillStyle = '#4cae3a'; c.fillRect(vx - 2, ay - 2, 5, 3); if (j !== i || !rope) line(c, vx, ay, vx + 1, ay + 12, '#2c883a'); }
+      for (let j = i; j <= i + 4; j++) { const bx = j * GAP + GAP / 2 - cam; if (bx > x - cam + 2 || j > i) c.drawImage(BANANA, Math.round(bx - 2), Math.round(30 + Math.sin(t * 3 + j) * 1.5)); }
+      if (rope) line(c, rope[0] - cam, rope[1], x - cam, y, '#82d044');
+      c.save(); c.translate(Math.round(x - cam), Math.round(y)); c.rotate(-ang * 0.9); c.drawImage(monkey.canvas, -Math.round(monkey.canvas.width * 0.44), -1); c.restore();
+      c.fillStyle = '#c6e4ec'; for (let j = 0; j < 6; j++) c.fillRect(Math.round(((j * 23 - t * 8) % SW + SW) % SW), SH - 5 + (j % 2) * 2, 4, 1);
+    },
+    stack(c, t) { // drop planks, chop overhangs, start again
+      const FH = 5, per = 0.9, N = 13, cyc = (N + 2) * per, tt = t % cyc, n = Math.floor(tt / per), u = tt - n * per, run = Math.floor(t / cyc);
+      const R = K.rng(run * 7 + 3), offs = Array.from({ length: N }, () => Math.round((R() - 0.5) * 10));
+      const tower = [{ x: 36, w: 40 }]; for (let k = 0; k < Math.min(n, N); k++) { const p = tower[tower.length - 1], x = p.x + offs[k], l = Math.max(x, p.x), r = Math.min(x + p.w, p.x + p.w); tower.push({ x: Math.abs(offs[k]) <= 1 ? p.x : l, w: Math.abs(offs[k]) <= 1 ? p.w : Math.max(4, r - l) }); }
+      const h = tower.length, camTop = Math.max(0, h * FH - 40);
+      const g = c.createLinearGradient(0, 0, 0, SH), k2 = Math.min(1, h / 14);
+      g.addColorStop(0, k2 > 0.6 ? '#4a8cc0' : '#25505e'); g.addColorStop(1, k2 > 0.6 ? '#c6e4ec' : '#1c6034'); c.fillStyle = g; c.fillRect(0, 0, SW, SH);
+      if (h > 9) { c.fillStyle = '#e8f0f4'; c.fillRect(Math.round((t * 6) % (SW + 30)) - 20, 18, 16, 4); c.fillRect(Math.round((t * 6) % (SW + 30)) - 16, 15, 9, 3); }
+      const gy = SH - 10 + camTop;
+      c.fillStyle = '#301c14'; c.fillRect(0, gy, SW, 20); c.fillStyle = '#2c883a'; c.fillRect(0, gy, SW, 2); c.fillStyle = '#5e3826'; c.fillRect(44, gy - 3, 24, 4);
+      const plank = (x, y, w) => { x = Math.round(x); y = Math.round(y); w = Math.round(w); c.fillStyle = '#1e120c'; c.fillRect(x - 1, y, w + 2, FH); c.fillStyle = '#764a32'; c.fillRect(x, y, w, FH - 1); c.fillStyle = '#a87452'; c.fillRect(x, y, w, 1); c.fillStyle = '#46281c'; for (let q = x + 5; q < x + w - 2; q += 8) c.fillRect(q, y + 1, 1, FH - 2); };
+      tower.forEach((f, k) => plank(f.x, gy - 3 - FH * (k + 1), f.w));
+      if (n < N) {
+        const p = tower[tower.length - 1], target = p.x + offs[n], hy = gy - 3 - FH * (h + 1);
+        if (u < 0.65) { const x = 2 + (target - 2) * Math.min(1, u / 0.6) + Math.sin(u * 20) * (u < 0.6 ? 0 : 0); c.fillStyle = '#2a2018'; c.fillRect(Math.round(x + p.w / 2), 0, 1, Math.max(0, hy - 10)); plank(x, hy - 10, p.w); }
+        else { const k = Math.min(1, (u - 0.65) / 0.1); plank(target, hy - 10 + 10 * k, p.w); }
+      }
+    },
+    snap(c, t) { // bugs drift, the chameleon snaps one up every so often
+      c.drawImage(S_SNAP, 0, 0);
+      const bugs = [0, 1, 2, 3].map((j) => { const per = 7 + j * 1.3, k = ((t + j * 2.1) % per) / per, dir = j % 2 ? -1 : 1; return { j, x: dir > 0 ? -6 + k * (SW + 12) : SW + 6 - k * (SW + 12), y: 14 + j * 9 + Math.sin(t * (2 + j * 0.4) + j) * 5 }; });
+      const cyc = 1.6, n = Math.floor(t / cyc), u = t - n * cyc, tgt = bugs[n % 4], mx = 56 + 12, my = 59;
+      const caught = (b) => b.j === tgt.j && u > 0.12 && u < 1.1;
+      bugs.forEach((b) => { if (caught(b)) return; const f = Math.floor(t * 8 + b.j) % 2, img = b.j === 1 ? BFLY[0][f] : b.j === 2 ? BFLY[1][f] : FLY[f]; c.drawImage(img, Math.round(b.x), Math.round(b.y)); });
+      c.drawImage(BRANCH, 0, SH - 22);
+      if (u < 0.22 && tgt.x > 0 && tgt.x < SW) {
+        const k = u < 0.1 ? u / 0.1 : 1 - (u - 0.1) / 0.12, ex = mx + (tgt.x + 2 - mx) * k, ey = my + (tgt.y + 1 - my) * k;
+        line(c, mx, my, ex, ey, '#e86a8a'); c.fillStyle = '#e86a8a'; c.fillRect(Math.round(ex) - 1, Math.round(ey) - 1, 3, 3);
+      }
+      c.drawImage(cham.canvas, 56 - Math.round(cham.canvas.width / 2) + 2, SH - 22 - Math.round(cham.canvas.height * 0.72) + 4);
+    }
+  };
+  const screens = [...document.querySelectorAll('canvas[data-game]')].map((cv) => ({ cv, c: cv.getContext('2d'), f: PREVIEW[cv.dataset.game] }));
+  screens.forEach((s) => { s.c.imageSmoothingEnabled = false; });
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function frame(now) { const t = now / 1000; screens.forEach((s) => { try { s.f(s.c, reduce ? 1.2 : t); } catch (e) { /* keep the others going */ } }); if (!reduce) requestAnimationFrame(frame); }
+  requestAnimationFrame(frame);
+  K.Consent.banner('../cookies');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canopy Stack · A free endless tower-stacking browser game</title>
+<meta name="description" content="Tap to drop each swinging plank onto your treehouse. Overhangs get chopped and perfect drops keep it wide. Build from the forest floor, through the canopy and up into the stars. A free pixel-art endless game for phone and desktop.">
+<meta name="keywords" content="stack game, tower stacking game, one tap game, endless game, pixel art game, free browser game">
+<link rel="canonical" href="https://harryh.xyz/stack/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/stack/">
+<meta property="og:title" content="Canopy Stack">
+<meta property="og:description" content="Tap to drop each plank. How tall can you build your treehouse?">
+<meta property="og:image" content="https://harryh.xyz/share/stack.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Canopy Stack: a pixel-art treehouse tower rising through the jungle canopy">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Canopy Stack">
+<meta name="twitter:description" content="Tap to drop each plank. How tall can you build your treehouse?">
+<meta name="twitter:image" content="https://harryh.xyz/share/stack.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": ["VideoGame", "WebApplication"], "name": "Canopy Stack", "url": "https://harryh.xyz/stack/", "description": "Tap to drop each swinging plank onto your treehouse. Overhangs get chopped and perfect drops keep it wide. Build from the forest floor up into the stars.", "image": "https://harryh.xyz/share/stack.jpg", "genre": ["Arcade", "Casual", "Endless"], "gamePlatform": ["Web browser", "Mobile", "Desktop"], "applicationCategory": "GameApplication", "operatingSystem": "Any", "playMode": "SinglePlayer", "inLanguage": "en-GB", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}, "publisher": {"@type": "Organization", "name": "Ducklops"}, "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}}</script>
+<meta name="theme-color" content="#0f1f2e">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../arcade-kit.css">
+</head>
+<body>
+<canvas id="game" aria-label="Canopy Stack game" role="img"></canvas>
+<div class="bar">
+  <a href="../arcade/" aria-label="Back to the jungle arcade">◂ Arcade</a>
+  <div><button id="pause" hidden aria-label="Pause">Pause</button><button id="mute" aria-pressed="true" aria-label="Sound">Sound on</button></div>
+</div>
+<noscript><p style="padding:80px 20px;text-align:center">Canopy Stack needs JavaScript switched on.</p></noscript>
+<div class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
+
+<script src="../jungle-kit.js"></script>
+<script src="../arcade-kit.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit, T = K.TONES, AR = Arcade;
+  const QS = new URLSearchParams(location.search);
+
+  /* ---------- plank styles (the "characters" here) ---------- */
+  // c = [outline, shadow, body, highlight, accent]; style = how the grain is drawn
+  const SKINS = [
+    { id: 'jungle', name: 'Jungle plank', price: 0, c: ['#1e120c', '#46281c', '#764a32', '#a87452', '#3a9c3a'], style: 'plank', note: 'Good honest timber.' },
+    { id: 'bamboo', name: 'Bamboo', price: 60, c: ['#1e2a0c', '#5a7a1e', '#8eb43a', '#c8e06a', '#3a5a12'], style: 'bamboo', note: 'Light, strong and fast-growing.' },
+    { id: 'mahogany', name: 'Mahogany', price: 150, c: ['#1e0c0a', '#4a1a14', '#7a2e22', '#a84a36', '#d8a888'], style: 'plank', note: 'Rich red hardwood.' },
+    { id: 'mossy', name: 'Mossy log', price: 300, c: ['#14100a', '#3a2a1c', '#5e4630', '#8a6a4a', '#82d044'], style: 'moss', note: 'Comes with its own garden.' },
+    { id: 'leaf', name: 'Banana leaf', price: 600, c: ['#0e2a22', '#1c6034', '#2c883a', '#82d044', '#c2ea6a'], style: 'leaf', note: 'Woven by the leafcutter ants.' },
+    { id: 'clay', name: 'Termite clay', price: 1000, c: ['#2a1a10', '#8a4a22', '#c27a3a', '#e8a868', '#f6d8a8'], style: 'clay', note: 'Built to last a century.' },
+    { id: 'moon', name: 'Moonwood', price: 1600, c: ['#070e16', '#1e3a6a', '#2e5aa0', '#82bede', '#e8f0f4'], style: 'plank', note: 'Glows faintly after dark.' },
+    { id: 'gold', name: 'Golden', price: 3000, c: ['#4a3a0a', '#b88a12', '#f2c62a', '#fff09a', '#ffffff'], style: 'plank', note: 'For true treehouse royalty.' }
+  ];
+  const NUT = AR.pix([
+    '...k...',
+    '.CCCCC.',
+    'CCcCCCC',
+    '.nnnnn.',
+    '.nNnnn.',
+    '..nnn..',
+    '...n...'
+  ], { k: '#2a1a10', C: '#5e3826', c: '#8e5e40', n: '#c28c68', N: '#f6d8a8' });
+  // animals that move in as the treehouse grows
+  const MOVE_IN = [[10, 'frog', 'A tree frog'], [20, 'gecko', 'A gecko'], [32, 'toucan', 'A toucan'], [45, 'capuchin', 'A capuchin'], [60, 'lemur', 'A lemur'], [80, 'parrot', 'A parrot'], [100, 'iguana', 'An iguana'], [125, 'macaw', 'A macaw'], [150, 'jaguar', 'A jaguar'], [180, 'orangutan', 'An orangutan'], [220, 'hummingbird', 'A hummingbird'], [260, 'chameleon', 'A chameleon']];
+  const MOVE_W = { frog: 12, gecko: 9, toucan: 13, capuchin: 13, lemur: 10, parrot: 9, iguana: 20, macaw: 9, jaguar: 24, orangutan: 15, hummingbird: 12, chameleon: 18 };
+
+  /* ---------- the frame ---------- */
+  const A = AR.init({
+    key: 'harry-stack', name: 'Canopy Stack', slug: 'stack', unit: 'floors', unitLong: 'floors',
+    how: '<b>Tap</b> to drop the swinging plank onto your treehouse. Any overhang gets chopped off, and <b>perfect</b> drops keep it wide. Build up from the forest floor, through the canopy and into the stars.',
+    hint: 'Tap to drop the plank',
+    cur: { one: 'nut', many: 'Nuts', icon: NUT },
+    skins: SKINS, skinsLabel: 'Planks', shopLabel: 'Planks & upgrades',
+    skinIcon: (s) => plankIcon(s),
+    upgrades: [
+      { id: 'glue', name: 'Sticky sap', desc: 'A wider window for perfect drops.', costs: [40, 120, 300] },
+      { id: 'slow', name: 'Sloth pace', desc: 'Planks swing a little slower.', costs: [50, 150, 350, 700] },
+      { id: 'wide', name: 'Wide base', desc: 'Start with a wider treehouse.', costs: [30, 90, 220, 500] },
+      { id: 'catch', name: 'Monkey catch', desc: 'A monkey catches one missed plank per run, per level.', costs: [150, 600] },
+      { id: 'grow', name: 'Growth spurt', desc: 'Perfect streaks grow your plank back sooner.', costs: [200] }
+    ],
+    missions: [
+      { id: 'floors', stat: 'floors', text: (n) => `Build ${n} floors in one run`, targets: [10, 20, 35, 50, 70, 100, 140, 190] },
+      { id: 'perfect', stat: 'perfect', text: (n) => `Land ${n} perfect drops in one run`, targets: [3, 8, 15, 25, 40, 60] },
+      { id: 'combo', stat: 'combo', text: (n) => `Chain ${n} perfect drops in a row`, targets: [3, 5, 8, 12, 16, 20, 25] },
+      { id: 'cur', stat: 'cur', text: (n) => `Earn ${n} nuts in one run`, targets: [20, 50, 100, 160, 250, 360] },
+      { id: 'animals', stat: 'animals', text: (n) => `Get ${n} animal${n > 1 ? 's' : ''} to move in`, targets: [1, 2, 3, 5, 7, 9, 11], when: (D) => D.best >= 5 },
+      { id: 'grow', stat: 'grow', text: (n) => `Grow your plank back ${n} time${n > 1 ? 's' : ''} in one run`, targets: [1, 2, 4, 6, 9], when: (D) => (D.mt.combo || 0) >= 1 },
+      { id: 'total', stat: 'floors', total: true, text: (n) => `Build ${AR.fmt(n)} floors across all runs`, targets: [100, 300, 700, 1500, 3000, 6000] }
+    ],
+    reward: 20,
+    cardTitle: ['CANOPY', 'STACK'], cardLabel: 'Tallest treehouse', cardKind: 'toucan',
+    shareText: (best, url) => `I built a ${AR.fmt(best)}-floor treehouse in Canopy Stack. Can you build higher? Play at ${url}`,
+    start: () => startRun(),
+    quit: () => { if (state === 'play') gameOver('You put down your tools.', true); },
+    onSkin: () => { /* planks are drawn live */ },
+    onEnv: () => { paint(); },
+    regrade: () => K.setGrade(AR.gradeFor('day', A.wx))
+  });
+
+  /* ---------- canvas ---------- */
+  const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  let W = 200, H = 300, S = 3;
+  function resize() {
+    S = Math.max(1, Math.min(innerHeight / 300, innerWidth / 190));
+    W = Math.min(380, Math.ceil(innerWidth / S)); H = Math.min(440, Math.ceil(innerHeight / S));
+    cv.width = W; cv.height = H; cv.style.width = W * S + 'px'; cv.style.height = H * S + 'px';
+    ctx.imageSmoothingEnabled = false; paint();
+    if (state !== 'play') idleTower();
+  }
+
+  /* ---------- scenery by height ---------- */
+  const ZONES = [ // floors, sky top, sky bottom
+    [0, '#14301e', '#0e2a22'], [18, '#25505e', '#1c6034'], [40, '#4a8cc0', '#2e7a4a'], [65, '#4a8cc0', '#c6e4ec'],
+    [110, '#3a74b0', '#e2f0e6'], [150, '#4a2a6a', '#f6aa3e'], [190, '#13293a', '#4a2a6a'], [230, '#070e16', '#0f1f2e']
+  ];
+  const ZONE_NAMES = { 18: 'The understory', 40: 'Into the canopy', 65: 'Above the treetops', 110: 'Among the clouds', 150: 'Sunset heights', 190: 'Twilight', 230: 'Up in the stars' };
+  const mix = (a, b, t) => { const A1 = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16)), B1 = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16)); return `rgb(${A1.map((v, i) => Math.round(v + (B1[i] - v) * t)).join(',')})`; };
+  function skyAt(fl) {
+    let i = 0; while (i < ZONES.length - 1 && ZONES[i + 1][0] <= fl) i++;
+    const z = ZONES[i], n = ZONES[Math.min(ZONES.length - 1, i + 1)], t = n === z ? 0 : Math.min(1, Math.max(0, (fl - z[0]) / (n[0] - z[0])));
+    const e = Math.max(0, (t - 0.6) / 0.4); // hold each zone, then blend into the next
+    return [mix(z[1], n[1], e), mix(z[2], n[2], e)];
+  }
+  const L = {};
+  function paint() {
+    K.setGrade(AR.gradeFor('day', A.wx));
+    // forest floor with ferns
+    let k = AR.mk(W, 60), P = new K.Painter(k.c, 3);
+    k.c.fillStyle = '#301c14'; k.c.fillRect(0, 16, W, 44);
+    for (let i = 0; i < 50; i++) { k.c.fillStyle = P.r() > 0.5 ? '#46281c' : '#1e120c'; k.c.fillRect(Math.floor(P.r() * W), 18 + Math.floor(P.r() * 40), 2, 1); }
+    for (let i = 0; i < W / 9; i++) P.frond(P.r() * W, 20, 12 + P.r() * 10, -Math.PI / 2 + (P.r() - 0.5) * 1.8, i % 2 ? T.leafB : T.leafMid, { leaf: 4 });
+    for (let i = 0; i < W / 14; i++) P.clump(P.r() * W, 18, 4 + P.r() * 4, T.leafB, [0, -1]);
+    K.finalize(k.c, W, 60, { dither: 12 }); L.ground = k.cv;
+    // tree stump the treehouse is built on
+    k = AR.mk(60, 40); P = new K.Painter(k.c, 5); P.trunk(30, 0, 40, 34, 44, T.bark, { moss: true }); K.finalize(k.c, 60, 40, { dither: 10 }); L.stump = k.cv;
+    // side trunks (tile vertically)
+    k = AR.mk(24, 120); P = new K.Painter(k.c, 7); P.trunk(12, -2, 122, 16, 16, T.barkCool, { moss: true }); K.finalize(k.c, 24, 120, { haze: 0.25, hazeColor: '#a6c8c4', dither: 10 }); L.trunk = k.cv;
+    // leaf clumps for the canopy, clouds for higher up
+    L.clumps = [0, 1, 2, 3, 4, 5].map((v) => { const c = AR.mk(56, 40), p = new K.Painter(c.c, 20 + v); for (let i = 0; i < 4; i++) p.clump(14 + i * 9 + p.r() * 4, 20 + (p.r() - 0.5) * 10, 8 + p.r() * 6, v % 2 ? T.leafA : T.leafB, [0, -1]); K.finalize(c.c, 56, 40, { dither: 12 }); return c.cv; });
+    L.clouds = [0, 1, 2, 3].map((v) => { const c = AR.mk(70, 30), p = new K.Painter(c.c, 50 + v); p.cloud(35, 18, 26 + v * 4); K.finalize(c.c, 70, 30, { dither: 8 }); return c.cv; });
+    L.animals = {};
+  }
+  function animalSprite(kind) { if (!L.animals[kind]) { const s = new K.Sprite(kind, MOVE_W[kind] || 12, { pad: 1 }); s.render({}); L.animals[kind] = s.canvas; } return L.animals[kind]; }
+  function plankIcon(s) {
+    const k = AR.mk(30, 26); const g = k.c; ctx_ = g;
+    drawPlank(g, s, 3, 18, 24, 9, 0, 1); drawPlank(g, s, 5, 9, 20, 9, 1, 2); drawPlank(g, s, 8, 0, 14, 9, 2, 3);
+    ctx_ = null; return AR.scaled(k.cv, 2).toDataURL();
+  }
+  let ctx_ = null;
+
+  /* ---------- plank drawing ---------- */
+  const FH = 9;
+  function drawPlank(g, s, x, y, w, h, seed, floorNo) {
+    const c = s.c; x = Math.round(x); y = Math.round(y); w = Math.max(1, Math.round(w));
+    g.fillStyle = c[0]; g.fillRect(x - 1, y, w + 2, h);
+    g.fillStyle = c[2]; g.fillRect(x, y, w, h - 1);
+    g.fillStyle = c[3]; g.fillRect(x, y, w, 1);
+    g.fillStyle = c[1]; g.fillRect(x, y + h - 2, w, 1);
+    const R = K.rng(seed * 131 + 7);
+    if (s.style === 'plank' || s.style === 'moss') { for (let i = 4 + Math.floor(R() * 6); i < w - 2; i += 6 + Math.floor(R() * 8)) { g.fillStyle = c[1]; g.fillRect(x + i, y + 2, 1, h - 4); } g.fillStyle = c[1]; g.fillRect(x + 2 + Math.floor(R() * Math.max(1, w - 8)), y + 4, 3, 1); }
+    if (s.style === 'bamboo') { for (let i = 5; i < w - 2; i += 9) { g.fillStyle = c[4]; g.fillRect(x + i, y + 1, 1, h - 2); g.fillStyle = c[3]; g.fillRect(x + i + 1, y + 1, 1, h - 3); } g.fillStyle = c[3]; g.fillRect(x, y + 3, w, 1); }
+    if (s.style === 'moss') for (let i = 0; i < w; i += 3 + Math.floor(R() * 5)) { g.fillStyle = R() > 0.5 ? c[4] : '#3a9c3a'; g.fillRect(x + i, y - 1, 2 + Math.floor(R() * 2), 2); }
+    if (s.style === 'leaf') { for (let i = 0; i < w; i += 4) { g.fillStyle = c[1]; g.fillRect(x + i, y + 2 + (i % 8 ? 0 : 3), 3, 1); } g.fillStyle = c[4]; g.fillRect(x, y + Math.floor(h / 2), w, 1); }
+    if (s.style === 'clay') { for (let i = 0; i < w * h / 14; i++) { g.fillStyle = R() > 0.5 ? c[1] : c[3]; g.fillRect(x + Math.floor(R() * w), y + 1 + Math.floor(R() * (h - 2)), 1, 1); } }
+    // a little window on every fourth floor
+    if (floorNo && floorNo % 4 === 0 && w > 22) { const wx = x + Math.floor(w / 2) - 2; g.fillStyle = c[0]; g.fillRect(wx - 1, y + 2, 6, 5); g.fillStyle = night() ? '#f6d24a' : '#0f1f2e'; g.fillRect(wx, y + 3, 4, 3); }
+  }
+  const night = () => tower.length >= 190;
+
+  /* ---------- game state ---------- */
+  let state = 'menu', tower = [], mover = null, falling = null, debris = [], dust = [], camY = 0, combo = 0, catches = 0, time = 0, nutsRun = 0, shake = 0, deadPiece = null, flash = 0, nextZone = 1;
+  const FL = AR.Floats(cv);
+  const baseW = () => Math.min(Math.round(W * 0.42), 64) + A.lvl('wide') * 8;
+  const GROUND = 0;              // world y of the stump top (up is negative)
+  const topY = () => GROUND - FH * tower.length;
+  const floors = () => tower.length - 1;
+  const speed = () => { const f = floors(); let s = (40 + Math.min(100, f * 1.35)) * (1 - A.lvl('slow') * 0.07); if (f >= 60) s *= 1 + 0.32 * Math.sin(time * 2.1); return s; };
+  const tol = () => 2 + A.lvl('glue');
+
+  function idleTower() {
+    tower = [{ x: W / 2 - baseW() / 2, w: baseW(), seed: 1 }];
+    for (let i = 1; i < 7; i++) { const p = tower[i - 1], w = p.w - (i % 3 === 0 ? 4 : 0); tower.push({ x: p.x + (p.w - w) / 2 + (i % 2 ? 1 : -1), w, seed: i + 1 }); }
+    camY = topY() - H * 0.62; mover = { x: 10, w: tower[tower.length - 1].w, dir: 1 }; falling = null; debris = []; deadPiece = null;
+  }
+  function startRun() {
+    A.audio(); A.begin(); state = 'play'; FL.clear();
+    tower = [{ x: W / 2 - baseW() / 2, w: baseW(), seed: 1 }];
+    combo = 0; catches = A.lvl('catch'); time = 0; nutsRun = 0; debris = []; dust = []; deadPiece = null; nextZone = 1;
+    camY = topY() - H * 0.62; newMover(); hud(); A.score('0<small>floors</small>');
+  }
+  function newMover() {
+    const top = tower[tower.length - 1], f = floors();
+    const fromRight = f >= 25 && f % 2 === 1;
+    mover = { w: top.w, x: fromRight ? W - top.w - 4 : 4, dir: fromRight ? -1 : 1, seed: tower.length + 1 };
+  }
+  function hud() { A.hud(`<span class="b">${A.CI}${AR.fmt(nutsRun)}</span><span>Streak ${combo}</span>${catches ? `<span>Catch ×${catches}</span>` : ''}`); }
+  function drop() {
+    if (state !== 'play' || A.paused || falling || deadPiece) return;
+    A.hideHint();
+    falling = { x: mover.x, w: mover.w, y: topY() - FH - 26, vy: 0, seed: mover.seed }; mover = null; A.sfx('tick');
+  }
+  function land() {
+    const top = tower[tower.length - 1], f = falling; falling = null;
+    let l = Math.max(f.x, top.x), r = Math.min(f.x + f.w, top.x + top.w);
+    const dx = f.x - top.x;
+    if (r - l <= 0) { // missed completely
+      if (catches > 0) { catches--; FL.add(W / 2, topY() - 30, 'Monkey catch!', '#f6d24a'); A.sfx('big'); newMover(); hud(); return; }
+      deadPiece = { x: f.x, y: topY() - FH, w: f.w, vy: 0, rot: 0, vr: (dx > 0 ? 1 : -1) * 2.5, seed: f.seed };
+      A.sfx('miss'); return gameOver(floors() < 1 ? 'The plank missed. Tap when it’s over the treehouse.' : 'The plank tumbled to the forest floor.');
+    }
+    let w = r - l, x = l, perfect = Math.abs(dx) <= tol();
+    if (perfect) { x = top.x; w = top.w; combo++; }
+    else {
+      combo = 0;
+      const offX = dx > 0 ? r : f.x, offW = f.w - w; // the bit that hangs over gets chopped
+      debris.push({ x: offX, y: topY() - FH, w: offW, vy: -20, vx: dx > 0 ? 30 : -30, rot: 0, vr: (dx > 0 ? 1 : -1) * (2 + Math.random() * 2), seed: f.seed });
+      A.sfx('chop');
+    }
+    const need = A.lvl('grow') ? 2 : 3;
+    if (perfect && combo >= need && w < baseW()) { const g = Math.min(baseW() - w, 4); x -= g / 2; w += g; A.inc('grow'); FL.add(x + w / 2, topY() - FH - 12, 'Grow!', '#c2ea6a'); }
+    tower.push({ x, w, seed: f.seed });
+    for (let i = 0; i < 6; i++) dust.push({ x: x + Math.random() * w, y: topY() + 1, vx: (Math.random() - 0.5) * 40, vy: -Math.random() * 30, t: 0 });
+    shake = perfect ? 0.08 : 0.05;
+    let nuts = 1; if (perfect) { nuts += 1 + Math.min(4, Math.floor(combo / 2)); flash = 0.25; A.sfx('perfect'); FL.add(x + w / 2, topY() - 14, combo > 1 ? `Perfect ×${combo}` : 'Perfect!', '#f6d24a'); A.inc('perfect'); } else A.sfx('thud');
+    nutsRun += nuts; A.earn(nuts); A.popHud('.b');
+    A.stat('floors', floors()); A.stat('combo', combo);
+    A.score(`${floors()}<small>floors</small>`);
+    const mv = MOVE_IN.find((m) => m[0] === floors());
+    if (mv) { tower[tower.length - 1].animal = mv[1]; tower[tower.length - 1].aside = floors() % 2 ? 1 : -1; A.inc('animals'); setTimeout(() => FL.add(x + w / 2, topY() - 26, `${mv[2]} moved in!`, '#c2ea6a'), 350); }
+    const z = ZONES[nextZone]; if (z && floors() >= z[0]) { nextZone++; setTimeout(() => FL.add(W / 2, topY() - 50, ZONE_NAMES[z[0]], '#eef6d8'), 700); }
+    newMover(); hud();
+  }
+  function gameOver(cause, quiet) { state = 'dead'; mover = null; A.end({ score: floors(), cause, delay: quiet ? 200 : 1400 }); }
+
+  /* ---------- loop ---------- */
+  function step(dt) {
+    if (state === 'play' && A.paused) return;
+    time += dt; shake = Math.max(0, shake - dt); flash = Math.max(0, flash - dt);
+    if (mover) { mover.x += mover.dir * (state === 'play' ? speed() : 40) * dt; const lo = -mover.w * 0.25, hi = W - mover.w * 0.75; if (mover.x < lo) { mover.x = lo; mover.dir = 1; } if (mover.x > hi) { mover.x = hi; mover.dir = -1; } }
+    if (falling) { falling.vy += 900 * dt; falling.y += falling.vy * dt; if (falling.y >= topY() - FH) { falling.y = topY() - FH; land(); } }
+    for (const d of debris) { d.vy += 500 * dt; d.y += d.vy * dt; d.x += d.vx * dt; d.rot += d.vr * dt; }
+    debris = debris.filter((d) => d.y - camY < H + 40);
+    for (const d of dust) { d.t += dt; d.x += d.vx * dt; d.y += d.vy * dt; d.vy += 60 * dt; } dust = dust.filter((d) => d.t < 0.6);
+    if (deadPiece) { deadPiece.vy += 500 * dt; deadPiece.y += deadPiece.vy * dt; deadPiece.rot += deadPiece.vr * dt; }
+    const ty = (state === 'dead' && deadPiece ? Math.min(topY() + 60, deadPiece.y) : topY()) - H * 0.62;
+    camY += (ty - camY) * Math.min(1, dt * (state === 'dead' ? 1.5 : 4));
+  }
+  function draw() {
+    const fl = Math.max(0, (-camY - H * 0.38) / FH), sky = skyAt(fl);
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const sx = shake ? Math.round((Math.random() - 0.5) * 2) : 0, oy = -Math.round(camY);
+    ctx.save(); ctx.translate(sx, 0);
+    // stars and the moon way up high
+    if (fl > 170) { ctx.globalAlpha = Math.min(1, (fl - 170) / 40); const R = K.rng(9); for (let i = 0; i < 90; i++) { const x = R() * W, y = ((R() * 900 - camY * 0.15) % H + H) % H; ctx.fillStyle = R() > 0.7 ? '#e8f0f4' : '#96a8c4'; if (Math.sin(time * 2 + i) > -0.6) ctx.fillRect(Math.round(x), Math.round(y), 1, 1); } ctx.fillStyle = '#e8f0f4'; ctx.beginPath(); ctx.arc(W * 0.78, H * 0.2, 9, 0, 6.3); ctx.fill(); ctx.globalAlpha = 1; }
+    // clouds drifting by between 90 and 170 floors
+    for (let i = 0; i < 26; i++) { const wy = GROUND - (90 + i * 3.2) * FH; const y = Math.round((wy - camY) * 0.8 + H * 0.2 * 0.2); if (y < -40 || y > H + 10) continue; const R = K.rng(i + 40); const x = ((R() * (W + 80) + time * (4 + R() * 6)) % (W + 80)) - 70; ctx.drawImage(L.clouds[i % 4], Math.round(x), y); }
+    // side trunks (forest floor up to the canopy)
+    const trunkTop = GROUND - 70 * FH;
+    for (const tx of [-6, W - 18]) for (let y = GROUND - 120; y > trunkTop; y -= 120) { const sy = Math.round((y - camY) * 0.85 + H * 0.15 * 0.15); if (sy > H || sy < -120) continue; ctx.drawImage(L.trunk, tx, sy); }
+    // canopy leaves around 35–75 floors
+    for (let i = 0; i < 40; i++) { const R = K.rng(i + 7), wy = GROUND - (30 + R() * 48) * FH, y = Math.round((wy - camY) * 0.85); if (y < -40 || y > H) continue; const left = i % 2 === 0, x = left ? -20 + R() * 40 : W - 36 - R() * 40; ctx.drawImage(L.clumps[i % 6], Math.round(x), y); }
+    // the ground and stump
+    const gy = GROUND + oy; if (gy < H + 10) { ctx.drawImage(L.ground, 0, gy - 18); ctx.drawImage(L.stump, Math.round(W / 2 - 30), gy - 2); }
+    // the tower
+    const s = A.skin();
+    for (let i = 0; i < tower.length; i++) {
+      const f = tower[i], y = GROUND - FH * (i + 1) + oy; if (y > H + 4 || y < -FH - 20) continue;
+      drawPlank(ctx, s, f.x, y, f.w, FH, f.seed, i);
+      if (f.animal) { const a = animalSprite(f.animal); const ax = f.aside > 0 ? f.x + f.w - a.width + 2 : f.x - 2; ctx.drawImage(a, Math.round(ax), y - a.height + 1); }
+    }
+    if (flash > 0 && tower.length > 1) { const f = tower[tower.length - 1], y = GROUND - FH * tower.length + oy; ctx.globalAlpha = flash * 3; ctx.fillStyle = '#fff09a'; ctx.fillRect(Math.round(f.x) - 2, y - 2, Math.round(f.w) + 4, 1); ctx.fillRect(Math.round(f.x) - 2, y + FH, Math.round(f.w) + 4, 1); ctx.globalAlpha = 1; }
+    // guide line under the moving plank (early floors only)
+    if (mover && state === 'play' && floors() < 6) { ctx.fillStyle = 'rgba(238,246,216,.35)'; for (let y = topY() - FH - 14 + oy; y < topY() + oy - 1; y += 3) { ctx.fillRect(Math.round(mover.x), y, 1, 1); ctx.fillRect(Math.round(mover.x + mover.w) - 1, y, 1, 1); } }
+    if (mover) { const y = topY() - FH - 26 + oy + Math.round(Math.sin(time * 4) * 1); ctx.fillStyle = 'rgba(42,32,24,.9)'; ctx.fillRect(Math.round(mover.x + mover.w / 2), -2, 1, y + 2); drawPlank(ctx, s, mover.x, y, mover.w, FH, mover.seed, 0); }
+    if (falling) drawPlank(ctx, s, falling.x, falling.y + oy, falling.w, FH, falling.seed, 0);
+    for (const d of [...debris, ...(deadPiece ? [deadPiece] : [])]) { ctx.save(); ctx.translate(Math.round(d.x + d.w / 2), Math.round(d.y + FH / 2 + oy)); ctx.rotate(d.rot); drawPlank(ctx, s, -d.w / 2, -FH / 2, d.w, FH, d.seed, 0); ctx.restore(); }
+    ctx.fillStyle = '#d8a888'; for (const d of dust) { ctx.globalAlpha = 1 - d.t / 0.6; ctx.fillRect(Math.round(d.x), Math.round(d.y + oy), 1, 1); } ctx.globalAlpha = 1;
+    // clouds in front, high up (they hide the plank for a moment)
+    if (floors() >= 100 && state === 'play') for (let i = 0; i < 3; i++) { const x = ((time * (10 + i * 5) + i * 140) % (W + 140)) - 80, y = Math.round(H * (0.25 + i * 0.12)); ctx.globalAlpha = 0.85; ctx.drawImage(L.clouds[i], Math.round(x), y); ctx.globalAlpha = 1; }
+    ctx.restore();
+  }
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; acc += dt;
+    while (acc > 1 / 120) { step(1 / 120); acc -= 1 / 120; }
+    draw(); FL.update(dt, (x, y) => [x, y - camY]); requestAnimationFrame(loop);
+  }
+
+  /* ---------- input ---------- */
+  addEventListener('pointerdown', (e) => { if (e.target.closest('button, a, .panel, .cbar')) return; if (state === 'play') { e.preventDefault(); A.audio(); drop(); } });
+  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'KeyS') && state === 'play') { e.preventDefault(); if (!e.repeat) drop(); } });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-menu]')) { state = 'menu'; FL.clear(); idleTower(); } });
+
+  if (QS.has('debug')) window.__cs = () => ({ state, floors: floors(), mover: mover && { x: mover.x, w: mover.w }, top: tower[tower.length - 1], falling: !!falling, W, H, from: +QS.get('from') || 0 });
+  if (QS.has('debug') && QS.get('from')) { const n = +QS.get('from'); const _s = startRun; window.__fill = () => { for (let i = 0; i < n; i++) { const p = tower[tower.length - 1]; tower.push({ x: p.x, w: p.w, seed: i }); } nextZone = ZONES.findIndex((z) => z[0] > n); camY = topY() - H * 0.62; newMover(); }; }
+  addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+  paint(); resize(); requestAnimationFrame((n) => { last = n; loop(n); });
+})();
+</script>
+</body>
+</html>

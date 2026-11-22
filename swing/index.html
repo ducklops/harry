@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vine Swing · A free endless vine-swinging browser game</title>
+<meta name="description" content="Hold to grab a vine, let go to fling. Swing a monkey across a crocodile river from dawn to night, collect bananas, unlock new monkeys and upgrades. A free pixel-art endless game for phone and desktop.">
+<meta name="keywords" content="vine swing game, endless runner, one button game, pixel art game, monkey game, free browser game">
+<link rel="canonical" href="https://harryh.xyz/swing/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/swing/">
+<meta property="og:title" content="Vine Swing">
+<meta property="og:description" content="Hold to grab, let go to fling. How far can you swing over the crocodile river?">
+<meta property="og:image" content="https://harryh.xyz/share/swing.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Vine Swing: a pixel-art monkey swinging between jungle vines over a river">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vine Swing">
+<meta name="twitter:description" content="Hold to grab, let go to fling. How far can you swing over the crocodile river?">
+<meta name="twitter:image" content="https://harryh.xyz/share/swing.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": ["VideoGame", "WebApplication"], "name": "Vine Swing", "url": "https://harryh.xyz/swing/", "description": "Hold to grab a vine, let go to fling. Swing a monkey across a crocodile river from dawn to night, collect bananas, unlock new monkeys and upgrades.", "image": "https://harryh.xyz/share/swing.jpg", "genre": ["Arcade", "Casual", "Endless"], "gamePlatform": ["Web browser", "Mobile", "Desktop"], "applicationCategory": "GameApplication", "operatingSystem": "Any", "playMode": "SinglePlayer", "inLanguage": "en-GB", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}, "publisher": {"@type": "Organization", "name": "Ducklops"}, "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}}</script>
+<meta name="theme-color" content="#0f1f2e">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../arcade-kit.css">
+</head>
+<body>
+<canvas id="game" aria-label="Vine Swing game" role="img"></canvas>
+<div class="bar">
+  <a href="../arcade/" aria-label="Back to the jungle arcade">◂ Arcade</a>
+  <div><button id="pause" hidden aria-label="Pause">Pause</button><button id="mute" aria-pressed="true" aria-label="Sound">Sound on</button></div>
+</div>
+<noscript><p style="padding:80px 20px;text-align:center">Vine Swing needs JavaScript switched on.</p></noscript>
+<div class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
+
+<script src="../jungle-kit.js"></script>
+<script src="../arcade-kit.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit, T = K.TONES, AR = Arcade;
+  const QS = new URLSearchParams(location.search);
+
+  /* ---------- monkeys ---------- */
+  const SKINS = [
+    { id: 'spider', name: 'Spider monkey', price: 0, kind: 'monkey', note: 'The original swinger.' },
+    { id: 'capuchin', name: 'Capuchin', price: 60, kind: 'capuchin', note: 'Small, smart and quick off the mark.' },
+    { id: 'howler', name: 'Howler', price: 150, c: { fur: '#3a2418', dark: '#1e120c', face: '#2a1a12', belly: '#6a3a22' }, note: 'The loudest monkey in the jungle.' },
+    { id: 'orangutan', name: 'Orangutan', price: 300, kind: 'orangutan', note: 'Long arms, big heart.' },
+    { id: 'tamarin', name: 'Golden tamarin', price: 600, c: { fur: '#f08a1c', dark: '#c8601a', face: '#5a3a2a', belly: '#f6aa3e' }, note: 'A blaze of orange through the trees.' },
+    { id: 'snow', name: 'Snow monkey', price: 1000, c: { fur: '#b4b8bc', dark: '#7a7e82', face: '#e88a8a', belly: '#dcdee0' }, note: 'Visiting from the mountains.' },
+    { id: 'midnight', name: 'Midnight', price: 1600, c: { fur: '#1e3a6a', dark: '#0f1f3e', face: '#82d0e8', belly: '#2e5aa0' }, note: 'Comes out after dusk.' },
+    { id: 'king', name: 'Banana king', price: 3000, c: { fur: '#f2d22a', dark: '#b88a12', face: '#fff09a', belly: '#fff6c8' }, note: 'All hail.' }
+  ];
+  SKINS.forEach((s) => { if (s.c) { s.kind = 'vs_' + s.id; K.A[s.kind] = () => K.A.monkey(s.c); } });
+
+  /* ---------- pixel bits ---------- */
+  const BANANA = AR.pix([
+    '......kk',
+    '......Y.',
+    '.....yY.',
+    '....yyY.',
+    '..yyyyY.',
+    'yyyyyY..',
+    '.ooo....'
+  ], { k: '#4a2a14', y: '#f2c62a', Y: '#fff09a', o: '#b88a12' });
+  const BUNCH = (() => { const k = AR.mk(12, 10); k.c.drawImage(BANANA, 0, 3); k.c.drawImage(BANANA, 3, 1); k.c.drawImage(BANANA, 4, 3); return k.cv; })();
+  const WASP = [0, 1].map((f) => AR.pix(f ? [
+    '.ww..',
+    'wwww.',
+    'kykyk',
+    '.kyk.'
+  ] : [
+    '.....',
+    'w.ww.',
+    'kykyk',
+    '.kyk.'
+  ], { w: '#e8f4f8', k: '#14181a', y: '#f2c62a' }));
+
+  /* ---------- the frame: menu, missions, shop ---------- */
+  const A = AR.init({
+    key: 'harry-swing', name: 'Vine Swing', slug: 'swing', unit: 'm', unitLong: 'metres',
+    how: '<b>Hold</b> to grab the nearest vine, <b>let go</b> to fling. Swing over the crocodile river, grab bananas and keep your flow going. Time passes as you travel, from dawn to night.',
+    hint: 'Hold to grab · let go to fling',
+    cur: { one: 'banana', many: 'Bananas', icon: BANANA },
+    skins: SKINS, skinsLabel: 'Monkeys', shopLabel: 'Monkeys & upgrades',
+    upgrades: [
+      { id: 'reach', name: 'Long arms', desc: (l) => `Grab vines from further away. Reach ${95 + l * 8} → ${95 + (l + 1) * 8}`, costs: [30, 80, 180, 400, 800] },
+      { id: 'magnet', name: 'Banana nose', desc: 'Sniffs out bananas and pulls nearby ones in.', costs: [40, 100, 240, 500, 1000] },
+      { id: 'pads', name: 'Lily luck', desc: 'More lily pads on the river to bounce you back up.', costs: [30, 90, 200, 450] },
+      { id: 'flow', name: 'Steady flow', desc: 'Your flow multiplier drains more slowly.', costs: [60, 150, 350] },
+      { id: 'taxi', name: 'Toucan taxi', desc: 'A toucan catches you before the river, once per run per level.', costs: [150, 600] }
+    ],
+    missions: [
+      { id: 'dist', stat: 'dist', text: (n) => `Swing ${AR.fmt(n)} m in one run`, targets: [100, 250, 400, 600, 900, 1300, 1800, 2500] },
+      { id: 'cur', stat: 'cur', text: (n) => `Grab ${AR.fmt(n)} bananas in one run`, targets: [15, 35, 60, 100, 150, 220, 300] },
+      { id: 'vines', stat: 'vines', text: (n) => `Grab ${n} vines in one run`, targets: [15, 30, 50, 80, 120, 170] },
+      { id: 'flow', stat: 'flow', text: (n) => `Reach ×${n} flow`, targets: (t) => Math.min(5, 2 + t), when: (D) => (D.mt.flow || 0) < 4 },
+      { id: 'flowtime', stat: 'flow5', text: (n) => `Stay at ×5 flow for ${n} seconds`, targets: [3, 6, 10, 15, 20, 30], when: (D) => (D.mt.flow || 0) >= 4 },
+      { id: 'skip', stat: 'skip', text: (n) => `Fling past ${n} vine${n > 1 ? 's' : ''} without grabbing`, targets: [1, 3, 6, 10, 15, 22] },
+      { id: 'flips', stat: 'flips', text: (n) => `Do ${n} flip${n > 1 ? 's' : ''} in one run`, targets: [1, 3, 6, 10, 15] },
+      { id: 'pads', stat: 'pads', text: (n) => `Bounce on ${n} lily pad${n > 1 ? 's' : ''} in one run`, targets: [1, 2, 3, 5, 7], when: (D) => D.best >= 80 },
+      { id: 'rot', stat: 'rot', total: true, text: (n) => `Swing from ${n} rotten vines (all runs)`, targets: [3, 10, 25, 50, 90], when: (D) => D.best >= 300 },
+      { id: 'wasp', stat: 'waspdist', text: (n) => `Swing ${AR.fmt(n)} m past the wasps`, targets: [100, 250, 500, 800], when: (D) => D.best >= 1000 },
+      { id: 'total', stat: 'dist', total: true, text: (n) => `Swing ${AR.fmt(n)} m across all runs`, targets: [1000, 3000, 7000, 15000, 30000, 60000] }
+    ],
+    reward: 20,
+    cardTitle: ['VINE', 'SWING'], cardLabel: 'Furthest swing', cardPose: { parts: { '.p-arm': 'rotate(-150deg)' } },
+    shareText: (best, url) => `I swung ${AR.fmt(best)} m in Vine Swing. Can you go further? Play at ${url}`,
+    start: () => startRun(),
+    quit: () => { if (state === 'play') die('You let go of the run.', true); },
+    onSkin: () => makeMonkey(),
+    onEnv: () => { layerCache.clear(); rain = []; setPhase(phaseName(), true); },
+    regrade: () => K.setGrade(AR.gradeFor(curPhase, A.wx))
+  });
+
+  /* ---------- canvas & pixel scale ---------- */
+  const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  let W = 300, H = 240, S = 3, WATER = 224, TW = 300;
+  function resize() {
+    S = Math.max(1, Math.min(innerHeight / 240, innerWidth / 205));   // phones in portrait get a closer view
+    W = Math.min(560, Math.ceil(innerWidth / S)); H = Math.min(400, Math.ceil(innerHeight / S));
+    cv.width = W; cv.height = H; cv.style.width = W * S + 'px'; cv.style.height = H * S + 'px';
+    ctx.imageSmoothingEnabled = false;
+    WATER = H - 16; TW = Math.max(W, 300);
+    layerCache.clear(); setPhase(curPhase, true);
+  }
+
+  /* ---------- scenery, painted once per time of day ---------- */
+  const layerCache = new Map();
+  const START_PHASE = AR.PHASES.indexOf(A.phase) < 0 ? 1 : AR.PHASES.indexOf(A.phase);
+  let curPhase = AR.PHASES[START_PHASE], L = null, prevL = null, fadeT = 1;
+  function wrap(w, fn) { [-w, 0, w].forEach((o) => fn(o)); }
+  function paintPhase(ph) {
+    const key = ph + W + 'x' + H; if (layerCache.has(key)) return layerCache.get(key);
+    K.setGrade(AR.gradeFor(ph, A.wx));
+    const out = {};
+    let k = AR.mk(W, H), P = new K.Painter(k.c, 4);
+    P.vgrad(0, 0, W, H, AR.skyStops(ph, A.wx));
+    if (ph !== 'night') P.rgrad(W * 0.72, H * 0.12, H * 0.7, [[0, 'rgba(255,251,230,.85)'], [1, 'rgba(255,251,230,0)']]);
+    else { const R = K.rng(5); for (let i = 0; i < W * H / 160; i++) { k.c.fillStyle = R() > 0.6 ? '#e8f0f4' : '#96a8c4'; k.c.fillRect(Math.floor(R() * W), Math.floor(R() * H * 0.6), 1, 1); } P.circ(W * 0.78, H * 0.18, 6, '#e8f0f4'); }
+    for (let i = 0; i < 5; i++) P.cloud(W * (0.1 + i * 0.2), H * (0.2 + P.r() * 0.18), 10 + P.r() * 12);
+    K.finalize(k.c, W, H, { dither: 30, grade: ph === 'night' ? 0.4 : 0.8 }); out.sky = k.cv;
+    // far canopy hills
+    k = AR.mk(TW, H); P = new K.Painter(k.c, 6);
+    for (let i = 0; i < 26; i++) { const x = P.r() * TW, y = H * (0.6 + P.r() * 0.2), r = 10 + P.r() * 14; wrap(TW, (o) => P.clump(x + o, y, r, T.leafTeal, [0, -1])); }
+    k.c.fillStyle = '#2e606a'; k.c.fillRect(0, H * 0.74, TW, H);
+    K.finalize(k.c, TW, H, { haze: 0.45, hazeColor: '#c6e4ec', dither: 18 }); out.far = k.cv;
+    // mid: trunks, a few lianas and bank greenery
+    k = AR.mk(TW, H); P = new K.Painter(k.c, 8);
+    for (let i = 0; i < 4; i++) { const x = (i + P.r() * 0.6) * TW / 4, w = 6 + P.r() * 5; wrap(TW, (o) => P.trunk(x + o, -4, H, w * 0.7, w, T.barkCool, { moss: false })); }
+    for (let i = 0; i < 24; i++) { const x = P.r() * TW, y = H * (0.8 + P.r() * 0.1), r = 7 + P.r() * 9; wrap(TW, (o) => P.clump(x + o, y, r, T.leafA, [0, -1])); }
+    K.finalize(k.c, TW, H, { haze: 0.4, hazeColor: '#a6c8c4', dither: 14 }); out.mid = k.cv;
+    // canopy band along the top (the vines hang from this)
+    k = AR.mk(TW, 34); P = new K.Painter(k.c, 12);
+    for (let i = 0; i < 40; i++) { const x = P.r() * TW, y = 2 + P.r() * 10, r = 6 + P.r() * 7; wrap(TW, (o) => P.clump(x + o, y, r, i % 3 ? T.leafA : T.leafB, [0, 1])); }
+    for (let i = 0; i < 18; i++) { const x = P.r() * TW; wrap(TW, (o) => P.line(x + o, 10, x + o + (P.r() - 0.5) * 3, 16 + P.r() * 14, 1, T.leafMid[2])); }
+    K.finalize(k.c, TW, 34, { dither: 12 }); out.top = k.cv;
+    // river (tiles)
+    const RW = 96; k = AR.mk(RW, 22); P = new K.Painter(k.c, 14);
+    const night = ph === 'night';
+    k.c.fillStyle = night ? '#0f1f2e' : '#1e4152'; k.c.fillRect(0, 2, RW, 20);
+    k.c.fillStyle = night ? '#183446' : '#2e606a'; k.c.fillRect(0, 2, RW, 3);
+    k.c.fillStyle = night ? '#4c8a88' : '#82bcae'; k.c.fillRect(0, 2, RW, 1);
+    for (let i = 0; i < 18; i++) { k.c.fillStyle = P.r() > 0.5 ? (night ? '#25505e' : '#4c8a88') : (night ? '#183446' : '#25505e'); k.c.fillRect(Math.floor(P.r() * RW), 6 + Math.floor(P.r() * 14), 3 + Math.floor(P.r() * 6), 1); }
+    K.finalize(k.c, RW, 22, { dither: 8 }); out.water = k.cv;
+    // knot of leaves where each vine can be grabbed (3 kinds), rotten knot
+    out.knot = [0, 1, 2].map((v) => { const c = AR.mk(18, 14), p = new K.Painter(c.c, 30 + v); for (let i = 0; i < 3; i++) p.clump(5 + i * 4 + p.r() * 2, 7 + p.r() * 2, 3 + p.r() * 2, i % 2 ? T.leafB : T.leafMid, [0, -1]); K.finalize(c.c, 18, 14, { dither: 10 }); return c.cv; });
+    out.rot = (() => { const c = AR.mk(18, 14), p = new K.Painter(c.c, 40); for (let i = 0; i < 3; i++) p.clump(5 + i * 4, 7 + p.r() * 2, 3 + p.r() * 2, T.cliff, [0, -1]); K.finalize(c.c, 18, 14, { dither: 10 }); return c.cv; })();
+    const g = AR.gradeFor(ph, A.wx);
+    out.col = { vine: ['#070e16', '#237438', '#4cae3a', '#82d044'].map((h) => AR.gradeHex(h, g)), rotv: ['#070e16', '#5e3826', '#8e5e40', '#a87452'].map((h) => AR.gradeHex(h, g)),
+      pad: ['#0e2a22', '#2c883a', '#82d044', '#e0a8f0'].map((h) => AR.gradeHex(h, g)), lime: '#c2ea6a', text: '#eef6d8' };
+    out.phase = ph;
+    layerCache.set(key, out);
+    return out;
+  }
+  function setPhase(ph, now) {
+    if (L && ph === curPhase && !now) return;
+    prevL = now ? null : L; fadeT = now ? 1 : 0; curPhase = ph;
+    L = paintPhase(ph);
+    K.setGrade(AR.gradeFor(ph, A.wx));
+    makeMonkey();
+  }
+  const PHASE_M = 400;   // metres per time of day
+  const phaseName = () => AR.PHASES[(START_PHASE + Math.floor(Math.max(0, dist) / PHASE_M)) % 5];
+
+  /* ---------- the monkey ---------- */
+  const MW = 16;
+  let frames = {}, mH = 22;
+  function makeMonkey() {
+    const kind = A.skin().kind;
+    const f = (parts) => { const s = new K.Sprite(kind, MW, { pad: 1 }); s.render({ parts }); return s.canvas; };
+    frames = {
+      hang: [f({ '.p-tail': 'rotate(10deg)' }), f({ '.p-tail': 'rotate(-12deg)' })],
+      air: [f({ '.p-arm': 'rotate(-140deg)', '.p-tail': 'rotate(20deg)' }), f({ '.p-arm': 'rotate(-165deg)', '.p-tail': 'rotate(-6deg)' })]
+    };
+    mH = frames.hang[0].height - 2;
+  }
+  const HAND = { x: 0.44, y: 0.025 };   // where the raised hand is on the drawing
+
+  /* ---------- game state ---------- */
+  const G = 480, PUMP = 95, VMAX = 300;
+  let state = 'menu', p = { x: 0, y: 0 }, v = { x: 0, y: 0 }, ang = 0, spin = 0, spinLeft = 0, rope = null, ropeL = 0;
+  let anchors = [], bananas = [], pads = [], wasps = [], fx = [], snapped = [];
+  let camX = 0, X0 = 0, dist = 0, flow = 0, flow5 = 0, bananasRun = 0, held = false, autoHold = true, lastIdx = 0, nextIdx = 0, genX = 0;
+  let taxis = 0, rescue = null, croc = null, releasedAt = -9, lastRel = null, time = 0, rain = [], deadAt = 0;
+  const reach = () => 95 + A.lvl('reach') * 8;
+  const rnd = Math.random;
+
+  function addAnchor(x, y, type) {
+    const a = { x0: x, x, y, type, idx: nextIdx++, len: 10 + rnd() * 14, tip: { x, y: y + 18 }, tv: { x: 0, y: 0 }, ph: rnd() * 6.28, hold: 0, broken: false, v: Math.floor(rnd() * 3), topX: x + (rnd() - 0.5) * 16 };
+    anchors.push(a); return a;
+  }
+  function generate() {
+    while (genX < camX + W + 220) {
+      const d = (genX - X0) / 10, band = Math.max(40, H * 0.36 - 22);
+      let gap = d < 40 ? 56 + rnd() * 14 : (52 + Math.min(30, d / 40)) + rnd() * (26 + Math.min(20, d / 60));
+      const big = d > 150 && rnd() < Math.min(0.18, d / 3000);
+      if (big) gap *= 1.45;
+      const x = genX + gap, y = d < 40 ? 34 + rnd() * 18 : 22 + rnd() * band;
+      let type = 'vine';
+      if (d > 300 && rnd() < Math.min(0.22, (d - 300) / 2500)) type = 'rot';
+      else if (d > 600 && rnd() < Math.min(0.3, (d - 600) / 2000)) type = 'sway';
+      const prev = anchors[anchors.length - 1], a = addAnchor(x, y, type);
+      // bananas along the swing between the two vines
+      if (prev && rnd() < 0.7) {
+        const n = 3 + Math.floor(rnd() * 3), base = (prev.y + a.y) / 2 + 40 + rnd() * 20;
+        for (let i = 0; i < n; i++) { const t = 0.25 + (i / Math.max(1, n - 1)) * 0.6; bananas.push({ x: prev.x + (a.x - prev.x) * t, y: base - Math.sin(Math.PI * t) * (22 + rnd() * 10), big: false, got: false, bob: rnd() * 6 }); }
+      }
+      if (prev && rnd() < 0.12 + Math.min(0.1, d / 4000)) bananas.push({ x: (prev.x + a.x) / 2, y: Math.min(prev.y, a.y) - 8 - rnd() * 10, big: true, got: false, bob: rnd() * 6 });
+      // lily pads to bounce on
+      const padChance = Math.max(0.06, 0.34 - d / 3000) + A.lvl('pads') * 0.05 + (big ? 0.4 : 0);
+      if (prev && d > 8 && rnd() < padChance) pads.push({ x: prev.x + (a.x - prev.x) * (0.3 + rnd() * 0.4), w: 18 + Math.floor(rnd() * 6), used: false, sink: 0, flower: rnd() < 0.4 });
+      // wasps from 1 km
+      if (prev && d > 1000 && rnd() < Math.min(0.2, (d - 1000) / 4000)) wasps.push({ x: (prev.x + a.x) / 2, y0: (prev.y + a.y) / 2 + 45, amp: 18 + rnd() * 18, ph: rnd() * 6.28, sp: 1.6 + rnd() * 1.2, cool: 0 });
+      genX = x;
+    }
+    const cut = camX - 160;
+    anchors = anchors.filter((a) => a.x > cut || a === rope);
+    bananas = bananas.filter((b) => b.x > cut && !(b.got && b.t > 0.5));
+    pads = pads.filter((q) => q.x > cut);
+    wasps = wasps.filter((w) => w.x > cut);
+  }
+
+  function startRun() {
+    A.audio(); A.begin(); state = 'play';
+    anchors = []; bananas = []; pads = []; wasps = []; fx = []; snapped = []; rescue = null; croc = null; FL.clear();
+    nextIdx = 0; X0 = 60 - (QS.has('debug') ? +QS.get('from') || 0 : 0) * 10; dist = 0; flow = 0; flow5 = 0; bananasRun = 0; time = 0; taxis = A.lvl('taxi');
+    const first = addAnchor(60, 40, 'vine'); genX = 60; camX = 60 - W * 0.3;
+    rope = first; ropeL = 52; lastIdx = 0; held = false; autoHold = true; spin = 0; spinLeft = 0;
+    p = { x: first.x - Math.sin(0.7) * ropeL, y: first.y + Math.cos(0.7) * ropeL }; v = { x: 0, y: 0 };
+    setPhase(phaseName(), true); generate(); hud();
+    A.score('0<small>m</small>');
+  }
+
+  /* ---------- helpers ---------- */
+  function body() { return { x: p.x - Math.sin(ang) * mH * 0.55, y: p.y + Math.cos(ang) * mH * 0.55 }; }
+  const FL = AR.Floats(cv);
+  function float(x, y, txt, col) { FL.add(x, y, txt, col); }
+  function burst(x, y, col, n, sp = 60) { for (let i = 0; i < n; i++) { const a = rnd() * 6.28, s = sp * (0.4 + rnd()); fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 30, t: 0, life: 0.5 + rnd() * 0.4, col }); } }
+  const mult = () => 1 + Math.floor(flow);
+  function hud() {
+    A.hud(`<span class="b">${A.CI}${AR.fmt(bananasRun)}</span><span class="f">Flow ×${mult()}</span>${taxis ? `<span>Taxi ×${taxis}</span>` : ''}`);
+  }
+  function target() {
+    let best = null, bs = -1e9; const R = reach();
+    for (const a of anchors) {
+      if (a.broken || (a === lastRel && time - releasedAt < 0.18)) continue;
+      const dx = a.x - p.x, dy = a.y - p.y, d = Math.hypot(dx, dy);
+      if (d > R || dy > 6 || dx < -24) continue;
+      const s = dx - d * 0.15; if (s > bs) { bs = s; best = a; }
+    }
+    return best;
+  }
+  function grab(a) {
+    rope = a; ropeL = Math.max(26, Math.min(reach(), Math.hypot(p.x - a.x, p.y - a.y)));
+    A.sfx('grab'); A.inc('vines');
+    if (a.type === 'rot') A.inc('rot');
+    if (a.idx > lastIdx + 1) {
+      const n = a.idx - lastIdx - 1; A.inc('skip', n);
+      const b = 2 * n * mult(); bananasRun += b; A.earn(b); float(a.x, a.y - 10, `Skip ×${n} +${b}`, '#f6d24a'); A.sfx('big'); hud();
+    }
+    lastIdx = Math.max(lastIdx, a.idx);
+  }
+  function release() {
+    if (!rope) return;
+    lastRel = rope; releasedAt = time; rope = null; A.sfx('fling');
+    const sp = Math.hypot(v.x, v.y);
+    if (sp > 245 && v.y < 0 && !spinLeft) { spinLeft = Math.PI * 2; spin = v.x >= 0 ? 1 : -1; }
+    A.hideHint();
+  }
+  function die(cause, quiet) {
+    state = 'dead'; deadAt = time; rope = null;
+    A.end({ score: Math.floor(dist), cause, delay: quiet ? 200 : 1300 });
+  }
+
+  /* ---------- simulation ---------- */
+  function step(dt) {
+    if (state === 'play' && A.paused) return;
+    time += dt;
+    fx.forEach((f) => { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; f.vy += 200 * dt; }); fx = fx.filter((f) => f.t < f.life);
+    snapped.forEach((s) => { s.vy += G * dt; s.y += s.vy * dt; s.t += dt; }); snapped = snapped.filter((s) => s.t < 1.5);
+    if (fadeT < 1) fadeT = Math.min(1, fadeT + dt / 1.6);
+    for (const a of anchors) {
+      if (a.type === 'sway') a.x = a.x0 + Math.sin(time * 1.3 + a.ph) * 14;
+      if (a !== rope) { // dangling end swings back to rest
+        const rx = a.x, ry = a.y + a.len;
+        a.tv.x += ((rx - a.tip.x) * 40 - a.tv.x * 3) * dt; a.tv.y += ((ry - a.tip.y) * 40 - a.tv.y * 3) * dt;
+        a.tip.x += a.tv.x * dt; a.tip.y += a.tv.y * dt;
+      }
+    }
+    if (croc) { croc.t += dt; }
+    if (state === 'menu') { menuIdle(dt); return; }
+    if (state === 'dead') { if (!croc) { v.y += G * dt; p.x += v.x * dt; p.y += v.y * dt; } return; }
+    // rescue flight by the toucan
+    if (rescue) {
+      rescue.t += dt; const k = Math.min(1, rescue.t / 0.9), e = k * k * (3 - 2 * k);
+      p.x = rescue.from.x + (rescue.to.x - rescue.from.x) * e; p.y = rescue.from.y + (rescue.to.y - rescue.from.y) * e - Math.sin(Math.PI * k) * 30;
+      ang += (0 - ang) * Math.min(1, dt * 6);
+      if (k >= 1) { v = { x: 90, y: -60 }; rescue = null; }
+      after(dt); return;
+    }
+
+    const holding = autoHold || held;
+    if (!rope && holding) { const a = target(); if (a) grab(a); }
+    if (rope && !holding) release();
+
+    v.y += G * dt;
+    if (rope) {
+      const dx = p.x - rope.x, dy = p.y - rope.y, d = Math.hypot(dx, dy) || 1, nx = dx / d, ny = dy / d;
+      // pumping: a little push along the swing while hanging below the vine
+      const tx = -ny, ty = nx, vt = v.x * tx + v.y * ty;
+      if (dy > 0 && Math.hypot(v.x, v.y) < VMAX) { const s = vt >= 0 ? 1 : -1; v.x += tx * s * PUMP * dt; v.y += ty * s * PUMP * dt; }
+      p.x += v.x * dt; p.y += v.y * dt;
+      const dx2 = p.x - rope.x, dy2 = p.y - rope.y, d2 = Math.hypot(dx2, dy2) || 1;
+      if (d2 > ropeL) {
+        const nx2 = dx2 / d2, ny2 = dy2 / d2; p.x = rope.x + nx2 * ropeL; p.y = rope.y + ny2 * ropeL;
+        const vr = v.x * nx2 + v.y * ny2; if (vr > 0) { v.x -= vr * nx2; v.y -= vr * ny2; }
+      }
+      rope.tip.x = p.x; rope.tip.y = p.y;
+      ang += (Math.atan2(-(p.x - rope.x), p.y - rope.y) - ang) * Math.min(1, dt * 14);
+      if (rope.type === 'rot') {
+        rope.hold += dt;
+        if (rope.hold > 0.95) { // snap!
+          A.sfx('crack'); rope.broken = true; snapped.push({ x: rope.x, y: rope.y, vy: 0, t: 0, len: Math.hypot(p.x - rope.x, p.y - rope.y) }); burst(rope.x, rope.y, '#a87452', 8, 40);
+          float(rope.x, rope.y - 6, 'Snap!', '#e0503e'); rope = null; releasedAt = time;
+        }
+      }
+    } else {
+      p.x += v.x * dt; p.y += v.y * dt;
+      if (spinLeft > 0) { const s = Math.min(spinLeft, dt * 12); ang += s * spin; spinLeft -= s; if (spinLeft <= 0) { A.inc('flips'); const b = 3 * mult(); bananasRun += b; A.earn(b); float(p.x, p.y - 14, `Flip! +${b}`, '#c2ea6a'); A.sfx('perfect'); hud(); ang = Math.atan2(Math.sin(ang), Math.cos(ang)); } }
+      else ang += (Math.max(-0.7, Math.min(0.7, -v.x / 500)) - ang) * Math.min(1, dt * 5);
+    }
+    after(dt);
+  }
+  function after(dt) {
+    const c = body();
+    // flow
+    const fast = Math.abs(v.x) > 105 || rescue;
+    flow = Math.max(0, Math.min(4.999, flow + (fast ? dt * 0.32 : -dt * 0.55 * (1 - A.lvl('flow') * 0.2))));
+    if (mult() >= 5) { flow5 += dt; A.stat('flow5', Math.floor(flow5)); } else flow5 = 0;
+    A.stat('flow', mult());
+    // bananas
+    const mag = A.lvl('magnet') ? 12 + A.lvl('magnet') * 9 : 0;
+    for (const b of bananas) {
+      if (b.got) { b.t += dt; continue; }
+      const dx = c.x - b.x, dy = c.y - b.y, d = Math.hypot(dx, dy);
+      if (mag && d < mag) { b.x += dx * Math.min(1, dt * 8); b.y += dy * Math.min(1, dt * 8); }
+      if (d < (b.big ? 11 : 9)) {
+        b.got = true; b.t = 0; const n = (b.big ? 5 : 1) * mult(); bananasRun += n; A.earn(n);
+        A.sfx(b.big ? 'big' : 'coin'); if (b.big || n > 1) float(b.x, b.y - 6, '+' + n, '#f6d24a'); A.popHud('.b'); hud();
+      }
+    }
+    // wasps knock you off
+    for (const w of wasps) {
+      w.cool = Math.max(0, w.cool - dt);
+      const wx = w.x + Math.sin(time * w.sp * 0.7 + w.ph) * 10, wy = w.y0 + Math.sin(time * w.sp + w.ph) * w.amp;
+      if (!w.cool && Math.hypot(c.x - wx, c.y - wy) < 8) {
+        w.cool = 1.2; A.sfx('sting'); float(wx, wy - 8, 'Ouch!', '#e0503e'); flow = 0;
+        if (rope) { lastRel = rope; releasedAt = time; rope = null; }
+        v.x = -Math.sign(v.x || 1) * 60; v.y = Math.max(v.y, 40); hud();
+      }
+    }
+    // distance
+    const dm = (p.x - X0) / 10;
+    if (dm > dist) { dist = dm; A.stat('dist', Math.floor(dist)); if (dist > 1000) A.stat('waspdist', Math.floor(dist - 1000)); A.score(`${AR.fmt(Math.floor(dist))}<small>m</small>`); }
+    const ph = phaseName(); if (ph !== curPhase) { setPhase(ph); float(p.x + 40, 40, { dawn: 'Dawn', day: 'Daytime', golden: 'Golden hour', dusk: 'Dusk', night: 'Night falls' }[ph], '#c2ea6a'); }
+    if (Math.random() < dt * 0.6) hud();
+    // the river
+    if (c.y > WATER - 3 && !rescue) {
+      const pad = pads.find((q) => !q.used && Math.abs(c.x - q.x) < q.w / 2 + 4);
+      if (pad && v.y > 0) {
+        pad.used = true; pad.sink = 0.01; v.y = -Math.min(360, 250 + Math.abs(v.y) * 0.25); v.x = Math.max(v.x, 70);
+        A.sfx('bounce'); A.inc('pads'); burst(c.x, WATER - 2, '#82d044', 6, 50); float(c.x, WATER - 20, 'Boing!', '#82d044');
+      } else if (taxis > 0) {
+        taxis--; A.sfx('big'); burst(c.x, WATER - 2, '#c6e4ec', 10, 70);
+        const ahead = anchors.filter((a) => !a.broken && a.x > p.x + 20).sort((a, b) => a.x - b.x)[0] || { x: p.x + 80, y: 40 };
+        rescue = { t: 0, from: { x: p.x, y: p.y }, to: { x: ahead.x - 24, y: ahead.y + 34 } }; rope = null; float(c.x, WATER - 24, 'Toucan taxi!', '#f6d24a'); hud();
+      } else {
+        A.sfx('splash'); burst(c.x, WATER - 2, '#c6e4ec', 18, 90);
+        croc = { x: c.x, t: 0 }; setTimeout(() => A.sfx('chomp'), 250);
+        v = { x: 0, y: 0 }; p.y = WATER + 30;
+        die(Math.floor(dist) < 5 ? 'Splash! Hold on until you are ready to let go.' : 'Snapped up by a crocodile.');
+      }
+    }
+    // camera
+    const tx = p.x - W * 0.3 + Math.max(-40, Math.min(70, v.x * 0.3));
+    camX += (tx - camX) * Math.min(1, dt * 3.5);
+    generate();
+  }
+  // idle swing behind the menu
+  function menuIdle(dt) {
+    if (!anchors.length) { anchors = []; nextIdx = 0; X0 = 60; const a = addAnchor(W * 0.5, 40, 'vine'); genX = a.x; camX = 0; rope = a; ropeL = 56; p = { x: a.x + 30, y: 80 }; v = { x: 0, y: 0 }; generate(); }
+    camX = 0; if (!rope) rope = anchors[0];
+    v.y += G * dt; const dx = p.x - rope.x, dy = p.y - rope.y, d = Math.hypot(dx, dy) || 1, tx = -dy / d, ty = dx / d, vt = v.x * tx + v.y * ty;
+    if (Math.hypot(v.x, v.y) < 120) { const s = vt >= 0 ? 1 : -1; v.x += tx * s * 60 * dt; v.y += ty * s * 60 * dt; }
+    p.x += v.x * dt; p.y += v.y * dt;
+    const d2 = Math.hypot(p.x - rope.x, p.y - rope.y) || 1; if (d2 > ropeL) { const nx = (p.x - rope.x) / d2, ny = (p.y - rope.y) / d2; p.x = rope.x + nx * ropeL; p.y = rope.y + ny * ropeL; const vr = v.x * nx + v.y * ny; if (vr > 0) { v.x -= vr * nx; v.y -= vr * ny; } }
+    rope.tip.x = p.x; rope.tip.y = p.y; ang = Math.atan2(-(p.x - rope.x), p.y - rope.y);
+  }
+
+  /* ---------- drawing ---------- */
+  function plot(x0, y0, x1, y1, col, w) {
+    ctx.fillStyle = col; const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0)));
+    for (let i = 0; i <= n; i++) { const t = i / n; ctx.fillRect(Math.round(x0 + (x1 - x0) * t - w / 2), Math.round(y0 + (y1 - y0) * t), w, 1); }
+  }
+  function vine(pts, cols, thick) {
+    for (let pass = 0; pass < 3; pass++) for (let i = 1; i < pts.length; i++) {
+      const [a, b] = [pts[i - 1], pts[i]];
+      plot(a[0], a[1], b[0], b[1], cols[pass], pass === 0 ? thick + 1 : pass === 1 ? thick : 1);
+    }
+  }
+  function curve(x0, y0, cx, cy, x1, y1, n = 8) { const out = []; for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; out.push([u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1]); } return out; }
+  function drawLayers(Ly, alpha) {
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(Ly.sky, 0, 0);
+    const tile = (img, f, y) => { const w = img.width, o = -(((camX * f) % w) + w) % w; for (let x = o; x < W; x += w) ctx.drawImage(img, Math.round(x), y); };
+    tile(Ly.far, 0.15, 0); tile(Ly.mid, 0.4, 0);
+    ctx.globalAlpha = 1;
+  }
+  function draw() {
+    if (!L) return;
+    const t = time, ox = Math.round(camX);
+    if (prevL && fadeT < 1) { drawLayers(prevL, 1); drawLayers(L, fadeT); } else drawLayers(L, 1);
+    const C = L.col, tgt = state === 'play' && !rope && !rescue ? target() : null;
+    ctx.save(); ctx.translate(-ox, 0);
+    // best-distance flag
+    if (A.data.best > 0 && state !== 'menu') {
+      const bx = Math.round(X0 + A.data.best * 10);
+      if (bx > camX - 20 && bx < camX + W + 20) { ctx.fillStyle = '#46281c'; ctx.fillRect(bx, WATER - 34, 2, 34); ctx.fillStyle = '#f6d24a'; ctx.fillRect(bx + 2, WATER - 34, 9, 6); FL.pin('best', bx + 1, WATER - 37, 'Best ' + AR.fmt(A.data.best) + ' m', '#f6d24a'); } else FL.unpin('best');
+    } else FL.unpin('best');
+    // vines
+    for (const a of anchors) {
+      if (a.broken) continue;
+      const cols = a.type === 'rot' ? C.rotv : C.vine, shake = a === rope && a.type === 'rot' && a.hold > 0.5 ? Math.round(Math.sin(t * 60)) : 0;
+      vine(curve(a.topX, -2, (a.topX + a.x) / 2 + 3, a.y * 0.5, a.x + shake, a.y), cols, 2);
+      const tip = a.tip; vine(curve(a.x, a.y, (a.x + tip.x) / 2 + (a === rope ? 0 : 2), (a.y + tip.y) / 2 + (a === rope ? 0 : 3), tip.x, tip.y, 6), cols, 1);
+      ctx.drawImage(a.type === 'rot' ? L.rot : L.knot[a.v], Math.round(a.x - 9 + shake), Math.round(a.y - 8));
+      if (a === tgt && Math.floor(t * 6) % 2 === 0) { ctx.fillStyle = C.lime; const x = Math.round(a.x), y = Math.round(a.y); [[-8, -8], [6, -8], [-8, 6], [6, 6]].forEach(([dx, dy]) => { ctx.fillRect(x + dx, y + dy, 2, 1); ctx.fillRect(x + dx + (dx < 0 ? 0 : 1), y + dy + (dy < 0 ? 0 : -1), 1, 2); }); }
+    }
+    for (const s of snapped) vine([[s.x, s.y], [s.x + 3, s.y + s.len * 0.6]], C.rotv, 1);
+    // canopy band
+    const tw = L.top.width, to = Math.floor(camX / tw) * tw; for (let x = to - tw; x < camX + W + tw; x += tw) ctx.drawImage(L.top, x, -4);
+    // bananas
+    for (const b of bananas) {
+      const img = b.big ? BUNCH : BANANA, bob = Math.round(Math.sin(t * 3 + b.bob) * 1.5);
+      if (b.got) { ctx.globalAlpha = Math.max(0, 1 - b.t * 2); ctx.drawImage(img, Math.round(b.x - img.width / 2), Math.round(b.y - img.height / 2 - b.t * 20)); ctx.globalAlpha = 1; }
+      else ctx.drawImage(img, Math.round(b.x - img.width / 2), Math.round(b.y - img.height / 2) + bob);
+    }
+    // wasps
+    for (const w of wasps) { const wx = w.x + Math.sin(t * w.sp * 0.7 + w.ph) * 10, wy = w.y0 + Math.sin(t * w.sp + w.ph) * w.amp; ctx.drawImage(WASP[Math.floor(t * 14) % 2], Math.round(wx - 2), Math.round(wy - 2)); }
+    // the monkey
+    if (frames.hang && !(croc && croc.t > 0.15)) {
+      const air = !rope && state !== 'menu', set = air ? frames.air : frames.hang, img = set[Math.floor(t * (air ? 8 : 3)) % 2];
+      ctx.save(); ctx.translate(Math.round(p.x), Math.round(p.y)); ctx.rotate(ang);
+      ctx.drawImage(img, -Math.round(img.width * HAND.x), -Math.round(img.height * HAND.y) - 1); ctx.restore();
+    }
+    // toucan taxi
+    if (rescue) { const ts = toucan(); ctx.drawImage(ts, Math.round(p.x - ts.width / 2), Math.round(p.y - ts.height - 2)); }
+    // river, lily pads, crocodile
+    const ww = L.water.width, wo = Math.floor((camX - t * 6) / ww) * ww + (t * 6) % ww;
+    for (let x = wo - ww; x < camX + W + ww; x += ww) ctx.drawImage(L.water, Math.round(x), WATER - 2);
+    for (const q of pads) {
+      if (q.sink) q.sink = Math.min(1, q.sink + 1 / 40);
+      const y = WATER - 1 + Math.round((q.sink || 0) * 4), x = Math.round(q.x - q.w / 2);
+      if (q.sink >= 1) continue;
+      ctx.fillStyle = C.pad[0]; ctx.fillRect(x, y, q.w, 3); ctx.fillStyle = C.pad[1]; ctx.fillRect(x + 1, y - 1, q.w - 2, 3); ctx.fillStyle = C.pad[2]; ctx.fillRect(x + 3, y - 1, q.w - 8, 1);
+      ctx.fillStyle = C.pad[0]; ctx.fillRect(x + Math.floor(q.w * 0.6), y - 1, 2, 2);
+      if (q.flower) { ctx.fillStyle = C.pad[3]; ctx.fillRect(x + 4, y - 4, 3, 3); ctx.fillStyle = '#fff09a'; ctx.fillRect(x + 5, y - 3, 1, 1); }
+    }
+    if (croc) { const cs = crocSprite(), k = Math.min(1, croc.t / 0.25), down = Math.max(0, croc.t - 0.9) * 40; ctx.drawImage(cs, Math.round(croc.x - cs.width * 0.78), Math.round(WATER - cs.height * 0.75 * k + 8 + down)); }
+    // decoration: croc eyes drifting in the water
+    const ey = Math.floor((camX + 300) / 420); for (let i = ey - 1; i <= ey + 1; i++) { const ex = i * 420 + 100 + Math.sin(t * 0.4 + i) * 30; if (state !== 'menu') { ctx.fillStyle = '#46622a'; ctx.fillRect(Math.round(ex), WATER - 1, 5, 2); ctx.fillStyle = '#d8c03a'; ctx.fillRect(Math.round(ex) + 1, WATER - 1, 1, 1); ctx.fillRect(Math.round(ex) + 3, WATER - 1, 1, 1); } }
+    // night fireflies
+    if (curPhase === 'night' || curPhase === 'dusk') for (let i = 0; i < 14; i++) { const fx0 = ((i * 97 + camX * 0.6) % (W + 40)) + camX - 20, fy = 60 + ((i * 53) % (WATER - 80)) + Math.sin(t * 1.2 + i) * 6; if (Math.sin(t * 2 + i * 1.7) > 0.2) { ctx.fillStyle = '#fff09a'; ctx.fillRect(Math.round(fx0), Math.round(fy), 1, 1); } }
+    // particles + floating words
+    for (const f of fx) { ctx.globalAlpha = 1 - f.t / f.life; ctx.fillStyle = f.col; ctx.fillRect(Math.round(f.x), Math.round(f.y), 2, 2); } ctx.globalAlpha = 1;
+    ctx.restore();
+    // above the screen: a little arrow
+    if (p.y < -6 && state === 'play') { const x = Math.round(p.x - camX); ctx.fillStyle = '#c2ea6a'; ctx.fillRect(x - 1, 2, 3, 1); ctx.fillRect(x - 2, 3, 5, 1); ctx.fillRect(x, 1, 1, 1); }
+    // flow bar
+    if (state === 'play') { const bw = 40, fr = flow - Math.floor(flow); ctx.fillStyle = 'rgba(7,14,22,.6)'; ctx.fillRect(W - bw - 6, H - 8, bw + 2, 4); ctx.fillStyle = mult() >= 5 ? '#f6d24a' : '#c2ea6a'; ctx.fillRect(W - bw - 5, H - 7, Math.round(bw * (mult() >= 5 ? 1 : fr)), 2); }
+    // rain
+    if (/drizzle|rain|heavy|storm/.test(A.wx)) {
+      if (!rain.length) for (let i = 0; i < W * H / (A.wx === 'drizzle' ? 900 : 320); i++) rain.push([Math.random() * W, Math.random() * H, 3 + Math.random() * 3]);
+      ctx.fillStyle = curPhase === 'night' ? 'rgba(140,164,191,.7)' : 'rgba(198,228,236,.75)';
+      for (const d of rain) { d[1] += d[2]; d[0] -= 0.6; if (d[1] > H) { d[1] = -4; d[0] = Math.random() * (W + 20); } ctx.fillRect(Math.round(d[0]), Math.round(d[1]), 1, 3); }
+    }
+  }
+  let _toucan = null, _toucanKey = '';
+  function toucan() {
+    const key = curPhase + Math.floor(time * 10) % 2; if (_toucan && _toucanKey === key) return _toucan;
+    if (!K.A.vsToucan) K.A.vsToucan = () => `<svg viewBox="0 0 110 60" xmlns="http://www.w3.org/2000/svg"><path d="M36 29 L12 28 L12 37 L36 37Z" fill="#0f1012"/><ellipse cx="50" cy="33" rx="18" ry="9" fill="#141518"/><circle cx="68" cy="28" r="9" fill="#141518"/><path d="M62 30 C70 29 75 35 71 41 C65 41 60 36 62 30Z" fill="#f2d23a"/><circle cx="70" cy="25.5" r="4" fill="#7ad04a"/><rect x="68.5" y="24" width="3.4" height="3.4" fill="#0a0a0a"/><path d="M75 20 C90 15 104 19 108 28 C100 33 88 34 76 34 C73 28 73 24 75 20Z" fill="#f08a1c"/><path d="M75 20 C90 15 104 19 108 28 C98 24 88 23 76 26Z" fill="#7cc83e"/><g class="p-wing" style="transform-origin:54px 30px"><path d="M58 27 C46 21 30 21 22 25 C30 32 46 36 58 35Z" fill="#424c58"/></g></svg>`;
+    const s = new K.Sprite('vsToucan', 26, { pad: 1 }); s.render({ parts: { '.p-wing': `rotate(${Math.floor(time * 10) % 2 ? 50 : -40}deg)` } });
+    _toucan = s.canvas; _toucanKey = key; return _toucan;
+  }
+  let _croc = null, _crocPh = '';
+  function crocSprite() { if (!_croc || _crocPh !== curPhase) { const s = new K.Sprite('crocodile', 46, { pad: 1 }); s.render({ parts: { '.p-jaw': 'translateY(-3px)' } }); _croc = s.canvas; _crocPh = curPhase; } return _croc; }
+
+  /* ---------- loop ---------- */
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; acc += dt;
+    while (acc > 1 / 120) { step(1 / 120); acc -= 1 / 120; }
+    draw(); FL.update(dt, (x, y) => [x - Math.round(camX), y]); requestAnimationFrame(loop);
+  }
+
+  /* ---------- input: hold anywhere ---------- */
+  const down = () => { if (state !== 'play' || A.paused) return; A.audio(); held = true; autoHold = false; };
+  const up = () => { held = false; };
+  addEventListener('pointerdown', (e) => { if (e.target.closest('button, a, .panel, .cbar')) return; if (state === 'play') { e.preventDefault(); down(); } });
+  addEventListener('pointerup', up); addEventListener('pointercancel', up); addEventListener('blur', up);
+  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') && state === 'play') { e.preventDefault(); if (!e.repeat) down(); } });
+  addEventListener('keyup', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') up(); });
+  // back to the idle swing when leaving a run
+  const _toMenu = A.toMenu; A.toMenu = () => { state = 'menu'; anchors = []; _toMenu(); };
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-menu]')) { state = 'menu'; anchors = []; bananas = []; pads = []; wasps = []; croc = null; rope = null; FL.clear(); } });
+
+  if (QS.has('debug')) window.__vs = () => ({ state, p, v, rope: !!rope, dist, flow, anchors: anchors.length, camX, W, H });
+  addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+  resize(); requestAnimationFrame((n) => { last = n; loop(n); });
+})();
+</script>
+</body>
+</html>

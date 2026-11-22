@@ -28,4 +28,32 @@
     <priority>0.8</priority>
     <image:image><image:loc>https://harryh.xyz/share/flappy.jpg</image:loc></image:image>
   </url>
+  <url>
+    <loc>https://harryh.xyz/arcade/</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <image:image><image:loc>https://harryh.xyz/share/arcade.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/swing/</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://harryh.xyz/share/swing.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/stack/</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://harryh.xyz/share/stack.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://harryh.xyz/snap/</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://harryh.xyz/share/snap.jpg</image:loc></image:image>
+  </url>
 </urlset>

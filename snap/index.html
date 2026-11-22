@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tongue Snap · A free endless chameleon bug-catching browser game</title>
+<meta name="description" content="Tap to flick a chameleon's tongue at the bugs drifting through the jungle. Chain catches into combos, line up doubles and steer clear of the wasps. A free pixel-art endless game for phone and desktop.">
+<meta name="keywords" content="chameleon game, bug catching game, tap game, endless game, pixel art game, free browser game">
+<link rel="canonical" href="https://harryh.xyz/snap/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Harry">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://harryh.xyz/snap/">
+<meta property="og:title" content="Tongue Snap">
+<meta property="og:description" content="Flick, catch, gulp. How many points can your chameleon snap up?">
+<meta property="og:image" content="https://harryh.xyz/share/snap.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tongue Snap: a pixel-art chameleon flicking its tongue at butterflies in the jungle">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tongue Snap">
+<meta name="twitter:description" content="Flick, catch, gulp. How many points can your chameleon snap up?">
+<meta name="twitter:image" content="https://harryh.xyz/share/snap.jpg">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": ["VideoGame", "WebApplication"], "name": "Tongue Snap", "url": "https://harryh.xyz/snap/", "description": "Tap to flick a chameleon's tongue at the bugs drifting through the jungle. Chain catches into combos, line up doubles and steer clear of the wasps.", "image": "https://harryh.xyz/share/snap.jpg", "genre": ["Arcade", "Casual", "Endless"], "gamePlatform": ["Web browser", "Mobile", "Desktop"], "applicationCategory": "GameApplication", "operatingSystem": "Any", "playMode": "SinglePlayer", "inLanguage": "en-GB", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "GBP"}, "publisher": {"@type": "Organization", "name": "Ducklops"}, "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}}</script>
+<meta name="theme-color" content="#0f1f2e">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../arcade-kit.css">
+<style>
+  .belly { display: inline-block; width: 64px; height: 8px; background: rgba(238,246,216,.18); box-shadow: inset 0 0 0 1px rgba(7,14,22,.8); }
+  .belly i { display: block; height: 100%; background: var(--lime); }
+  .belly.low i { background: #e0503e; animation: blink .5s steps(2) infinite; }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Tongue Snap game" role="img"></canvas>
+<div class="bar">
+  <a href="../arcade/" aria-label="Back to the jungle arcade">◂ Arcade</a>
+  <div><button id="pause" hidden aria-label="Pause">Pause</button><button id="mute" aria-pressed="true" aria-label="Sound">Sound on</button></div>
+</div>
+<noscript><p style="padding:80px 20px;text-align:center">Tongue Snap needs JavaScript switched on.</p></noscript>
+<div class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
+
+<script src="../jungle-kit.js"></script>
+<script src="../arcade-kit.js"></script>
+<script>
+(function () {
+  'use strict';
+  const K = JungleKit, T = K.TONES, AR = Arcade;
+  const QS = new URLSearchParams(location.search);
+
+  /* ---------- chameleons ---------- */
+  // body, dark, stripes, belly line, eye
+  const BASE = ['#2aa878', '#24966a', '#e8c83a', '#d8e8a0', '#34c08a'];
+  const SKINS = [
+    { id: 'panther', name: 'Panther', price: 0, p: BASE, note: 'The classic jungle green.' },
+    { id: 'ruby', name: 'Ruby', price: 60, p: ['#c02a36', '#8c1a28', '#f0c83a', '#f0a0a0', '#e0503e'], note: 'Red when it means business.' },
+    { id: 'sapphire', name: 'Sapphire', price: 150, p: ['#2a62c8', '#1a4a9a', '#82d0e8', '#c6e4ec', '#3aa8f0'], note: 'Cool, calm and very blue.' },
+    { id: 'sunset', name: 'Sunset', price: 300, p: ['#f08a1c', '#c8601a', '#f6e04a', '#fff09a', '#f6aa3e'], note: 'Matches the golden hour.' },
+    { id: 'ghost', name: 'Ghost', price: 600, p: ['#c6d4d8', '#96a8ac', '#ffffff', '#eef6f8', '#dce6ea'], note: 'Barely there at all.' },
+    { id: 'neon', name: 'Neon', price: 1000, p: ['#82d044', '#3a9c3a', '#e86a8a', '#c2ea6a', '#c2ea6a'], note: 'Impossible to miss.' },
+    { id: 'night', name: 'Midnight', price: 1600, p: ['#4a2a6a', '#2a1a4a', '#b47ad8', '#e0a8f0', '#7a46a8'], note: 'Hunts by moonlight.' },
+    { id: 'gold', name: 'Golden', price: 3000, p: ['#f2c62a', '#b88a12', '#ffffff', '#fff09a', '#fff09a'], note: 'Legend of the canopy.' }
+  ];
+  SKINS.forEach((s) => { s.kind = 'ts_' + s.id; K.A[s.kind] = () => { let svg = K.A.chameleon(); BASE.forEach((c, i) => { svg = svg.split(c).join(s.p[i]); }); return svg; }; });
+
+  /* ---------- bugs ---------- */
+  const DEW = AR.pix([
+    '...b...',
+    '..bLb..',
+    '.bLlbb.',
+    'bLlbbbd',
+    'blbbbbd',
+    '.bbbbd.',
+    '..ddd..'
+  ], { b: '#3aa8f0', L: '#ffffff', l: '#c6e4ec', d: '#1a6ac8' });
+  const PX = (rows, pal) => AR.scaled(AR.pix(rows, pal), 2);   // bugs are drawn at double size so they're easy to see and tap
+  const IMG = {
+    fly: [PX(['w...w', '.wkw.', '.kkk.', '..k..'], { w: '#dcecf4', k: '#1a1a1a' }), PX(['.....', 'wwkww', '.kkk.', '..k..'], { w: '#dcecf4', k: '#1a1a1a' })],
+    beetle: [PX(['.k..k.', '.bbbb.', 'bBbbbb', 'bbbbbb', 'k.kk.k'], { k: '#14181a', b: '#2a62c8', B: '#82d0e8' }), PX(['.k..k.', '.bbbb.', 'bBbbbb', 'bbbbbb', '.k..k.'], { k: '#14181a', b: '#2a62c8', B: '#82d0e8' })],
+    firefly: [PX(['.w.w.', '.kkk.', '.kyk.', '..y..'], { w: '#c6d4d8', k: '#2a2018', y: '#fff09a' }), PX(['w...w', '.kkk.', '.kyk.', '..y..'], { w: '#c6d4d8', k: '#2a2018', y: '#fff09a' })],
+    dragonfly: [PX(['..ww.ww..', 'gggggggGk', '..ww.ww..'], { w: '#e8f4f8', g: '#f2c62a', G: '#fff09a', k: '#14181a' }), PX(['.ww...ww.', 'gggggggGk', '.........'], { w: '#e8f4f8', g: '#f2c62a', G: '#fff09a', k: '#14181a' })],
+    wasp: [PX(['.ww.ww.', '..www..', 'kykykyk', '.kykyk.', '....k..'], { w: '#e8f4f8', k: '#14181a', y: '#f2c62a' }), PX(['.......', 'ww...ww', 'kykykyk', '.kykyk.', '....k..'], { w: '#e8f4f8', k: '#14181a', y: '#f2c62a' })],
+    hornet: [PX(['.ww..ww.', '..wwww..', 'kokokoko', 'kokokok.', '.kokok..', '.....k..'], { w: '#e8f4f8', k: '#14181a', o: '#f08a1a' }), PX(['........', 'www..www', 'kokokoko', 'kokokok.', '.kokok..', '.....k..'], { w: '#e8f4f8', k: '#14181a', o: '#f08a1a' })]
+  };
+  const BUGS = {
+    fly: { pts: 10, belly: 12, dew: 1, r: 7, sp: 26, name: 'Fly' },
+    butterfly: { pts: 20, belly: 15, dew: 2, r: 8, sp: 22, name: 'Butterfly' },
+    beetle: { pts: 30, belly: 18, dew: 2, r: 7, sp: 48, name: 'Beetle' },
+    firefly: { pts: 25, belly: 15, dew: 2, r: 7, sp: 18, name: 'Firefly' },
+    dragonfly: { pts: 100, belly: 30, dew: 8, r: 8, sp: 70, name: 'Golden dragonfly' },
+    wasp: { pts: 0, belly: -35, dew: 0, r: 6, sp: 34, bad: true, name: 'Wasp' },
+    hornet: { pts: 0, belly: -45, dew: 0, r: 7, sp: 60, bad: true, name: 'Hornet' }
+  };
+
+  /* ---------- the frame ---------- */
+  const A = AR.init({
+    key: 'harry-snap', name: 'Tongue Snap', slug: 'snap', unit: 'pts', unitLong: 'points',
+    how: '<b>Tap</b> where you want to flick your tongue. Catch bugs to keep your belly full, chain catches for a bigger multiplier and line bugs up for doubles. <b>Don’t eat the wasps.</b>',
+    hint: 'Tap to flick your tongue',
+    cur: { one: 'dewdrop', many: 'Dewdrops', icon: DEW },
+    skins: SKINS, skinsLabel: 'Chameleons', shopLabel: 'Chameleons & upgrades',
+    upgrades: [
+      { id: 'tongue', name: 'Long tongue', desc: 'Reach bugs further away.', costs: [30, 90, 220, 500] },
+      { id: 'belly', name: 'Big belly', desc: 'A bigger belly that takes longer to empty.', costs: [40, 120, 300] },
+      { id: 'sticky', name: 'Sticky tip', desc: 'A bigger, stickier tongue tip.', costs: [50, 150, 400] },
+      { id: 'lazy', name: 'Lazy bugs', desc: 'Bugs fly a little slower.', costs: [60, 180, 420] },
+      { id: 'sense', name: 'Wasp sense', desc: 'Wasps glow red and hurt less.', costs: [120, 400] }
+    ],
+    missions: [
+      { id: 'bugs', stat: 'bugs', text: (n) => `Catch ${n} bugs in one run`, targets: [10, 25, 50, 80, 120, 170, 230] },
+      { id: 'score', stat: 'score', text: (n) => `Score ${AR.fmt(n)} points in one run`, targets: [150, 400, 800, 1400, 2200, 3500, 5000] },
+      { id: 'combo', stat: 'combo', text: (n) => `Catch ${n} bugs in a row without missing`, targets: [5, 10, 15, 25, 40, 60] },
+      { id: 'double', stat: 'double', text: (n) => `Catch two bugs with one flick ${n} time${n > 1 ? 's' : ''}`, targets: [1, 3, 6, 10, 15] },
+      { id: 'time', stat: 'time', text: (n) => `Last ${n >= 60 ? Math.round(n / 60) + ' minute' + (n >= 120 ? 's' : '') : n + ' seconds'} in one run`, targets: [60, 120, 180, 300, 420, 600] },
+      { id: 'cur', stat: 'cur', text: (n) => `Collect ${n} dewdrops in one run`, targets: [20, 50, 90, 150, 240] },
+      { id: 'butterfly', stat: 'butterfly', total: true, text: (n) => `Catch ${n} butterflies (all runs)`, targets: [10, 30, 70, 150, 300] },
+      { id: 'firefly', stat: 'firefly', text: (n) => `Catch ${n} fireflies in one run`, targets: [3, 8, 15, 25], when: (D) => (D.totals.time || 0) >= 120 },
+      { id: 'dragon', stat: 'dragonfly', total: true, text: (n) => `Catch ${n} golden dragonfl${n > 1 ? 'ies' : 'y'} (all runs)`, targets: [1, 3, 6, 10, 20], when: (D) => D.best >= 200 }
+    ],
+    reward: 20,
+    cardTitle: ['TONGUE', 'SNAP'], cardLabel: 'Best score',
+    shareText: (best, url) => `I scored ${AR.fmt(best)} points in Tongue Snap. Can you beat it? Play at ${url}`,
+    start: () => startRun(),
+    quit: () => { if (state === 'play') gameOver('You wandered off for a nap.', true); },
+    onSkin: () => makeCham(),
+    onEnv: () => { cache.clear(); rain = []; setPhase(curPhase, true); },
+    regrade: () => K.setGrade(AR.gradeFor(curPhase, A.wx))
+  });
+
+  /* ---------- canvas & scenery ---------- */
+  const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  let W = 300, H = 240, S = 3, BRANCH = 210;
+  function resize() {
+    S = Math.max(1, Math.min(innerHeight / 250, innerWidth / 240));
+    W = Math.min(480, Math.ceil(innerWidth / S)); H = Math.min(380, Math.ceil(innerHeight / S));
+    cv.width = W; cv.height = H; cv.style.width = W * S + 'px'; cv.style.height = H * S + 'px';
+    ctx.imageSmoothingEnabled = false; BRANCH = H - 30;
+    cache.clear(); setPhase(curPhase, true);
+  }
+  const cache = new Map();
+  const START = Math.max(0, AR.PHASES.indexOf(A.phase));
+  let curPhase = AR.PHASES[START], L = null, prevL = null, fade = 1;
+  function wrap(w, fn) { [-w, 0, w].forEach((o) => fn(o)); }
+  function paintPhase(ph) {
+    const key = ph + W + 'x' + H; if (cache.has(key)) return cache.get(key);
+    K.setGrade(AR.gradeFor(ph, A.wx));
+    const o = {};
+    let k = AR.mk(W, H), P = new K.Painter(k.c, 4);
+    P.vgrad(0, 0, W, H, AR.skyStops(ph, A.wx));
+    if (ph !== 'night') P.rgrad(W * 0.2, H * 0.15, H * 0.7, [[0, 'rgba(255,251,230,.8)'], [1, 'rgba(255,251,230,0)']]);
+    else { const R = K.rng(5); for (let i = 0; i < W * H / 170; i++) { k.c.fillStyle = R() > 0.6 ? '#e8f0f4' : '#96a8c4'; k.c.fillRect(Math.floor(R() * W), Math.floor(R() * H * 0.5), 1, 1); } P.circ(W * 0.2, H * 0.16, 6, '#e8f0f4'); }
+    for (let i = 0; i < 26; i++) P.clump(P.r() * W, H * (0.55 + P.r() * 0.2), 10 + P.r() * 14, T.leafTeal, [0, -1]);
+    for (let i = 0; i < 3; i++) P.trunk(W * (0.12 + i * 0.36 + P.r() * 0.1), -4, H, 7, 10, T.barkCool, { moss: true });
+    for (let i = 0; i < 30; i++) P.clump(P.r() * W, P.r() * H * 0.18, 9 + P.r() * 10, T.leafA, [0, 1]);
+    for (let i = 0; i < 8; i++) { const x = P.r() * W; P.liana([[x, -4], [x + 6, H * 0.15], [x - 6, H * 0.3], [x + 2, H * (0.25 + P.r() * 0.25)]], 1.4, T.leafA, { leaves: 3, leafTone: T.leafB }); }
+    K.finalize(k.c, W, H, { haze: 0.18, hazeColor: '#a6c8c4', dither: 18, grade: ph === 'night' ? 0.5 : 0.85 }); o.back = k.cv;
+    // the branch the chameleon sits on, with leaves
+    k = AR.mk(W, H - BRANCH + 20); P = new K.Painter(k.c, 9);
+    P.branch(-10, 22, W + 10, 18, 9, T.bark, T.leafB);
+    for (let i = 0; i < W / 18; i++) P.heart(P.r() * W, 28 + P.r() * 10, 9 + P.r() * 6, Math.PI + (P.r() - 0.5) * 1.4, i % 2 ? T.leafB : T.leafA);
+    P.bromeliad(W * 0.86, 16, 9);
+    K.finalize(k.c, W, k.cv.height, { dither: 12 }); o.branch = k.cv;
+    cache.set(key, o); return o;
+  }
+  function setPhase(ph, now) {
+    prevL = now ? null : L; fade = now ? 1 : 0; curPhase = ph; L = paintPhase(ph);
+    K.setGrade(AR.gradeFor(ph, A.wx)); makeCham(); butterflies = {};
+  }
+  const PHASE_S = 45; // seconds per time of day
+
+  /* ---------- chameleon ---------- */
+  const CW = 58; let cham = null, chamTongue = null, eyeKey = '';
+  function makeCham(dx = 1, dy = 0) {
+    const s = new K.Sprite(A.skin().kind, CW, { pad: 1 }), ex = Math.round(dx * 2), ey = Math.round(dy * 2);
+    s.render({ op: { '.p-tongue': 0 }, parts: { '.p-eye': `translate(${ex}px, ${ey}px)` } });
+    cham = s.canvas; eyeKey = ex + ',' + ey;
+    chamTongue = AR.gradeHex('#e86a8a', AR.gradeFor(curPhase, A.wx));
+  }
+  const chamPos = () => ({ x: Math.round(W / 2 - cham.width / 2), y: Math.round(BRANCH - cham.height * 80 / 110 + 2) });
+  const mouth = () => { const p = chamPos(), mx = 147 / 170 * CW + 1, my = 58 / 110 * (cham.height - 2) + 1; return { x: face > 0 ? p.x + mx : p.x + cham.width - mx, y: p.y + my }; };
+
+  /* ---------- game state ---------- */
+  let state = 'menu', bugs = [], tongue = null, face = 1, time = 0, score = 0, belly = 100, combo = 0, spawnT = 0, dewRun = 0, hurt = 0, fx = [], rain = [], butterflies = {}, nextPhaseAt = PHASE_S;
+  const FL = AR.Floats(cv);
+  const maxBelly = () => 100 * (1 + A.lvl('belly') * 0.2);
+  const reach = () => Math.min(H * 0.92, 120 + A.lvl('tongue') * 14);
+  const mult = () => 1 + Math.min(4, Math.floor(combo / 5));
+  const bugSpeed = () => (1 + Math.min(1.1, time / 200)) * (1 - A.lvl('lazy') * 0.08);
+  const phaseNow = () => AR.PHASES[(START + Math.floor(time / PHASE_S)) % 5];
+  const rnd = Math.random;
+
+  function spawn() {
+    const night = curPhase === 'night' || curPhase === 'dusk';
+    const w = { fly: 50, butterfly: night ? 4 : 22, firefly: night ? 26 : 0, beetle: time > 20 ? 16 : 0, dragonfly: time > 40 ? 3 : 0, wasp: time > 25 ? Math.min(24, (time - 25) / 4) : 0, hornet: time > 120 ? Math.min(14, (time - 120) / 8) : 0 };
+    if (state === 'menu') { w.wasp = 0; w.hornet = 0; }
+    let tot = 0; for (const k in w) tot += w[k]; let r = rnd() * tot, type = 'fly'; for (const k in w) { r -= w[k]; if (r <= 0) { type = k; break; } }
+    const from = rnd() < 0.5 ? -1 : 1, b = BUGS[type], sp = b.sp * (0.8 + rnd() * 0.4);
+    bugs.push({ type, x: from < 0 ? -8 : W + 8, y: 24 + rnd() * (BRANCH - 80), vx: -from * sp, vy: 0, t: 0, ph: rnd() * 6.28, kind: ['morpho', 'julia', 'sulphur'][Math.floor(rnd() * 3)], dart: 0 });
+  }
+  function startRun() {
+    A.audio(); A.begin(); state = 'play'; FL.clear();
+    bugs = []; tongue = null; time = 0; score = 0; belly = maxBelly(); combo = 0; spawnT = 0.3; dewRun = 0; hurt = 0; fx = []; nextPhaseAt = PHASE_S;
+    setPhase(AR.PHASES[START], true); for (let i = 0; i < 3; i++) { spawn(); bugs[bugs.length - 1].x = W * (0.2 + i * 0.3); }
+    hud(); A.score('0');
+  }
+  function hud() {
+    const pct = Math.max(0, belly / maxBelly());
+    A.hud(`<span class="b">${A.CI}${AR.fmt(dewRun)}</span><span>×${mult()}</span><span>Belly <i class="belly${pct < 0.25 ? ' low' : ''}"><i style="width:${Math.round(pct * 100)}%"></i></i></span>`);
+  }
+  function flick(tx, ty) {
+    if (state !== 'play' || A.paused || tongue) return;
+    A.hideHint();
+    const m0 = mouth(); face = tx < m0.x - 2 ? -1 : 1; const m = mouth();
+    let dx = tx - m.x, dy = ty - m.y; if (dy > -2) dy = -2; const d = Math.hypot(dx, dy) || 1;
+    tongue = { dx: dx / d, dy: dy / d, len: 0, out: true, got: [] }; A.sfx('snap');
+    makeCham(dx / d * face, dy / d);
+  }
+  function autoAim() { // keyboard: flick at the nearest bug that isn't a wasp
+    const m = mouth(); let best = null, bd = 1e9;
+    for (const b of bugs) { if (BUGS[b.type].bad || b.caught) continue; const d = Math.hypot(b.x - m.x, b.y - m.y); if (d < reach() && d < bd) { bd = d; best = b; } }
+    if (best) flick(best.x, best.y); else flick(m.x + face * 40, m.y - 60);
+  }
+  function eat(list) {
+    let pts = 0, dew = 0, fill = 0, bad = false;
+    for (const b of list) {
+      const B = BUGS[b.type];
+      if (B.bad) { bad = true; fill += B.belly * (1 - A.lvl('sense') * 0.25); continue; }
+      pts += B.pts; dew += B.dew; fill += B.belly; A.inc('bugs'); A.inc(b.type);
+    }
+    if (bad) {
+      combo = 0; hurt = 0.4; A.sfx('sting'); FL.add(W / 2, mouth().y - 20, 'Stung!', '#e0503e');
+    } else {
+      combo += list.length; A.stat('combo', combo);
+      if (list.length > 1) { A.inc('double'); pts *= 2; dew += 2; FL.add(W / 2, mouth().y - 34, list.length > 2 ? 'Triple!' : 'Double!', '#f6d24a'); A.sfx('big'); } else A.sfx('gulp');
+    }
+    pts *= mult(); score += pts; dewRun += dew; if (dew) A.earn(dew);
+    belly = Math.min(maxBelly(), belly + fill);
+    if (pts) { FL.add(list[0].x, list[0].y, '+' + pts, '#eef6d8'); A.popHud('.b'); }
+    A.stat('score', score); A.score(AR.fmt(score)); hud();
+  }
+  function gameOver(cause, quiet) { state = 'dead'; tongue = null; A.end({ score, cause, delay: quiet ? 200 : 1200 }); }
+
+  /* ---------- loop ---------- */
+  function step(dt) {
+    if (state === 'play' && A.paused) return;
+    if (fade < 1) fade = Math.min(1, fade + dt / 1.6);
+    hurt = Math.max(0, hurt - dt);
+    for (const f of fx) { f.t += dt; f.x += f.vx * dt; f.y += f.vy * dt; } fx = fx.filter((f) => f.t < 0.5);
+    if (state === 'play') {
+      time += dt; A.stat('time', Math.floor(time));
+      const drain = (3.2 + Math.min(8, time / 28)) * dt; belly -= drain;
+      if (Math.random() < dt * 4) hud();
+      if (belly <= 0) { belly = 0; hud(); return gameOver('Too hungry to carry on. Keep catching to stay full!'); }
+      if (time >= nextPhaseAt) { nextPhaseAt += PHASE_S; const ph = phaseNow(); setPhase(ph); FL.add(W / 2, H * 0.35, { dawn: 'Dawn', day: 'Daytime', golden: 'Golden hour', dusk: 'Dusk · fireflies', night: 'Night · fireflies' }[ph], '#c2ea6a'); }
+    }
+    spawnT -= dt;
+    const busy = state === 'play' ? Math.max(0.32, 1.05 - time / 260) : 1.3;
+    if (spawnT <= 0 && bugs.length < (state === 'play' ? 14 : 6)) { spawn(); spawnT = busy * (0.6 + rnd() * 0.8); }
+    const sm = state === 'play' ? bugSpeed() : 0.8;
+    for (const b of bugs) {
+      if (b.caught) continue;
+      b.t += dt; const B = BUGS[b.type];
+      let vy = 0, vx = b.vx;
+      if (b.type === 'fly') vy = Math.sin(b.t * 7 + b.ph) * 30;
+      else if (b.type === 'butterfly') vy = Math.sin(b.t * 3 + b.ph) * 22 + Math.sin(b.t * 11) * 10;
+      else if (b.type === 'firefly') vy = Math.sin(b.t * 1.5 + b.ph) * 10;
+      else if (b.type === 'wasp') vy = Math.sin(b.t * 4 + b.ph) * 26;
+      else if (b.type === 'hornet') vy = Math.sign(Math.sin(b.t * 3 + b.ph)) * 40;
+      else if (b.type === 'dragonfly') { b.dart -= dt; if (b.dart <= 0) { b.dart = 0.4 + rnd() * 0.5; b.dvy = (rnd() - 0.5) * 120; b.dvx = (rnd() * 0.6 + 0.7) * Math.sign(b.vx) * B.sp; } vx = b.dvx; vy = b.dvy; }
+      b.x += vx * sm * dt; b.y += vy * sm * dt; b.y = Math.max(16, Math.min(BRANCH - 34, b.y));
+    }
+    bugs = bugs.filter((b) => b.caught || (b.x > -20 && b.x < W + 20));
+    // the tongue
+    if (tongue) {
+      const m = mouth(), R = reach(), tipR = 3 + A.lvl('sticky') * 2;
+      if (tongue.out) {
+        const prev = tongue.len; tongue.len = Math.min(R, tongue.len + R * dt / 0.11);
+        // anything the tip sweeps through sticks to it
+        for (const b of bugs) {
+          if (b.caught) continue;
+          for (let s = prev; s <= tongue.len; s += 2) { const x = m.x + tongue.dx * s, y = m.y + tongue.dy * s; if (Math.hypot(b.x - x, b.y - y) < tipR + BUGS[b.type].r) { b.caught = true; tongue.got.push(b); break; } }
+        }
+        if (tongue.len >= R) tongue.out = false;
+      } else {
+        tongue.len = Math.max(0, tongue.len - R * dt / 0.15);
+        if (tongue.len <= 0) {
+          const got = tongue.got; tongue = null; bugs = bugs.filter((b) => !b.caught);
+          if (state === 'play') { if (got.length) eat(got); else { combo = 0; A.sfx('miss'); hud(); } }
+          else if (got.length) A.sfx('gulp');
+        }
+      }
+      if (tongue) for (const b of tongue.got) { b.x = m.x + tongue.dx * tongue.len; b.y = m.y + tongue.dy * tongue.len; }
+    }
+    // the chameleon in the menu flicks by itself now and then
+    if (state === 'menu' && !tongue && rnd() < dt * 0.8) { const b = bugs.find((x) => Math.hypot(x.x - W / 2, x.y - BRANCH) < reach()); if (b) { const st = state; state = 'play'; const pa = A.paused; A.paused = false; flick(b.x, b.y); state = st; A.paused = pa; } }
+  }
+  function draw() {
+    if (!L) return;
+    ctx.drawImage((prevL && fade < 1 ? prevL : L).back, 0, 0);
+    if (prevL && fade < 1) { ctx.globalAlpha = fade; ctx.drawImage(L.back, 0, 0); ctx.globalAlpha = 1; }
+    const t = performance.now() / 1000, fr = Math.floor(t * 12) % 2;
+    // bugs
+    for (const b of bugs) {
+      const x = Math.round(b.x), y = Math.round(b.y);
+      if (b.type === 'butterfly') {
+        const key = b.kind + (Math.floor(t * 8 + b.ph) % 2); if (!butterflies[key]) { const s = new K.Sprite(b.kind, 18, { pad: 1 }); s.render({ parts: { '.p-wl': `scale(${key.endsWith('1') ? 0.35 : 1},1)`, '.p-wr': `scale(${key.endsWith('1') ? 0.35 : 1},1)` } }); butterflies[key] = s.canvas; }
+        const img = butterflies[key]; ctx.drawImage(img, x - Math.floor(img.width / 2), y - Math.floor(img.height / 2));
+      } else {
+        const img = IMG[b.type][fr]; ctx.save(); ctx.translate(x, y); if (b.vx > 0 && b.type !== 'dragonfly' || (b.type === 'dragonfly' && (b.dvx || b.vx) < 0)) ctx.scale(-1, 1);
+        if (b.type === 'firefly' && Math.sin(t * 3 + b.ph) > -0.2) { ctx.fillStyle = 'rgba(255,240,154,.35)'; ctx.fillRect(-7, -5, 15, 13); ctx.fillStyle = 'rgba(255,240,154,.18)'; ctx.fillRect(-11, -9, 23, 21); }
+        if (BUGS[b.type].bad && A.lvl('sense')) { ctx.fillStyle = 'rgba(224,80,62,.45)'; ctx.fillRect(-Math.ceil(img.width / 2) - 2, -Math.ceil(img.height / 2) - 2, img.width + 4, img.height + 4); }
+        if (b.type === 'dragonfly') { ctx.fillStyle = 'rgba(246,210,74,.25)'; ctx.fillRect(-11, -6, 23, 13); }
+        ctx.drawImage(img, -Math.floor(img.width / 2), -Math.floor(img.height / 2)); ctx.restore();
+      }
+    }
+    // branch, chameleon, tongue
+    ctx.drawImage(L.branch, 0, BRANCH - 22);
+    if (cham) {
+      const p = chamPos();
+      if (tongue) {
+        const m = mouth(), ex = m.x + tongue.dx * tongue.len, ey = m.y + tongue.dy * tongue.len, n = Math.ceil(tongue.len);
+        ctx.fillStyle = '#5a0e1a'; for (let i = 0; i <= n; i++) ctx.fillRect(Math.round(m.x + tongue.dx * i) - 1, Math.round(m.y + tongue.dy * i), 3, 2);
+        ctx.fillStyle = chamTongue; for (let i = 0; i <= n; i++) ctx.fillRect(Math.round(m.x + tongue.dx * i), Math.round(m.y + tongue.dy * i), 2, 1);
+        ctx.fillStyle = '#5a0e1a'; ctx.fillRect(Math.round(ex) - 3, Math.round(ey) - 3, 6, 6); ctx.fillStyle = chamTongue; ctx.fillRect(Math.round(ex) - 2, Math.round(ey) - 2, 4, 4);
+      }
+      ctx.save(); if (face < 0) { ctx.translate(p.x * 2 + cham.width, 0); ctx.scale(-1, 1); }
+      if (hurt > 0 && Math.floor(hurt * 20) % 2) ctx.globalAlpha = 0.4;
+      ctx.drawImage(cham, p.x, p.y); ctx.restore(); ctx.globalAlpha = 1;
+    }
+    if (hurt > 0) { ctx.fillStyle = `rgba(224,80,62,${hurt * 0.4})`; ctx.fillRect(0, 0, W, H); }
+    // reach ring for the first few seconds
+    if (state === 'play' && time < 5) { const m = mouth(), R = reach(); ctx.fillStyle = 'rgba(238,246,216,.35)'; for (let a = Math.PI; a <= Math.PI * 2; a += 0.04) ctx.fillRect(Math.round(m.x + Math.cos(a) * R), Math.round(m.y + Math.sin(a) * R), 1, 1); }
+    if (/drizzle|rain|heavy|storm/.test(A.wx)) {
+      if (!rain.length) for (let i = 0; i < W * H / (A.wx === 'drizzle' ? 900 : 320); i++) rain.push([Math.random() * W, Math.random() * H, 3 + Math.random() * 3]);
+      ctx.fillStyle = curPhase === 'night' ? 'rgba(140,164,191,.7)' : 'rgba(198,228,236,.75)';
+      for (const d of rain) { d[1] += d[2]; d[0] -= 0.6; if (d[1] > H) { d[1] = -4; d[0] = Math.random() * (W + 20); } ctx.fillRect(Math.round(d[0]), Math.round(d[1]), 1, 3); }
+    }
+  }
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; acc += dt;
+    while (acc > 1 / 120) { step(1 / 120); acc -= 1 / 120; }
+    draw(); FL.update(dt, (x, y) => [x, y]); requestAnimationFrame(loop);
+  }
+
+  /* ---------- input ---------- */
+  addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button, a, .panel, .cbar')) return;
+    if (state !== 'play') return;
+    e.preventDefault(); A.audio();
+    const r = cv.getBoundingClientRect(); flick((e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H);
+  });
+  addEventListener('keydown', (e) => { if ((e.code === 'Space' || e.code === 'ArrowUp') && state === 'play') { e.preventDefault(); if (!e.repeat) autoAim(); } });
+  document.addEventListener('click', (e) => { if (e.target.closest('[data-menu]')) { state = 'menu'; FL.clear(); bugs = []; } });
+
+  if (QS.has('debug')) window.__ts = () => ({ state, time, score, belly, combo, tongue: !!tongue, mouth: cham ? mouth() : null, reach: reach(), bugs: bugs.filter((b) => !b.caught).map((b) => ({ type: b.type, x: b.x, y: b.y })), W, H });
+  if (QS.has('debug')) window.__skip = (s) => { time = s; nextPhaseAt = Math.ceil(s / PHASE_S) * PHASE_S; };
+  addEventListener('resize', () => { clearTimeout(resize.t); resize.t = setTimeout(resize, 150); });
+  resize(); requestAnimationFrame((n) => { last = n; loop(n); });
+})();
+</script>
+</body>
+</html>

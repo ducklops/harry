@@ -30,7 +30,7 @@
     const fur = o.fur || '#4a3022', dk = o.dark || '#33201a', face = o.face || '#c79a72', belly = o.belly || '#7a5236';
     return svg('0 0 120 170', `
       <g class="p-tail" ${O(46, 108)}><path d="M45 108 C18 118 10 146 28 158 C40 166 50 152 40 146" stroke="${dk}" stroke-width="6" stroke-linecap="round" fill="none"/></g>
-      <path d="M60 4 C58 22 60 36 62 50" stroke="${dk}" stroke-width="10" stroke-linecap="round" fill="none"/>
+      <path d="M53 4 C51 22 52 36 54 52" stroke="${dk}" stroke-width="10" stroke-linecap="round" fill="none"/>
       <path d="M50 110 C42 128 44 142 50 152" stroke="${dk}" stroke-width="10" stroke-linecap="round" fill="none"/>
       <path d="M74 110 C84 126 82 140 76 150" stroke="${dk}" stroke-width="10" stroke-linecap="round" fill="none"/>
       <ellipse cx="62" cy="88" rx="23" ry="30" fill="${fur}"/>
@@ -832,6 +832,7 @@
       { id: 'flappy', title: 'Flappy', url: 'flappy', icon: 'animal:macaw', place: 'jungle' },
       { id: 'trolley', title: 'Trolley Trials', url: 'trolley', icon: 'animal:capuchin', place: 'jungle' },
       { id: 'trivia', title: 'Tree-Frog Trivia', url: 'trivia', icon: 'animal:frog', place: 'jungle' },
+      { id: 'arcade', title: 'Arcade', url: 'arcade', icon: 'animal:parrot', place: 'jungle' },
       { id: 'contact', title: 'Contact', url: 'contact', icon: 'animal:frog' }
     ],
     socials: [
@@ -841,7 +842,7 @@
     ]
   };
   /** page folders that must not be used for new pages */
-  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', 'trivia', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
+  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap', 'arcade-kit', 'share', 'media', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
   const pageSlug = (title, taken = []) => { let b = slugify(title); if (RESERVED.includes(b)) b += '-page'; let s = b, n = 1; while (taken.includes(s)) s = `${b}-${++n}`; return s; };
 
   /* =======================================================================
@@ -849,7 +850,7 @@
      accepts. Until then those values only live in memory for this visit.
      ======================================================================= */
   const CONSENT_KEY = 'harry-consent';
-  const FUNCTIONAL = ['harry-wx', 'harry-sound', 'harry-flappy', 'harry-trolley', 'harry-trivia'];
+  const FUNCTIONAL = ['harry-wx', 'harry-sound', 'harry-flappy', 'harry-trolley', 'harry-trivia', 'harry-swing', 'harry-stack', 'harry-snap'];
   const ls = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage off */ } }, del(k) { try { localStorage.removeItem(k); } catch (e) { /* storage off */ } } };
   const MEM = {}, subs = [];
   const Consent = {

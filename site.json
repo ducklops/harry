@@ -31,6 +31,13 @@
       "place": "jungle"
     },
     {
+      "id": "arcade",
+      "title": "Arcade",
+      "url": "arcade",
+      "icon": "animal:parrot",
+      "place": "jungle"
+    },
+    {
       "id": "contact",
       "title": "Contact",
       "url": "contact",
