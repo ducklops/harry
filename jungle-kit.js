@@ -842,7 +842,7 @@
     ]
   };
   /** page folders that must not be used for new pages */
-  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap', 'arcade-kit', 'share', 'media', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
+  const RESERVED = ['icons', 'fonts', 'pages', 'index', 'console', 'site', 'favicon', 'cookies', 'flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap', 'shush', 'arcade-kit', 'share', 'media', '404', 'apple-touch-icon', 'jungle-kit', 'page'];
   const pageSlug = (title, taken = []) => { let b = slugify(title); if (RESERVED.includes(b)) b += '-page'; let s = b, n = 1; while (taken.includes(s)) s = `${b}-${++n}`; return s; };
 
   /* =======================================================================

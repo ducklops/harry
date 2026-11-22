@@ -525,7 +525,7 @@
   let PAGEEDITS = {}, MEDIA = {};   // page-editor work in progress: { file → page }, { 'media/x.webp' → picture }
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const overrides = () => Object.fromEntries(Object.entries(PENDING).map(([p, v]) => [p, v.dataURL]));
-  const placeOf = (p) => p.place || (['flappy', 'trolley', 'trivia', 'arcade'].includes(p.url) ? 'jungle' : 'menu');
+  const placeOf = (p) => p.place || (['trolley', 'trivia', 'arcade', 'shush'].includes(p.url) ? 'jungle' : 'menu');
   const isSlug = (u) => /^[a-z0-9][a-z0-9-]*$/i.test(u || '');
   const pageFile = (u) => (isSlug(u) ? u + '/index.html' : /^pages\/[\w-]+\.html$/.test(u || '') ? u : null);
   function dirty() { return !!SITE && (JSON.stringify(SITE) !== SAVED || Object.keys(PENDING).length > 0 || REMOVALS.size > 0 || Object.values(PAGEEDITS).some(peChanged)); }
@@ -710,7 +710,7 @@
      A page is a list of blocks; each block turns into plain, tidy HTML.
      ===================================================================== */
   const ROOTURL = new URL('./', location.href);
-  const APP_PAGES = ['flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap'];       // full pages of their own (games) — not edited here
+  const APP_PAGES = ['flappy', 'trolley', 'trivia', 'arcade', 'swing', 'stack', 'snap', 'shush'];       // full pages of their own (games) — not edited here
   const A = K.esc;
   const LABEL = { heading: 'Heading', text: 'Text', image: 'Picture', gallery: 'Gallery', quote: 'Quote', button: 'Button', embed: 'Embed', divider: 'Divider', html: 'HTML' };
   const IMG_TYPES = /^image\/(png|jpeg|webp|gif|svg\+xml|avif)$/;

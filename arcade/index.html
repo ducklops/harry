@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jungle Arcade · Free endless browser games</title>
-<meta name="description" content="Three free pixel-art endless games in a jungle arcade: Vine Swing, Canopy Stack and Tongue Snap. Easy to pick up, hard to put down. No download needed.">
+<meta name="description" content="Four free pixel-art endless games in a jungle arcade: Jungle Flappy, Vine Swing, Canopy Stack and Tongue Snap. Easy to pick up, hard to put down. No download needed.">
 <meta name="keywords" content="arcade games, endless games, free browser games, pixel art games, one button games">
 <link rel="canonical" href="https://harryh.xyz/arcade/">
 <meta name="robots" content="index, follow, max-image-preview:large">
@@ -13,16 +13,16 @@
 <meta property="og:locale" content="en_GB">
 <meta property="og:url" content="https://harryh.xyz/arcade/">
 <meta property="og:title" content="Jungle Arcade">
-<meta property="og:description" content="Vine Swing, Canopy Stack and Tongue Snap: three endless games in the jungle.">
+<meta property="og:description" content="Jungle Flappy, Vine Swing, Canopy Stack and Tongue Snap: four endless games in the jungle.">
 <meta property="og:image" content="https://harryh.xyz/share/arcade.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Three pixel-art arcade cabinets standing in the jungle">
+<meta property="og:image:alt" content="Four pixel-art arcade cabinets standing in the jungle">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Jungle Arcade">
-<meta name="twitter:description" content="Vine Swing, Canopy Stack and Tongue Snap: three endless games in the jungle.">
+<meta name="twitter:description" content="Jungle Flappy, Vine Swing, Canopy Stack and Tongue Snap: four endless games in the jungle.">
 <meta name="twitter:image" content="https://harryh.xyz/share/arcade.jpg">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Jungle Arcade", "url": "https://harryh.xyz/arcade/", "description": "Three free pixel-art endless games: Vine Swing, Canopy Stack and Tongue Snap.", "image": "https://harryh.xyz/share/arcade.jpg", "inLanguage": "en-GB", "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}, "hasPart": [{"@type": "VideoGame", "name": "Vine Swing", "url": "https://harryh.xyz/swing/"}, {"@type": "VideoGame", "name": "Canopy Stack", "url": "https://harryh.xyz/stack/"}, {"@type": "VideoGame", "name": "Tongue Snap", "url": "https://harryh.xyz/snap/"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "Jungle Arcade", "url": "https://harryh.xyz/arcade/", "description": "Four free pixel-art endless games: Jungle Flappy, Vine Swing, Canopy Stack and Tongue Snap.", "image": "https://harryh.xyz/share/arcade.jpg", "inLanguage": "en-GB", "isPartOf": {"@type": "WebSite", "name": "Harry", "url": "https://harryh.xyz/"}, "hasPart": [{"@type": "VideoGame", "name": "Vine Swing", "url": "https://harryh.xyz/swing/"}, {"@type": "VideoGame", "name": "Canopy Stack", "url": "https://harryh.xyz/stack/"}, {"@type": "VideoGame", "name": "Tongue Snap", "url": "https://harryh.xyz/snap/"}]}</script>
 <meta name="theme-color" content="#0f1f2e">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <link rel="icon" href="../favicon-32.png" sizes="32x32" type="image/png">
@@ -41,7 +41,7 @@
   h1 { margin: 6px 0 4px; font: 400 clamp(34px, 7vw, 64px)/1 'Climate Crisis', 'Arial Black', sans-serif; text-align: center; text-shadow: 0 .06em 0 #070e16, 0 0 24px rgba(194,234,106,.35); }
   .tag { margin: 8px 0 22px; padding: 6px 12px; text-align: center; font: 400 16px/1.5 Barlow, system-ui, sans-serif; color: var(--ice); background: rgba(7,14,22,.7); max-width: 520px; }
   .row { display: flex; gap: clamp(14px, 3vw, 34px); align-items: flex-end; justify-content: center; width: 100%; }
-  @media (max-width: 760px) {
+  @media (max-width: 980px) {
     .row { justify-content: flex-start; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 9vw 18px; margin: 0 -12px; width: 100vw; scrollbar-width: none; }
     .row::-webkit-scrollbar { display: none; }
     .swipe { display: block !important; }
@@ -50,7 +50,8 @@
 
   /* ---- a cabinet ---- */
   .cab { --body: #2c883a; --dark: #164c2e; --hi: #82d044; --glow: 130,208,68;
-    flex: 0 0 auto; width: clamp(220px, 26vw, 270px); scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ice); transition: transform .15s steps(3); position: relative; }
+    flex: 0 0 auto; width: clamp(210px, 21vw, 262px); scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--ice); transition: transform .15s steps(3); position: relative; }
+  .cab.flappy { --body: #c02a36; --dark: #5a0e1a; --hi: #f0803a; --glow: 224,80,62; }
   .cab.stack { --body: #a8602a; --dark: #5e3826; --hi: #e8a868; --glow: 246,170,62; }
   .cab.snap { --body: #2a62c8; --dark: #1a3a7a; --hi: #82d0e8; --glow: 130,208,232; }
   .cab:hover, .cab:focus-visible { transform: translateY(-6px); outline: none; }
@@ -94,8 +95,15 @@
 <div class="bar"><a href="../" aria-label="Back to Harry's jungle">◂ Harry</a></div>
 <main>
   <h1>Jungle Arcade</h1>
-  <p class="tag">Three endless games, easy to pick up and hard to put down. Pick a cabinet.</p>
+  <p class="tag">Four endless games, easy to pick up and hard to put down. Pick a cabinet.</p>
   <div class="row" id="row">
+    <a class="cab flappy" href="../flappy/" aria-label="Play Jungle Flappy">
+      <div class="marquee">Jungle Flappy</div>
+      <div class="head"><div class="screen"><canvas width="112" height="84" data-game="flappy"></canvas></div></div>
+      <div class="deck" aria-hidden="true"><span class="stick"></span><span class="btns"><i></i><i></i></span></div>
+      <div class="base"><span class="how">Tap to flap. Pick a bird and squeeze through the gaps in the trees.</span><span class="best" data-best="harry-flappy" data-unit="pts"></span><span class="play">Play</span></div>
+      <div class="slot" aria-hidden="true"><i></i><i></i></div>
+    </a>
     <a class="cab swing" href="../swing/" aria-label="Play Vine Swing">
       <div class="marquee">Vine Swing</div>
       <div class="head"><div class="screen"><canvas width="112" height="84" data-game="swing"></canvas></div></div>
@@ -119,7 +127,7 @@
     </a>
   </div>
   <div class="swipe">Swipe for more cabinets ▸</div>
-  <p class="more">More games hang from the branches back in the jungle: <a href="../flappy/">Jungle Flappy</a>, <a href="../trolley/">Trolley Trials</a> and <a href="../trivia/">Tree-Frog Trivia</a>.</p>
+  <p class="more">More hangs from the branches back in the jungle: <a href="../trolley/">Trolley Trials</a>, <a href="../trivia/">Tree-Frog Trivia</a> and <a href="../shush/">Shush Snake</a>.</p>
   <div class="copy">Copyright © <span class="yr">2026</span> Ducklops · <a href="../cookies">Cookies</a></div>
 </main>
 
@@ -191,11 +199,50 @@
   }
   const S_SWING = scenery(3, SKY.day, (c) => { c.fillStyle = '#1e4152'; c.fillRect(0, SH - 8, SW * 2, 8); c.fillStyle = '#82bcae'; c.fillRect(0, SH - 8, SW * 2, 1); });
   const S_SNAP = scenery(5, SKY.golden, null);
+  const S_FLAP = (() => { // open sky (no background trunks, so only the obstacle trees read as trees)
+    const k = mk(SW * 2, SH), P = new K.Painter(k.c, 9); P.vgrad(0, 0, SW * 2, SH, SKY.day);
+    for (let i = 0; i < 3; i++) P.cloud(SW * (0.3 + i * 0.6), 14 + P.r() * 10, 12 + P.r() * 6);
+    for (let i = 0; i < 16; i++) P.clump(P.r() * SW * 2, SH * (0.62 + P.r() * 0.16), 8 + P.r() * 8, T.leafTeal, [0, -1]);
+    k.c.fillStyle = '#301c14'; k.c.fillRect(0, SH - 7, SW * 2, 7); k.c.fillStyle = '#2c883a'; k.c.fillRect(0, SH - 7, SW * 2, 2);
+    K.finalize(k.c, SW * 2, SH, { haze: 0.3, hazeColor: '#c6e4ec', dither: 12 }); return k.cv; })();
+  // Jungle Flappy's side-on flying toucan (same drawing as flappy/index.html)
+  K.A.toucanFly = K.A.toucanFly || (() => `<svg viewBox="0 0 110 60" xmlns="http://www.w3.org/2000/svg">
+    <path d="M36 29 L12 28 L12 37 L36 37Z" fill="#0f1012"/>
+    <path d="M38 37 q4 5 9 1 l-2 -3Z" fill="#c8282a"/>
+    <ellipse cx="50" cy="33" rx="18" ry="9" fill="#141518"/>
+    <circle cx="68" cy="28" r="9" fill="#141518"/>
+    <path d="M62 30 C70 29 75 35 71 41 C65 41 60 36 62 30Z" fill="#f2d23a"/>
+    <circle cx="70" cy="25.5" r="4" fill="#7ad04a"/><rect x="68.5" y="24" width="3.4" height="3.4" fill="#0a0a0a"/>
+    <path d="M75 20 C90 15 104 19 108 28 C100 33 88 34 76 34 C73 28 73 24 75 20Z" fill="#f08a1c"/>
+    <path d="M75 20 C90 15 104 19 108 28 C98 24 88 23 76 26Z" fill="#7cc83e"/>
+    <path d="M103 22 C106 24 108 26 108 28 C105 30 102 31 99 32Z" fill="#c8282a"/>
+    <g class="p-wing" style="transform-origin:54px 30px"><path d="M58 27 C46 21 30 21 22 25 C30 32 46 36 58 35Z" fill="#424c58"/><path d="M30 24 C26 24 24 25 22 25 C25 28 28 30 31 31Z" fill="#141518"/></g></svg>`);
+  const bird = new K.Sprite('toucanFly', 20, { pad: 1, grade: 0 }); const BIRD = [50, -42].map((w) => { bird.render({ parts: { '.p-wing': `rotate(${w}deg)` }, op: {} }); const k = mk(bird.canvas.width, bird.canvas.height); k.c.drawImage(bird.canvas, 0, 0); return k.cv; });
+  const TREETOP = (() => { const LP = 6, k = mk(16 + LP * 2, 10 + LP * 2), P = new K.Painter(k.c, 31); for (let i = 0; i < 4; i++) P.clump(LP + 3 + i * 3.5, LP + 5, 3.4, i % 2 ? T.leafB : T.leafMid, [0, -1]); K.finalize(k.c, k.cv.width, k.cv.height, { dither: 10 }); return k.cv; })();
   const BRANCH = (() => { const k = mk(SW, 24), P = new K.Painter(k.c, 8); P.branch(-6, 10, SW + 6, 8, 6, T.bark, T.leafB); K.finalize(k.c, SW, 24, { dither: 10 }); return k.cv; })();
   const BANANA = (() => { const k = mk(4, 4); k.c.fillStyle = '#f2c62a'; k.c.fillRect(0, 2, 3, 1); k.c.fillRect(1, 3, 2, 1); k.c.fillRect(3, 0, 1, 3); k.c.fillStyle = '#4a2a14'; k.c.fillRect(3, 0, 1, 1); return k.cv; })();
   const line = (c, x0, y0, x1, y1, col) => { c.fillStyle = col; const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0)); for (let i = 0; i <= n; i++) c.fillRect(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1); };
 
   const PREVIEW = {
+    flappy(c, t) { // the bird hops through gaps in the trees, auto-pilot
+      const SP = 26, GAPX = 50, GAP = 28, cam = t * SP, bw = SW * 2, o = -((cam * 0.4) % bw + bw) % bw;
+      c.drawImage(S_FLAP, Math.round(o), 0); c.drawImage(S_FLAP, Math.round(o + bw), 0);
+      const gy = (j) => 20 + Math.round(((Math.sin(j * 12.9898) * 43758.5453) % 1 + 1) % 1 * 28);   // gap top for tree j
+      const bx = 34, j0 = Math.floor((cam + bx - 8) / GAPX);
+      for (let j = j0 - 1; j <= j0 + 3; j++) {
+        const x = Math.round(j * GAPX + 60 - cam), top = gy(j);
+        if (x < -14 || x > SW + 6) continue;
+        c.fillStyle = '#1e120c'; c.fillRect(x - 1, 0, 9, top); c.fillRect(x - 1, top + GAP, 9, SH - top - GAP);
+        c.fillStyle = '#764a32'; c.fillRect(x, 0, 7, top - 1); c.fillRect(x, top + GAP + 1, 7, SH - top - GAP);
+        c.fillStyle = '#a87452'; c.fillRect(x + 1, 0, 1, top - 1); c.fillRect(x + 1, top + GAP + 1, 1, SH - top - GAP);
+        c.drawImage(TREETOP, x - 9, top + GAP - 6); c.save(); c.translate(x - 9, top + 6); c.scale(1, -1); c.drawImage(TREETOP, 0, 0); c.restore();
+      }
+      // aim for the middle of the next gap, with a little flap bounce
+      const xw = cam + bx, j = Math.floor((xw - 60 + 12) / GAPX) + 1, prevJ = j - 1;
+      const fx = Math.max(0, Math.min(1, (xw - (prevJ * GAPX + 60 + 8)) / (GAPX - 8)));
+      const ya = gy(prevJ) + GAP / 2, yb = gy(j) + GAP / 2, y = ya + (yb - ya) * (fx * fx * (3 - 2 * fx)) - Math.abs(Math.sin(t * 7)) * 3;
+      c.save(); c.translate(bx, Math.round(y)); c.rotate(Math.cos(t * 7) * 0.12); const im = BIRD[Math.floor(t * 7 / Math.PI) % 2]; c.drawImage(im, -Math.round(im.width / 2), -Math.round(im.height / 2)); c.restore();
+    },
     swing(c, t) { // swing → fling → grab, forever
       const GAP = 46, Lr = 24, TH = 0.85, TS = 0.75, TF = 0.32, per = TS + TF, i = Math.floor(t / per), u = t - i * per;
       const ax = i * GAP, ay = 9; let x, y, ang, rope = null;

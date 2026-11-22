@@ -8,11 +8,12 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 |---|---|
 | `index.html` | The home page: the jungle, the title, the menu and social links. Every page opens inside it |
 | `about/`, `projects/`, `gallery/`, `contact/` | Your pages. Each is a folder with an `index.html`, so it lives at harryh.xyz/about and so on |
-| `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy |
+| `flappy/` | Jungle Flappy, the game, at harryh.xyz/flappy. It's a cabinet in the Jungle Arcade (its **◂ Arcade** button goes back there) |
 | `trolley/` | Trolley Trials, the jungle-market trolley game, at harryh.xyz/trolley |
-| `arcade/` | The Jungle Arcade, at harryh.xyz/arcade: three CRT cabinets standing in the jungle, each playing a tiny preview of its game. It hangs as one **Arcade** sign in the jungle |
+| `arcade/` | The Jungle Arcade, at harryh.xyz/arcade: four CRT cabinets standing in the jungle (Jungle Flappy, Vine Swing, Canopy Stack and Tongue Snap), each playing a tiny preview of its game. It hangs as one **Arcade** sign in the jungle |
 | `swing/`, `stack/`, `snap/` | The arcade's three endless games: Vine Swing, Canopy Stack and Tongue Snap |
 | `arcade-kit.js`, `arcade-kit.css` | The shared frame for the three arcade games: menu, missions, ranks, shop, result screen, sounds and share card |
+| `shush/` | Shush Snake, the jungle noise meter, at harryh.xyz/shush. Too loud and a snake eats the animals one by one; quiet for long enough and they come back. The microphone level is worked out on the device and never sent or stored (see below) |
 | `trivia/` | Tree-Frog Trivia, the daily trivia climb, at harryh.xyz/trivia. `trivia/data/` holds the question bank and the built days (encoded, see below) |
 | `cookies/` | The cookie policy, at harryh.xyz/cookies |
 | `404.html` | The "Lost in the jungle" page, at harryh.xyz/404. GitHub Pages shows it for any address that doesn't exist; it switches the address to /404 and suggests the page you probably meant. Keep it at the top of the repository |
@@ -31,9 +32,9 @@ A layered, pixel-art 3D jungle home page for GitHub Pages, with a console for ed
 
 ## The Jungle Arcade
 
-harryh.xyz/arcade is a clearing in the jungle with three arcade cabinets. Each screen plays a little looping preview; tap a cabinet to play. Only the **Arcade** sign hangs in the jungle, so the games don't crowd the branches. Each game has a **◂ Arcade** button to get back.
+harryh.xyz/arcade is a clearing in the jungle with four arcade cabinets: Jungle Flappy plus the three games below. Each screen plays a little looping preview; tap a cabinet to play. Only the **Arcade** sign hangs in the jungle, so the games don't crowd the branches. Each game has a **◂ Arcade** button to get back.
 
-All three are endless, played with one button or one tap, and start gently before getting harder the longer a run goes on. They share the same extras:
+Vine Swing, Canopy Stack and Tongue Snap are endless, played with one button or one tap, and start gently before getting harder the longer a run goes on. They share the same extras:
 - **Currency and a shop.** Every run earns bananas, nuts or dewdrops. Spend them on new characters (8 per game) and upgrades (5 per game, each with a few levels).
 - **Missions.** Three at a time, such as "Swing 400 m in one run". Finishing one pays out straight away and brings in a harder one. Every three missions raises your rank (Seedling, Sprout, Sapling … Jungle legend).
 - **Changing scenery.** Time of day moves on as you play (Vine Swing and Tongue Snap) or the sky changes as you climb (Canopy Stack), and new hazards turn up.
@@ -48,6 +49,16 @@ All three are endless, played with one button or one tap, and start gently befor
 | **Tongue Snap** (`snap/`) | Tap where you want the chameleon's tongue to go (Space aims at the nearest bug). Bugs keep its **belly** full; it slowly empties and the run ends when it's empty. Catch in a row for a multiplier, line bugs up for doubles. Eating a wasp costs a chunk of belly. | A new time of day every 45 seconds, with fireflies at dusk and night. Wasps from 25 s, hornets from 2 minutes, faster bugs and a hungrier chameleon. |
 
 To tweak a game, the characters, prices, upgrade costs and mission targets are near the top of each game's `index.html`; the difficulty lives further down (`generate()` in Vine Swing, `speed()` in Canopy Stack, `spawn()` and the belly drain in Tongue Snap). Add `?time=night` to preview a time of day.
+
+## Shush Snake (noise meter)
+
+harryh.xyz/shush is a classroom-style noise meter. It hangs as a **Shush Snake** sign in the jungle.
+
+- **How it plays.** Up to 12 animals stand in a clearing (some hang from the branch). When the noise stays above the **Too loud** line, eyes appear in the bushes, the animals start shaking, and then an emerald tree boa slithers in, rears up and eats one (CHOMP, bits everywhere, a bulge travelling down its body). It keeps coming while it's loud. When it's been quiet for the set time, the last animal eaten comes back: either the snake coughs it up covered in slime (HURK!) or it sneaks back in by itself.
+- **Settings** (in the page, not saved): the Too loud line (or drag it on the meter, or **Set it from the room** to measure 5 seconds and put the line 10 dB above), how long the noise must last before the snake strikes, how long the quiet must last to win one back (10 s to 5 min), and how many animals (4 to 12). **Bring everyone back** resets. **Full screen** for a projector. **Try it without a mic** is a demo where holding a button or Space counts as loud.
+- **Privacy.** The mic starts only when **Allow microphone** is pressed, and there's a picker for which mic to use. The page only measures loudness (one number, about 60 times a second) and discards the audio straight away; nothing is recorded. Echo cancelling, noise suppression and auto gain are switched off so the level is honest. The page has a Content Security Policy with `connect-src 'none'`, so it can't send data anywhere even by mistake, and it stores nothing (no cookies or local storage). The mic switches off when you press **Mic on**, switch tabs or leave. Browsers decide whether they remember the permission: choosing **Allow this time** / **Allow once** makes them ask on every visit, and the page shows a note if the browser is set to always allow.
+- **dB readings are approximate.** Browsers can't give a calibrated sound level, so the number is a rough guide; set the line by ear or with **Set it from the room**.
+- The animals, sizes and order are in `ROSTER` near the top of the script in `shush/index.html`; the snake's speed and timing are in `updateSnake()`.
 
 ## Tree-Frog Trivia
 
@@ -111,7 +122,7 @@ To get a key: GitHub → **Settings → Developer settings → Personal access t
 - **Sound.** Switch it on with the music-note button. If a visitor has accepted cookies, the site remembers it, and sound resumes on their next click.
 - **Cookies.** Visitors choose **Accept** or **Essential only**. Nothing optional is stored on their device unless they accept. Add a contact email to `cookies/index.html` if you'd like one on the policy.
 - **Editing a page.** In the console, press **✎ Edit page** next to any page. Type straight onto the page, add headings, text, pictures, galleries, quotes, buttons, embeds (YouTube, Vimeo, Spotify, SoundCloud, TikTok, Google Maps) and dividers from the **Add** bar, drag blocks by ⠿ to move them, and drop pictures from your computer anywhere on the page. Big photos are shrunk automatically and saved in `media/`. Only the inside of the page's content box changes; anything the editor doesn't recognise is kept as an HTML block, exactly as written.
-- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Flappy, Trolley Trials, Tree-Frog Trivia and the Arcade hang in the jungle by default.
+- **Where links show.** In the console, each page can show in the main menu or hang as a wooden sign on a branch in the jungle (up to 5). Trolley Trials, Tree-Frog Trivia, the Arcade and Shush Snake hang in the jungle by default; Jungle Flappy lives in the Arcade.
 - **Jungle Flappy.** High scores stay on the visitor's device. **Share** sends "My Jungle Flappy high score is…" with a link to harryh.xyz/flappy, and **Save image** downloads a score card.
 - **Trolley Trials.** A new store every day (London time): the aisles, items, prices, budget and hazards come from the date, so everyone gets the same one. **Copy receipt** shares a text receipt; **Challenge a friend** shares a link with your route packed inside it, and their game races your ghost trolley on that day's store. Preview another day with `?day=2026-12-25`.
 - **Latest Letterboxd review.** Every three hours a GitHub Action (`.github/workflows/letterboxd.yml`) reads letterboxd.com/harryhayw/rss, saves the newest review to `letterboxd.json` and copies its poster into `letterboxd/`, so visitors never load anything from Letterboxd. It shows on the Gallery page as a card with the poster, stars and the start of the review (**Read the rest** opens the whole thing; reviews marked as spoilers stay hidden until tapped). To show it on another page, add an **HTML** block in the page editor containing `<div data-letterboxd></div>`. To refresh it straight away: repository → **Actions → Latest Letterboxd review → Run workflow**.

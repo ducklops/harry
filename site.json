@@ -10,10 +10,10 @@
       "place": "menu"
     },
     {
-      "id": "flappy",
-      "title": "Flappy",
-      "url": "flappy",
-      "icon": "animal:macaw",
+      "id": "shush",
+      "title": "Shush Snake",
+      "url": "shush",
+      "icon": "animal:snake",
       "place": "jungle"
     },
     {

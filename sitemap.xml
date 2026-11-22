@@ -36,6 +36,13 @@
     <image:image><image:loc>https://harryh.xyz/share/arcade.jpg</image:loc></image:image>
   </url>
   <url>
+    <loc>https://harryh.xyz/shush/</loc>
+    <lastmod>2026-11-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <image:image><image:loc>https://harryh.xyz/share/shush.jpg</image:loc></image:image>
+  </url>
+  <url>
     <loc>https://harryh.xyz/swing/</loc>
     <lastmod>2026-11-22</lastmod>
     <changefreq>monthly</changefreq>
